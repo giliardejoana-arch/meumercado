@@ -2,56 +2,95 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#065f46">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Meu Mercadinho Online</title>
-    <!-- Tailwind CSS para interface moderna, limpa e responsiva -->
+
+    <!-- Tailwind CSS para espaçamento e responsividade -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fonte Inter para excelente legibilidade -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Fonte Inter para leitura clara em celular e desktop -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <!-- Ícones Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
+        /* Estilo base com alto contraste para uso diário */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f1f5f9;
             color: #0f172a;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
-        /* Transições suaves para gavetas e modais */
-        .drawer-transition {
-            transition: transform 0.28s ease-in-out;
+
+        /* Grade de produtos SEMPRE em 2 colunas lado a lado em qualquer largura */
+        .two-col-products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+            width: 100%;
         }
-        .fade-transition {
-            transition: opacity 0.2s ease-in-out;
+
+        @media (min-width: 640px) {
+            .two-col-products-grid {
+                gap: 1rem;
+            }
+        }
+
+        /* Transição suave para gavetas laterais */
+        .drawer-panel {
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Barra horizontal oculta mantendo rolagem por toque/arrasto */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-slate-100 text-slate-950">
 
     <!-- =====================================================================
-         NOTIFICAÇÃO IN-PAGE (Substitui alert() para não exibir popups do navegador)
+         AVISO VISUAL NA TELA (Substitui alert() nativo)
          ===================================================================== -->
-    <div id="toast-banner" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] hidden w-[92%] max-w-md bg-slate-900 text-white px-4 py-3.5 rounded-xl shadow-2xl border border-slate-700 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2.5">
-            <i id="toast-icon" class="fa-solid fa-circle-info text-emerald-400 text-lg"></i>
-            <span id="toast-text" class="text-sm font-medium"></span>
+    <div id="toast-banner" role="status" aria-live="polite"
+         class="fixed top-4 left-1/2 -translate-x-1/2 z-[140] hidden w-[92%] max-w-md bg-slate-950 text-white px-4 py-3.5 rounded-2xl shadow-2xl border-2 border-emerald-400 items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-xl shrink-0"></i>
+            <span id="toast-text" class="text-sm font-bold leading-snug break-words"></span>
         </div>
-        <button type="button" onclick="window.app.hideToast()" class="text-slate-400 hover:text-white p-1" aria-label="Fechar aviso">
-            <i class="fa-solid fa-xmark"></i>
+        <button type="button" onclick="window.app.hideToast()" aria-label="Fechar aviso"
+                class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition shrink-0">
+            <i class="fa-solid fa-xmark text-base"></i>
         </button>
     </div>
 
     <!-- =====================================================================
-         MODAL DE CONFIRMAÇÃO CUSTOMIZADO (Substitui confirm() nativo)
+         MODAL DE CONFIRMAÇÃO NA TELA (Substitui confirm() nativo)
          ===================================================================== -->
-    <div id="confirm-dialog" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[95] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
-            <h3 id="confirm-title" class="text-lg font-bold text-slate-900">Confirmar ação</h3>
-            <p id="confirm-message" class="text-sm text-slate-600"></p>
-            <div class="flex justify-end gap-2 pt-2">
-                <button type="button" id="confirm-cancel-btn" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm">
+    <div id="confirm-modal"
+         class="fixed inset-0 bg-slate-950/70 backdrop-blur-[2px] z-[135] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border-2 border-slate-300 space-y-4">
+            <h3 id="confirm-title" class="text-lg font-black text-slate-950">Confirmar ação</h3>
+            <p id="confirm-message" class="text-sm font-medium text-slate-700 leading-relaxed"></p>
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button type="button" id="confirm-cancel-btn"
+                        class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-900 font-extrabold text-sm transition">
                     Cancelar
                 </button>
-                <button type="button" id="confirm-ok-btn" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-sm">
+                <button type="button" id="confirm-ok-btn"
+                        class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm transition">
                     Confirmar
                 </button>
             </div>
@@ -59,91 +98,168 @@
     </div>
 
     <!-- =====================================================================
-         CABEÇALHO PRINCIPAL COM MENU GAVETA, TÍTULO E CARRINHO
+         MODAL DE CONFIRMAÇÃO DE PEDIDO ENVIADO AO WHATSAPP
          ===================================================================== -->
-    <header class="sticky top-0 z-30 bg-emerald-700 text-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <button type="button" onclick="window.app.toggleDrawer(true)" class="p-2.5 rounded-lg hover:bg-emerald-600 active:bg-emerald-800 transition" aria-label="Abrir menu">
+    <div id="order-success-modal"
+         class="fixed inset-0 bg-slate-950/75 backdrop-blur-[2px] z-[130] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-emerald-500 space-y-4 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-motorcycle"></i>
+            </div>
+            <div class="space-y-1.5">
+                <h3 class="text-xl font-black text-slate-950">Pedido Enviado!</h3>
+                <p id="order-modal-message" class="text-sm font-bold text-emerald-800 leading-relaxed">
+                    Seu pedido foi enviado para o WhatsApp e em poucos minutos chega na sua casa!
+                </p>
+                <p id="order-modal-subinfo" class="text-xs font-medium text-slate-600 leading-relaxed"></p>
+            </div>
+            <div class="pt-2">
+                <button type="button" onclick="window.app.closeOrderSuccessModal()"
+                        class="w-full py-3 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm transition">
+                    Continuar na Loja
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         CABEÇALHO FIXO SUPERIOR
+         ===================================================================== -->
+    <header class="sticky top-0 z-30 bg-emerald-800 text-white shadow-lg border-b border-emerald-950/30">
+        <div class="max-w-5xl mx-auto px-3 sm:px-5 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <button type="button" onclick="window.app.toggleDrawer(true)" aria-label="Abrir menu gaveta"
+                        class="p-2.5 rounded-xl bg-emerald-900/75 hover:bg-emerald-950 active:scale-95 text-white transition shrink-0">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
-                <button type="button" onclick="window.app.showView('store')" class="flex items-center gap-2 text-left">
-                    <i class="fa-solid fa-store text-amber-300 text-xl"></i>
-                    <span class="font-extrabold text-lg sm:text-xl tracking-tight">Meu Mercadinho Online</span>
+                <button type="button" onclick="window.app.showView('store')"
+                        class="flex items-center gap-2.5 text-left min-w-0">
+                    <span class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
+                        <i class="fa-solid fa-store text-lg"></i>
+                    </span>
+                    <span class="font-black text-base sm:text-xl tracking-tight truncate text-white">
+                        Meu Mercadinho Online
+                    </span>
                 </button>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span id="header-user-badge" class="hidden md:inline-flex items-center gap-1.5 text-xs bg-emerald-800/90 px-3 py-1.5 rounded-full font-medium">
-                    <i class="fa-regular fa-user"></i>
-                    <span id="header-user-label">Visitante</span>
-                </span>
-                <button type="button" onclick="window.app.toggleCart(true)" class="relative flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-3.5 py-2 rounded-xl shadow-xs transition">
-                    <i class="fa-solid fa-cart-shopping"></i>
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button" onclick="window.app.openAuthModal(window.app.hasUserSession() ? 'register' : 'login')"
+                        id="header-account-btn"
+                        class="hidden md:inline-flex items-center gap-2 bg-emerald-950/65 hover:bg-emerald-950 text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl transition max-w-[195px]">
+                    <i class="fa-regular fa-user text-amber-300 shrink-0"></i>
+                    <span id="header-user-label" class="truncate">Visitante</span>
+                </button>
+
+                <button type="button" onclick="window.app.toggleCart(true)"
+                        aria-label="Abrir carrinho"
+                        class="relative flex items-center gap-2 bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 font-black px-3.5 py-2.5 rounded-xl shadow-md transition">
+                    <i class="fa-solid fa-cart-shopping text-base"></i>
                     <span class="hidden sm:inline text-sm">Carrinho</span>
-                    <span id="cart-count-badge" class="bg-slate-950 text-white text-xs font-extrabold px-2 py-0.5 rounded-full">0</span>
+                    <span id="cart-count-badge"
+                          class="bg-slate-950 text-amber-300 text-xs font-black px-2 py-0.5 rounded-full">
+                        0
+                    </span>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- =====================================================================
-         MENU GAVETA LATERAL (NAVEGAÇÃO SIMPLES E DIRETA)
+         MENU GAVETA LATERAL DESLIZANTE
          ===================================================================== -->
-    <div id="drawer-backdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-slate-900/50 z-40 hidden fade-transition"></div>
-    <aside id="side-drawer" class="fixed top-0 left-0 h-full w-72 max-w-[85vw] bg-white z-50 shadow-2xl -translate-x-full drawer-transition flex flex-col justify-between">
-        <div>
-            <div class="p-5 bg-emerald-700 text-white flex items-center justify-between">
+    <div id="drawer-backdrop" onclick="window.app.toggleDrawer(false)"
+         class="fixed inset-0 bg-slate-950/65 z-40 hidden"></div>
+
+    <aside id="side-drawer"
+           class="fixed top-0 left-0 h-full w-80 max-w-[88vw] bg-slate-950 text-white z-50 shadow-2xl -translate-x-full drawer-panel flex flex-col justify-between border-r border-slate-800">
+        <div class="overflow-y-auto">
+            <!-- Cabeçalho da Gaveta -->
+            <div class="p-5 bg-emerald-800 text-white flex items-center justify-between border-b border-emerald-700">
                 <div>
-                    <p class="text-xs uppercase tracking-wider text-emerald-200 font-semibold">Bem-vindo ao</p>
-                    <h2 class="font-bold text-lg">Meu Mercadinho Online</h2>
+                    <p class="text-[11px] uppercase tracking-wider text-amber-300 font-black">Menu</p>
+                    <h2 class="font-black text-lg leading-tight mt-0.5">Meu Mercadinho Online</h2>
                 </div>
-                <button type="button" onclick="window.app.toggleDrawer(false)" class="p-2 rounded-lg hover:bg-emerald-600" aria-label="Fechar menu">
+                <button type="button" onclick="window.app.toggleDrawer(false)" aria-label="Fechar menu"
+                        class="p-2.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-950 text-white transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
-            <div id="drawer-account-box" class="p-4 bg-slate-50 border-b border-slate-200">
-                <p id="drawer-account-name" class="font-bold text-slate-900 text-sm">Visitante</p>
-                <p id="drawer-account-sub" class="text-xs text-slate-500 mt-0.5">Navegue à vontade e cadastre-se ao fechar o pedido</p>
+            <!-- Estado do Cliente / Visitante -->
+            <div class="p-4 bg-slate-900 border-b border-slate-800 space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                    <p id="drawer-account-name" class="font-extrabold text-white text-sm truncate">Visitante</p>
+                    <span id="drawer-role-pill"
+                          class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-100 shrink-0">
+                        Visitante
+                    </span>
+                </div>
+                <p id="drawer-account-phone" class="text-xs text-emerald-300 font-bold hidden"></p>
+                <p id="drawer-account-address" class="text-xs text-slate-300 leading-relaxed">
+                    Veja os produtos e monte seu carrinho à vontade. Na hora de fechar o pedido, informe seu endereço e ponto de referência.
+                </p>
+                <p id="drawer-account-landmark" class="text-xs text-amber-300 font-bold hidden"></p>
             </div>
 
-            <nav class="p-3 space-y-1">
-                <button type="button" onclick="window.app.showView('store'); window.app.toggleDrawer(false);" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left font-semibold text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 transition">
-                    <i class="fa-solid fa-bag-shopping w-5 text-emerald-700"></i>
-                    <span>Catálogo de Produtos</span>
+            <!-- Navegação Principal -->
+            <nav class="p-3 space-y-1.5">
+                <button type="button" onclick="window.app.showView('store'); window.app.toggleDrawer(false);"
+                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-extrabold text-sm text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-store w-5 text-emerald-400"></i>
+                    <span>Catálogo da Loja</span>
                 </button>
 
-                <button type="button" onclick="window.app.toggleDrawer(false); window.app.toggleCart(true);" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left font-semibold text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 transition">
-                    <i class="fa-solid fa-cart-shopping w-5 text-emerald-700"></i>
-                    <span>Meu Carrinho</span>
+                <button type="button" onclick="window.app.selectCategory('Promoções'); window.app.showView('store'); window.app.toggleDrawer(false);"
+                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-extrabold text-sm text-amber-300 hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-tags w-5 text-amber-400"></i>
+                    <span>Promoções</span>
                 </button>
 
-                <button type="button" id="drawer-my-orders-btn" onclick="window.app.showView('orders'); window.app.toggleDrawer(false);" class="hidden w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left font-semibold text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 transition">
-                    <i class="fa-solid fa-receipt w-5 text-emerald-700"></i>
-                    <span>Meus Pedidos e Endereço</span>
+                <button type="button" onclick="window.app.toggleDrawer(false); window.app.toggleCart(true);"
+                        class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left font-extrabold text-sm text-white hover:bg-slate-800 transition">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-cart-shopping w-5 text-amber-400"></i>
+                        <span>Meu Carrinho</span>
+                    </span>
+                    <span id="drawer-cart-count" class="text-xs font-black bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full">0</span>
                 </button>
 
-                <button type="button" id="drawer-admin-btn" onclick="window.app.showView('admin'); window.app.toggleDrawer(false);" class="hidden w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left font-bold text-amber-950 bg-amber-100 hover:bg-amber-200 transition mt-2">
-                    <i class="fa-solid fa-sliders w-5 text-amber-800"></i>
-                    <span>Painel do Administrador</span>
+                <button type="button" onclick="window.app.showView('profile'); window.app.toggleDrawer(false);"
+                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-extrabold text-sm text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-location-dot w-5 text-sky-400"></i>
+                    <span>Endereço e Referência</span>
                 </button>
 
-                <!-- Ativação segura do primeiro administrador quando nenhum admin existe no Firestore -->
-                <div id="drawer-claim-admin-wrap" class="hidden pt-2">
-                    <button type="button" onclick="window.app.claimFirstAdmin()" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 text-amber-300 transition">
-                        <i class="fa-solid fa-crown"></i>
-                        <span>Ativar minha conta como Admin</span>
+                <!-- Opção "Painel" exibida apenas quando a conta autenticada possui permissão -->
+                <div id="admin-menu-section" class="hidden pt-2 mt-2 border-t border-slate-800">
+                    <button type="button" onclick="window.app.openAdminPanel()"
+                            class="w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left font-black text-sm bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-md transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-sliders w-5"></i>
+                            <span>Painel</span>
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
                     </button>
                 </div>
             </nav>
         </div>
 
-        <div class="p-4 border-t border-slate-200 space-y-2">
-            <button type="button" id="drawer-login-btn" onclick="window.app.toggleDrawer(false); window.app.openAuthModal('login');" class="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm transition">
-                Entrar ou Cadastrar
+        <!-- Rodapé da Gaveta -->
+        <div class="p-4 border-t border-slate-800 bg-slate-900 space-y-2">
+            <button type="button" id="drawer-login-btn"
+                    onclick="window.app.toggleDrawer(false); window.app.openAuthModal('register');"
+                    class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm transition">
+                Cadastrar ou Entrar
             </button>
-            <button type="button" id="drawer-logout-btn" onclick="window.app.logoutUser()" class="hidden w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition">
+            <button type="button" id="drawer-edit-profile-btn"
+                    onclick="window.app.toggleDrawer(false); window.app.openAuthModal('register');"
+                    class="hidden w-full py-3 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm transition">
+                Atualizar Endereço e Referência
+            </button>
+            <button type="button" id="drawer-logout-btn"
+                    onclick="window.app.logoutUser()"
+                    class="hidden w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold text-sm transition">
                 Sair da Conta
             </button>
         </div>
@@ -152,106 +268,169 @@
     <!-- =====================================================================
          CONTEÚDO PRINCIPAL
          ===================================================================== -->
-    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5 space-y-6">
+    <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-5 py-4 space-y-4">
 
-        <!-- Banner animado em HTML5 Canvas (limpo e integrado ao topo da loja) -->
-        <div class="w-full rounded-2xl overflow-hidden shadow-sm border border-emerald-200/70 bg-emerald-800">
-            <canvas id="store-canvas" class="w-full h-28 sm:h-32 block"></canvas>
+        <!-- Banner Promocional em HTML5 Canvas -->
+        <div class="w-full rounded-2xl overflow-hidden shadow-md border-2 border-emerald-900/20 bg-emerald-900">
+            <canvas id="promo-canvas" class="w-full h-28 sm:h-32 block"></canvas>
+        </div>
+
+        <!-- Aviso de confirmação na tela após envio do pedido ao WhatsApp -->
+        <div id="order-sent-banner"
+             class="hidden bg-emerald-900 text-white border-2 border-emerald-400 px-4 py-4 rounded-2xl shadow-lg items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+                <i class="fa-solid fa-motorcycle text-amber-300 text-2xl mt-0.5 shrink-0"></i>
+                <div class="space-y-1">
+                    <p class="font-black text-sm sm:text-base text-amber-300">
+                        Pedido enviado para o WhatsApp! Em poucos minutos chega na sua casa.
+                    </p>
+                    <p id="order-sent-banner-desc" class="text-xs sm:text-sm text-emerald-50 font-medium leading-relaxed"></p>
+                </div>
+            </div>
+            <button type="button" onclick="window.app.hideOrderSentBanner()" aria-label="Fechar aviso de pedido enviado"
+                    class="p-1.5 rounded-lg text-emerald-200 hover:text-white hover:bg-emerald-800 transition shrink-0">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
         <!-- =================================================================
-             VIEW 1: VITRINE LIMPA E INTUITIVA
+             VIEW 1: VITRINE PRINCIPAL (2 COLUNAS LADO A LADO + PROMOÇÕES)
              ================================================================= -->
-        <section id="view-store" class="space-y-5">
-            <!-- Barra de busca e categorias simples -->
-            <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-                <div class="relative flex-1">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="search-input" placeholder="Buscar produto no mercadinho..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm">
+        <section id="view-store" class="space-y-4">
+            <!-- Busca e Filtros de Categoria + Promoções -->
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="search" id="search-input"
+                           placeholder="Buscar produto, categoria ou oferta..."
+                           class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold text-slate-900">
                 </div>
 
-                <div id="category-tabs" class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-                    <!-- Categorias preenchidas via JS -->
+                <div id="category-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+                    <!-- Preenchido via JS -->
                 </div>
             </div>
 
-            <!-- Grade de Produtos Limpa -->
-            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <!-- Grade de Produtos SEMPRE em 2 colunas lado a lado -->
+            <div id="products-grid" class="two-col-products-grid">
                 <!-- Cards gerados via JS -->
             </div>
 
-            <!-- Mensagem quando não há produtos visíveis -->
-            <div id="empty-catalog" class="hidden bg-white rounded-2xl p-10 text-center border border-slate-200 space-y-2">
-                <i class="fa-solid fa-box-open text-4xl text-slate-300"></i>
-                <p class="font-bold text-slate-700">Nenhum produto disponível no momento</p>
-                <p class="text-sm text-slate-500">Tente outra busca ou categoria.</p>
+            <!-- Estado Vazio -->
+            <div id="empty-catalog"
+                 class="hidden bg-white rounded-2xl p-10 text-center border border-slate-200 space-y-2">
+                <i class="fa-solid fa-basket-shopping text-4xl text-slate-300"></i>
+                <p id="empty-catalog-title" class="font-black text-slate-800 text-base">Nenhum produto encontrado</p>
+                <p id="empty-catalog-desc" class="text-sm font-medium text-slate-500">Tente outra palavra ou toque em "Todos".</p>
             </div>
         </section>
 
         <!-- =================================================================
-             VIEW 2: MEUS PEDIDOS E ENDEREÇO DO CLIENTE
+             VIEW 2: PERFIL DO CLIENTE (ENDEREÇO E PONTO DE REFERÊNCIA)
              ================================================================= -->
-        <section id="view-orders" class="hidden space-y-5">
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-extrabold text-slate-900">Meus Pedidos e Endereço</h2>
-                <button type="button" onclick="window.app.showView('store')" class="text-sm font-bold text-emerald-700 hover:underline">
-                    ← Voltar ao catálogo
+        <section id="view-profile" class="hidden space-y-4">
+            <div class="flex items-center justify-between gap-2">
+                <h2 class="text-xl font-black text-slate-950">Endereço e Ponto de Referência</h2>
+                <button type="button" onclick="window.app.showView('store')"
+                        class="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-extrabold transition">
+                    ← Voltar à Loja
                 </button>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                <div class="flex items-center justify-between">
-                    <h3 class="font-bold text-slate-800">Endereço de Entrega</h3>
-                    <button type="button" onclick="window.app.openAuthModal('login')" class="text-xs font-bold text-emerald-700 hover:underline">
-                        Atualizar dados
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div>
+                        <p class="text-xs font-black uppercase text-emerald-800">Cadastro do Cliente</p>
+                        <h3 id="profile-name-display" class="text-lg font-black text-slate-950">Visitante</h3>
+                    </div>
+                    <button type="button" onclick="window.app.openAuthModal('register')"
+                            class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition">
+                        Editar Endereço / Referência
                     </button>
                 </div>
-                <p id="profile-address-display" class="text-sm text-slate-600">Carregando endereço...</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <p class="text-xs font-extrabold text-slate-500 uppercase">Telefone / WhatsApp</p>
+                        <p id="profile-phone-display" class="font-bold text-slate-900 mt-0.5">Não informado</p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <p class="text-xs font-extrabold text-slate-500 uppercase">E-mail</p>
+                        <p id="profile-email-display" class="font-bold text-slate-900 mt-0.5">Não informado</p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <p class="text-xs font-extrabold text-slate-500 uppercase">Endereço de Entrega</p>
+                        <p id="profile-address-display" class="font-bold text-slate-900 mt-0.5">Rua, número e bairro</p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-amber-100/90 border-2 border-amber-400">
+                        <p class="text-xs font-black text-amber-950 uppercase">
+                            <i class="fa-solid fa-location-crosshairs mr-1"></i>
+                            Ponto de Referência / Lugar mais próximo
+                        </p>
+                        <p id="profile-landmark-display" class="font-black text-amber-950 mt-0.5">Não informado</p>
+                    </div>
+                </div>
             </div>
 
-            <div id="customer-orders-list" class="space-y-3">
-                <!-- Pedidos do cliente via JS -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <h3 class="font-black text-slate-950 text-base">Meus Pedidos</h3>
+                <div id="customer-orders-list" class="space-y-3"></div>
             </div>
         </section>
 
         <!-- =================================================================
-             VIEW 3: PAINEL DO ADMINISTRADOR (PRODUTOS, OCULTAR, EXCLUIR, WHATSAPP)
+             VIEW 3: PAINEL DE PRODUTOS E LOJA
              ================================================================= -->
-        <section id="view-admin" class="hidden space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+        <section id="view-admin" class="hidden space-y-4">
+            <div class="bg-slate-950 text-white p-5 rounded-2xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-800">
                 <div>
-                    <h2 class="text-xl font-extrabold text-slate-900">Painel do Administrador</h2>
-                    <p class="text-sm text-slate-500">Cadastre itens com links de fotos do GitHub, oculte itens sem estoque ou configure seu WhatsApp.</p>
+                    <span class="text-[11px] font-black uppercase tracking-wider text-amber-300">Gestão da Loja</span>
+                    <h2 class="text-xl font-black mt-0.5">Painel</h2>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-0.5">
+                        Cadastre produtos com foto do GitHub, promoções, oculte ou exiba itens e defina o WhatsApp da loja.
+                    </p>
                 </div>
-                <button type="button" onclick="window.app.showView('store')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm self-start sm:self-auto">
-                    Ver Loja
+                <button type="button" onclick="window.app.showView('store')"
+                        class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm transition self-start sm:self-auto shrink-0">
+                    Ver Vitrine
                 </button>
             </div>
 
-            <!-- Configuração rápida do WhatsApp do Administrador -->
-            <form id="admin-whatsapp-form" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-                <div class="md:col-span-2">
-                    <label for="admin-whatsapp-input" class="block text-xs font-bold uppercase text-slate-600 mb-1">
-                        Seu WhatsApp para receber pedidos (com DDI e DDD)
+            <!-- Configuração do WhatsApp da Loja -->
+            <form id="admin-settings-form"
+                  class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                <div class="sm:col-span-2">
+                    <label for="admin-whatsapp-input" class="block text-xs font-black uppercase text-slate-700 mb-1">
+                        WhatsApp da Loja (DDI + DDD + Número) *
                     </label>
-                    <input type="text" id="admin-whatsapp-input" placeholder="Ex: 5585999999999" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm">
+                    <input type="text" id="admin-whatsapp-input" required
+                           placeholder="Ex: 5585999999999"
+                           class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-bold">
                 </div>
                 <div>
-                    <label for="admin-delivery-fee-input" class="block text-xs font-bold uppercase text-slate-600 mb-1">
+                    <label for="admin-delivery-fee-input" class="block text-xs font-black uppercase text-slate-700 mb-1">
                         Taxa de Entrega (R$)
                     </label>
-                    <input type="number" step="0.01" min="0" id="admin-delivery-fee-input" placeholder="0.00" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm">
+                    <input type="number" step="0.01" min="0" id="admin-delivery-fee-input"
+                           placeholder="0.00"
+                           class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-bold">
                 </div>
-                <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm transition">
+                <button type="submit"
+                        class="w-full py-3 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm transition">
                     Salvar WhatsApp
                 </button>
             </form>
 
-            <!-- Formulário de Cadastro / Edição de Produto -->
-            <form id="admin-product-form" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 id="admin-form-title" class="font-bold text-slate-900 text-base">Cadastrar Novo Produto</h3>
-                    <button type="button" id="cancel-edit-product-btn" onclick="window.app.resetProductForm()" class="hidden text-xs font-bold text-slate-500 hover:text-slate-800">
+            <!-- Formulário de Cadastro / Edição de Produto e Promoção -->
+            <form id="admin-product-form"
+                  class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between gap-2">
+                    <h3 id="admin-product-form-title" class="font-black text-slate-950 text-base">
+                        Cadastrar Novo Produto
+                    </h3>
+                    <button type="button" id="cancel-edit-product-btn"
+                            onclick="window.app.resetProductForm()"
+                            class="hidden text-xs font-extrabold text-red-700 hover:underline">
                         Cancelar edição
                     </button>
                 </div>
@@ -260,18 +439,29 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div class="lg:col-span-2">
-                        <label for="product-name" class="block text-xs font-bold text-slate-600 mb-1">Nome do Produto *</label>
-                        <input type="text" id="product-name" required placeholder="Ex: Arroz Parboilizado 5kg" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm">
+                        <label for="product-name" class="block text-xs font-extrabold text-slate-800 mb-1">
+                            Nome do Produto *
+                        </label>
+                        <input type="text" id="product-name" required
+                               placeholder="Ex: Arroz Branco Tipo 1 5kg"
+                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
                     </div>
 
                     <div>
-                        <label for="product-price" class="block text-xs font-bold text-slate-600 mb-1">Preço (R$) *</label>
-                        <input type="number" step="0.01" min="0.01" id="product-price" required placeholder="24.90" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm">
+                        <label for="product-price" class="block text-xs font-extrabold text-slate-800 mb-1">
+                            Preço Normal (R$) *
+                        </label>
+                        <input type="number" step="0.01" min="0.01" id="product-price" required
+                               placeholder="25.00"
+                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
                     </div>
 
                     <div>
-                        <label for="product-category" class="block text-xs font-bold text-slate-600 mb-1">Categoria</label>
-                        <select id="product-category" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm bg-white">
+                        <label for="product-category" class="block text-xs font-extrabold text-slate-800 mb-1">
+                            Categoria
+                        </label>
+                        <select id="product-category"
+                                class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-bold bg-white">
                             <option value="Mercearia">Mercearia</option>
                             <option value="Bebidas">Bebidas</option>
                             <option value="Limpeza">Limpeza</option>
@@ -282,43 +472,83 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-center">
-                    <div class="lg:col-span-2">
-                        <label for="product-image-url" class="block text-xs font-bold text-slate-600 mb-1">
-                            Link da Foto (ex: link Raw do GitHub) *
+                <!-- Campos de Promoção -->
+                <div class="p-3.5 rounded-xl bg-amber-50 border-2 border-amber-300 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                    <label class="inline-flex items-center gap-2.5 cursor-pointer select-none py-1.5">
+                        <input type="checkbox" id="product-promo" onchange="window.app.togglePromoFields()"
+                               class="w-4 h-4 accent-amber-600 rounded">
+                        <span class="text-sm font-black text-amber-950">
+                            Marcar em Promoção
+                        </span>
+                    </label>
+
+                    <div>
+                        <label for="product-promo-price" class="block text-xs font-extrabold text-amber-950 mb-1">
+                            Preço Promocional (R$)
                         </label>
-                        <input type="url" id="product-image-url" required placeholder="https://raw.githubusercontent.com/usuario/repositorio/main/produto.jpg" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm">
+                        <input type="number" step="0.01" min="0.01" id="product-promo-price"
+                               placeholder="Ex: 19.90"
+                               class="w-full px-3 py-2 rounded-xl border-2 border-amber-300 bg-white focus:border-amber-600 focus:outline-none text-sm font-bold">
                     </div>
 
-                    <div class="flex items-center gap-2 pt-5">
-                        <input type="checkbox" id="product-hidden" class="w-4 h-4 accent-emerald-700 rounded">
-                        <label for="product-hidden" class="text-sm font-semibold text-slate-700">
-                            Ocultar produto dos clientes
+                    <div>
+                        <label for="product-promo-badge" class="block text-xs font-extrabold text-amber-950 mb-1">
+                            Selo da Promoção
                         </label>
+                        <input type="text" id="product-promo-badge"
+                               placeholder="Ex: OFERTA, -20%, PROMO"
+                               class="w-full px-3 py-2 rounded-xl border-2 border-amber-300 bg-white focus:border-amber-600 focus:outline-none text-sm font-bold">
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <button type="submit" id="save-product-btn" class="px-6 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm transition">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
+                    <div class="lg:col-span-2">
+                        <label for="product-image-url" class="block text-xs font-extrabold text-slate-800 mb-1">
+                            Link da Foto (URL / GitHub Raw) *
+                        </label>
+                        <input type="url" id="product-image-url" required
+                               placeholder="https://raw.githubusercontent.com/usuario/repo/main/foto.jpg"
+                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
+                    </div>
+
+                    <div>
+                        <label for="product-unit" class="block text-xs font-extrabold text-slate-800 mb-1">
+                            Unidade / Peso
+                        </label>
+                        <input type="text" id="product-unit"
+                               placeholder="Ex: Pacote 5kg, 1L, Un."
+                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                    <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+                        <input type="checkbox" id="product-hidden" class="w-4 h-4 accent-emerald-800 rounded">
+                        <span class="text-sm font-bold text-slate-800">
+                            Ocultar produto na vitrine
+                        </span>
+                    </label>
+
+                    <button type="submit"
+                            class="px-6 py-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm transition">
                         Salvar Produto
                     </button>
                 </div>
             </form>
 
-            <!-- Gerenciamento da Lista de Produtos (Visíveis e Ocultos) -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-                <h3 class="font-bold text-slate-900 text-base">Produtos Cadastrados</h3>
-                <div id="admin-products-list" class="divide-y divide-slate-100">
-                    <!-- Lista gerada via JS -->
+            <!-- Lista de Produtos -->
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-black text-slate-950 text-base">Produtos Cadastrados</h3>
+                    <span id="admin-product-count" class="text-xs font-extrabold text-slate-600">0 itens</span>
                 </div>
+                <div id="admin-products-list" class="divide-y divide-slate-100"></div>
             </div>
 
-            <!-- Pedidos Recebidos -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-                <h3 class="font-bold text-slate-900 text-base">Pedidos Recentes</h3>
-                <div id="admin-orders-list" class="space-y-2.5">
-                    <!-- Pedidos via JS -->
-                </div>
+            <!-- Pedidos Registrados -->
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm space-y-3">
+                <h3 class="font-black text-slate-950 text-base">Pedidos Enviados</h3>
+                <div id="admin-orders-list" class="space-y-3"></div>
             </div>
         </section>
 
@@ -327,112 +557,171 @@
     <!-- =====================================================================
          GAVETA LATERAL DO CARRINHO
          ===================================================================== -->
-    <div id="cart-backdrop" onclick="window.app.toggleCart(false)" class="fixed inset-0 bg-slate-900/50 z-40 hidden fade-transition"></div>
-    <aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl translate-x-full drawer-transition flex flex-col justify-between">
-        <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-            <h2 class="font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-cart-shopping text-emerald-700"></i>
+    <div id="cart-backdrop" onclick="window.app.toggleCart(false)"
+         class="fixed inset-0 bg-slate-950/65 z-40 hidden"></div>
+
+    <aside id="cart-drawer"
+           class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl translate-x-full drawer-panel flex flex-col justify-between">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <h2 class="font-black text-lg text-slate-950 flex items-center gap-2">
+                <i class="fa-solid fa-cart-shopping text-emerald-800"></i>
                 <span>Meu Carrinho</span>
             </h2>
-            <button type="button" onclick="window.app.toggleCart(false)" class="p-2 rounded-lg hover:bg-slate-100 text-slate-600" aria-label="Fechar carrinho">
+            <button type="button" onclick="window.app.toggleCart(false)" aria-label="Fechar carrinho"
+                    class="p-2 rounded-xl hover:bg-slate-200 text-slate-800 transition">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
 
-        <div id="cart-items-list" class="flex-1 overflow-y-auto p-4 space-y-3">
-            <!-- Itens do carrinho via JS -->
-        </div>
+        <div id="cart-items-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
 
         <div class="p-5 border-t border-slate-200 bg-slate-50 space-y-3">
-            <div class="flex justify-between text-sm text-slate-600">
+            <div class="flex justify-between text-sm font-bold text-slate-700">
                 <span>Subtotal</span>
-                <span id="cart-subtotal" class="font-bold text-slate-900">R$ 0,00</span>
+                <span id="cart-subtotal" class="font-black text-slate-950">R$ 0,00</span>
             </div>
-            <div class="flex justify-between text-sm text-slate-600">
-                <span>Entrega</span>
-                <span id="cart-delivery" class="font-bold text-emerald-700">Grátis</span>
+            <div class="flex justify-between text-sm font-bold text-slate-700">
+                <span>Taxa de Entrega</span>
+                <span id="cart-delivery" class="font-black text-emerald-800">Grátis</span>
             </div>
-            <div class="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
+            <div class="flex justify-between text-base font-black text-slate-950 pt-2 border-t border-slate-200">
                 <span>Total</span>
                 <span id="cart-total">R$ 0,00</span>
             </div>
-            <button type="button" onclick="window.app.proceedToCheckout()" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm shadow-sm transition">
-                Fechar Pedido
+            <button type="button" onclick="window.app.proceedToCheckout()"
+                    class="w-full py-3.5 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 active:scale-[0.99] text-white font-black text-sm shadow-md transition">
+                Finalizar Pedido
             </button>
         </div>
     </aside>
 
     <!-- =====================================================================
-         MODAL DE LOGIN / CADASTRO (E-MAIL, SENHA E ENDEREÇO NO FECHAMENTO)
+         MODAL DE CADASTRO / LOGIN COM ENDEREÇO E PONTO DE REFERÊNCIA
          ===================================================================== -->
-    <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[60] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+    <div id="auth-modal"
+         class="fixed inset-0 bg-slate-950/70 backdrop-blur-[2px] z-[80] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
             <div class="flex items-center justify-between">
-                <h3 id="auth-modal-title" class="text-lg font-extrabold text-slate-900">Cadastro para Entrega</h3>
-                <button type="button" onclick="window.app.closeAuthModal()" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+                <div>
+                    <h3 id="auth-modal-title" class="text-lg font-black text-slate-950">Cadastro para Entrega</h3>
+                    <p class="text-xs font-semibold text-slate-600 mt-0.5">
+                        Seus itens no carrinho continuam salvos sem perder nada.
+                    </p>
+                </div>
+                <button type="button" onclick="window.app.closeAuthModal()" aria-label="Fechar janela de conta"
+                        class="p-2 rounded-xl hover:bg-slate-100 text-slate-600">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
             <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl">
-                <button type="button" id="mode-register-btn" onclick="window.app.setAuthMode('register')" class="py-2 rounded-lg text-xs font-extrabold bg-white text-emerald-700 shadow-2xs">
+                <button type="button" id="mode-register-btn" onclick="window.app.setAuthMode('register')"
+                        class="py-2 rounded-lg text-xs font-black bg-white text-emerald-800 shadow-2xs transition">
                     Cadastrar
                 </button>
-                <button type="button" id="mode-login-btn" onclick="window.app.setAuthMode('login')" class="py-2 rounded-lg text-xs font-bold text-slate-600">
-                    Já tenho conta
+                <button type="button" id="mode-login-btn" onclick="window.app.setAuthMode('login')"
+                        class="py-2 rounded-lg text-xs font-extrabold text-slate-600 transition">
+                    Entrar
                 </button>
             </div>
 
             <form id="auth-form" class="space-y-3">
-                <div id="register-extra-fields" class="space-y-3">
+                <div id="register-fields" class="space-y-3">
                     <div>
-                        <label for="auth-name" class="block text-xs font-bold text-slate-600 mb-1">Nome Completo *</label>
-                        <input type="text" id="auth-name" placeholder="Seu nome" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                        <label for="auth-name" class="block text-xs font-extrabold text-slate-800 mb-1">
+                            Nome Completo *
+                        </label>
+                        <input type="text" id="auth-name"
+                               placeholder="Ex: Maria da Silva"
+                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
                     </div>
+
                     <div>
-                        <label for="auth-address" class="block text-xs font-bold text-slate-600 mb-1">Endereço Completo para Entrega *</label>
-                        <input type="text" id="auth-address" placeholder="Rua, número, bairro, ponto de referência" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                        <label for="auth-phone" class="block text-xs font-extrabold text-slate-800 mb-1">
+                            Telefone / WhatsApp *
+                        </label>
+                        <input type="tel" id="auth-phone"
+                               placeholder="Ex: (85) 99999-9999"
+                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
+                    </div>
+
+                    <div>
+                        <label for="auth-address" class="block text-xs font-extrabold text-slate-800 mb-1">
+                            Endereço Completo (Rua, Número, Bairro) *
+                        </label>
+                        <input type="text" id="auth-address"
+                               placeholder="Ex: Rua das Palmeiras, 45 - Centro"
+                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-amber-100/80 border-2 border-amber-400">
+                        <label for="auth-landmark" class="block text-xs font-black text-amber-950 mb-1">
+                            <i class="fa-solid fa-location-crosshairs mr-1 text-amber-800"></i>
+                            Ponto de Referência / Lugar mais próximo *
+                        </label>
+                        <input type="text" id="auth-landmark"
+                               placeholder="Ex: Próximo à padaria central, casa com portão verde"
+                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-amber-400 bg-white focus:border-amber-700 focus:outline-none text-sm font-bold">
                     </div>
                 </div>
 
                 <div>
-                    <label for="auth-email" class="block text-xs font-bold text-slate-600 mb-1">E-mail *</label>
-                    <input type="email" id="auth-email" required placeholder="voce@exemplo.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <label for="auth-email" class="block text-xs font-extrabold text-slate-800 mb-1">
+                        E-mail *
+                    </label>
+                    <input type="email" id="auth-email" required
+                           placeholder="cliente@exemplo.com"
+                           class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
                 </div>
 
                 <div>
-                    <label for="auth-password" class="block text-xs font-bold text-slate-600 mb-1">Senha (mín. 6 caracteres) *</label>
-                    <input type="password" id="auth-password" required minlength="6" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <label for="auth-password" class="block text-xs font-extrabold text-slate-800 mb-1">
+                        Senha (mínimo 6 caracteres) *
+                    </label>
+                    <input type="password" id="auth-password" required minlength="6"
+                           placeholder="••••••••"
+                           class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
                 </div>
 
-                <button type="submit" id="auth-submit-btn" class="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm transition">
-                    Salvar e Continuar Pedido
+                <button type="submit" id="auth-submit-btn"
+                        class="w-full py-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm transition">
+                    Salvar e Continuar
                 </button>
             </form>
         </div>
     </div>
 
     <!-- =====================================================================
-         MODAL DE CONFIRMAÇÃO E ENVIO DIRETO PARA O WHATSAPP
+         MODAL DE CONFIRMAÇÃO FINAL DO PEDIDO PARA WHATSAPP
          ===================================================================== -->
-    <div id="checkout-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[70] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+    <div id="checkout-modal"
+         class="fixed inset-0 bg-slate-950/70 backdrop-blur-[2px] z-[90] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-extrabold text-slate-900">Enviar Pedido pelo WhatsApp</h3>
-                <button type="button" onclick="window.app.closeCheckoutModal()" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+                <h3 class="text-lg font-black text-slate-950">Confirmar Pedido no WhatsApp</h3>
+                <button type="button" onclick="window.app.closeCheckoutModal()" aria-label="Fechar confirmação"
+                        class="p-2 rounded-xl hover:bg-slate-100 text-slate-600">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
-            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1">
-                <p><strong class="text-slate-800">Cliente:</strong> <span id="checkout-client-name"></span></p>
-                <p><strong class="text-slate-800">Endereço:</strong> <span id="checkout-client-address"></span></p>
-                <p><strong class="text-slate-800">Total:</strong> <span id="checkout-total-label" class="font-extrabold text-emerald-700"></span></p>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-1.5">
+                <p><strong class="text-slate-950">Cliente:</strong> <span id="checkout-client-name" class="font-bold"></span></p>
+                <p><strong class="text-slate-950">Telefone:</strong> <span id="checkout-client-phone" class="font-bold"></span></p>
+                <p><strong class="text-slate-950">E-mail:</strong> <span id="checkout-client-email" class="font-bold"></span></p>
+                <p><strong class="text-slate-950">Endereço:</strong> <span id="checkout-client-address" class="font-bold"></span></p>
+                <p class="text-amber-950 font-extrabold bg-amber-100 px-2.5 py-1.5 rounded-lg border border-amber-300">
+                    <strong>Ponto de Referência:</strong> <span id="checkout-client-landmark"></span>
+                </p>
+                <p class="pt-1 text-sm"><strong class="text-slate-950">Total:</strong> <span id="checkout-total-label" class="font-black text-emerald-800"></span></p>
             </div>
 
             <div>
-                <label for="checkout-payment" class="block text-xs font-bold text-slate-600 mb-1">Forma de Pagamento</label>
-                <select id="checkout-payment" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <label for="checkout-payment" class="block text-xs font-extrabold text-slate-800 mb-1">
+                    Forma de Pagamento
+                </label>
+                <select id="checkout-payment"
+                        class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 text-sm font-bold bg-white focus:border-emerald-700 focus:outline-none">
                     <option value="Pix">Pix</option>
                     <option value="Dinheiro">Dinheiro</option>
                     <option value="Cartão na entrega">Cartão na entrega</option>
@@ -440,19 +729,24 @@
             </div>
 
             <div>
-                <label for="checkout-note" class="block text-xs font-bold text-slate-600 mb-1">Troco ou observação (opcional)</label>
-                <input type="text" id="checkout-note" placeholder="Ex: Troco para R$ 50,00" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <label for="checkout-note" class="block text-xs font-extrabold text-slate-800 mb-1">
+                    Observação / Troco (opcional)
+                </label>
+                <input type="text" id="checkout-note"
+                       placeholder="Ex: Troco para R$ 50,00"
+                       class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 text-sm font-semibold focus:border-emerald-700 focus:outline-none">
             </div>
 
-            <button type="button" id="send-whatsapp-btn" onclick="window.app.confirmAndSendWhatsApp()" class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-md transition">
-                <i class="fa-brands fa-whatsapp text-lg"></i>
-                <span>Enviar para o WhatsApp do Mercadinho</span>
+            <button type="button" onclick="window.app.confirmAndSendWhatsApp()"
+                    class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md transition">
+                <i class="fa-brands fa-whatsapp text-xl"></i>
+                <span>Enviar Pedido pelo WhatsApp</span>
             </button>
         </div>
     </div>
 
     <!-- =====================================================================
-         LÓGICA JAVASCRIPT (FIREBASE MODULAR + CANVAS + ESTADO DA LOJA)
+         LÓGICA COMPLETA (FIREBASE AUTH + FIRESTORE + CANVAS + CARRINHO + LOJA)
          ===================================================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -469,19 +763,15 @@
             collection,
             doc,
             getDoc,
-            getDocs,
             setDoc,
             addDoc,
             updateDoc,
             deleteDoc,
             onSnapshot,
-            query,
-            where,
-            limit,
             serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Configuração oficial do Firebase fornecida para o projeto
+        // Configuração Firebase do projeto 'mercadinho-oline'
         const firebaseConfig = {
             apiKey: "AIzaSyBcLkzbgLJKJkm7nnYqg6UT0XHYRTqGgQA",
             authDomain: "mercadinho-oline.firebaseapp.com",
@@ -492,32 +782,119 @@
             measurementId: "G-83JPHJG1QT"
         };
 
-        const app = initializeApp(firebaseConfig);
-        try { getAnalytics(app); } catch (_) {}
+        let app = null;
+        let auth = null;
+        let db = null;
+        let firebaseReady = false;
 
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            try { getAnalytics(app); } catch (_) { /* Analytics opcional */ }
+            firebaseReady = true;
+        } catch (_) {
+            firebaseReady = false;
+        }
 
-        const CATEGORIES = ["Todos", "Mercearia", "Bebidas", "Limpeza", "Hortifrúti", "Padaria", "Outros"];
+        const CATEGORIES = ["Todos", "Promoções", "Mercearia", "Bebidas", "Limpeza", "Hortifrúti", "Padaria", "Outros"];
+        const STORAGE_KEYS = {
+            cart: "meu_mercadinho_cart_v1",
+            products: "meu_mercadinho_products_v1",
+            settings: "meu_mercadinho_store_config_v1",
+            profile: "meu_mercadinho_profile_v1",
+            orders: "meu_mercadinho_orders_v1"
+        };
+
+        // Catálogo inicial para manter a vitrine pronta mesmo antes do primeiro item cadastrado
+        const DEFAULT_PRODUCTS = [
+            {
+                id: "default-arroz-5kg",
+                name: "Arroz Branco Tipo 1 5kg",
+                price: 25.00,
+                promo: true,
+                promoPrice: 21.90,
+                promoBadge: "PROMOÇÃO",
+                category: "Mercearia",
+                unit: "Pacote 5kg",
+                imageUrl: "https://placehold.co/400x300/ecfdf5/065f46?text=Arroz+5kg",
+                hidden: false
+            },
+            {
+                id: "default-feijao-1kg",
+                name: "Feijão Carioca 1kg",
+                price: 8.50,
+                promo: false,
+                promoPrice: null,
+                promoBadge: "",
+                category: "Mercearia",
+                unit: "Pacote 1kg",
+                imageUrl: "https://placehold.co/400x300/fef3c7/78350f?text=Feijao+1kg",
+                hidden: false
+            },
+            {
+                id: "default-refri-2l",
+                name: "Refrigerante Cola 2L",
+                price: 9.50,
+                promo: true,
+                promoPrice: 7.90,
+                promoBadge: "-17%",
+                category: "Bebidas",
+                unit: "Garrafa 2L",
+                imageUrl: "https://placehold.co/400x300/fee2e2/7f1d1d?text=Refri+2L",
+                hidden: false
+            },
+            {
+                id: "default-detergente",
+                name: "Detergente Líquido 500ml",
+                price: 2.80,
+                promo: false,
+                promoPrice: null,
+                promoBadge: "",
+                category: "Limpeza",
+                unit: "Frasco 500ml",
+                imageUrl: "https://placehold.co/400x300/e0f2fe/0c4a6e?text=Detergente",
+                hidden: false
+            }
+        ];
+
+        function loadJson(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (_) {
+                return fallback;
+            }
+        }
+
+        function saveJson(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (_) { /* Ignora erro de armazenamento local em modo restrito */ }
+        }
 
         const state = {
-            products: [],
-            cart: JSON.parse(localStorage.getItem("mercadinho_cart") || "[]"),
+            products: loadJson(STORAGE_KEYS.products, DEFAULT_PRODUCTS),
+            cart: loadJson(STORAGE_KEYS.cart, []),
+            orders: loadJson(STORAGE_KEYS.orders, []),
             selectedCategory: "Todos",
             searchTerm: "",
             currentUser: null,
-            userProfile: null,
+            userProfile: loadJson(STORAGE_KEYS.profile, null),
             isAdmin: false,
-            hasAnyAdmin: true,
             authMode: "register",
             pendingCheckout: false,
-            settings: {
+            settings: loadJson(STORAGE_KEYS.settings, {
                 whatsapp: "5585999999999",
                 deliveryFee: 0
-            }
+            })
         };
 
-        // Formatação de moeda em Real brasileiro
+        if (!Array.isArray(state.products) || state.products.length === 0) {
+            state.products = [...DEFAULT_PRODUCTS];
+            saveJson(STORAGE_KEYS.products, state.products);
+        }
+
         function formatBRL(value) {
             return Number(value || 0).toLocaleString("pt-BR", {
                 style: "currency",
@@ -525,8 +902,8 @@
             });
         }
 
-        // Notificação na tela (evita alert() nativo do navegador)
-        let toastTimeout = null;
+        // Notificação visual própria na página (sem alert())
+        let toastTimer = null;
         function showToast(message, isError = false) {
             const banner = document.getElementById("toast-banner");
             const textEl = document.getElementById("toast-text");
@@ -534,115 +911,140 @@
 
             textEl.textContent = message;
             iconEl.className = isError
-                ? "fa-solid fa-circle-exclamation text-red-400 text-lg"
-                : "fa-solid fa-circle-check text-emerald-400 text-lg";
+                ? "fa-solid fa-circle-exclamation text-red-400 text-xl shrink-0"
+                : "fa-solid fa-circle-check text-emerald-400 text-xl shrink-0";
 
             banner.classList.remove("hidden");
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                banner.classList.add("hidden");
-            }, 3500);
+            banner.classList.add("flex");
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => hideToast(), 4000);
         }
 
         function hideToast() {
-            document.getElementById("toast-banner").classList.add("hidden");
+            const banner = document.getElementById("toast-banner");
+            banner.classList.add("hidden");
+            banner.classList.remove("flex");
         }
 
-        // Modal de confirmação customizado (evita confirm() nativo)
+        function hideOrderSentBanner() {
+            const banner = document.getElementById("order-sent-banner");
+            banner.classList.add("hidden");
+            banner.classList.remove("flex");
+        }
+
+        function closeOrderSuccessModal() {
+            const modal = document.getElementById("order-success-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        // Confirmação visual própria na página (sem confirm())
         function askConfirm(title, message) {
             return new Promise((resolve) => {
-                const dialog = document.getElementById("confirm-dialog");
+                const modal = document.getElementById("confirm-modal");
                 document.getElementById("confirm-title").textContent = title;
                 document.getElementById("confirm-message").textContent = message;
-                dialog.classList.remove("hidden");
-                dialog.classList.add("flex");
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
 
                 const okBtn = document.getElementById("confirm-ok-btn");
                 const cancelBtn = document.getElementById("confirm-cancel-btn");
 
-                const finish = (choice) => {
-                    dialog.classList.add("hidden");
-                    dialog.classList.remove("flex");
+                const cleanAndResolve = (result) => {
+                    modal.classList.add("hidden");
+                    modal.classList.remove("flex");
                     okBtn.replaceWith(okBtn.cloneNode(true));
                     cancelBtn.replaceWith(cancelBtn.cloneNode(true));
-                    resolve(choice);
+                    resolve(result);
                 };
 
-                document.getElementById("confirm-ok-btn").addEventListener("click", () => finish(true));
-                document.getElementById("confirm-cancel-btn").addEventListener("click", () => finish(false));
+                document.getElementById("confirm-ok-btn").addEventListener("click", () => cleanAndResolve(true));
+                document.getElementById("confirm-cancel-btn").addEventListener("click", () => cleanAndResolve(false));
             });
         }
 
-        // Animação suave no HTML5 Canvas
-        function initCanvasHeader() {
-            const canvas = document.getElementById("store-canvas");
+        // Banner promocional animado em HTML5 <canvas>
+        function initCanvasBanner() {
+            const canvas = document.getElementById("promo-canvas");
             if (!canvas) return;
             const ctx = canvas.getContext("2d");
-            let tick = 0;
+            let frame = 0;
 
-            function resize() {
-                const rect = canvas.parentElement.getBoundingClientRect();
+            function resizeCanvas() {
+                const parent = canvas.parentElement;
+                if (!parent) return;
+                const rect = parent.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
-                canvas.width = rect.width * dpr;
-                canvas.height = rect.height * dpr;
+                canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+                canvas.height = Math.max(1, Math.floor(rect.height * dpr));
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             }
 
-            function renderFrame() {
-                const rect = canvas.parentElement.getBoundingClientRect();
-                const w = rect.width;
-                const h = rect.height;
+            function draw() {
+                const parent = canvas.parentElement;
+                if (!parent) return;
+                const w = parent.getBoundingClientRect().width;
+                const h = parent.getBoundingClientRect().height;
 
                 ctx.clearRect(0, 0, w, h);
 
-                const grad = ctx.createLinearGradient(0, 0, w, h);
-                grad.addColorStop(0, "#065f46");
-                grad.addColorStop(1, "#047857");
-                ctx.fillStyle = grad;
+                const gradient = ctx.createLinearGradient(0, 0, w, h);
+                gradient.addColorStop(0, "#064e3b");
+                gradient.addColorStop(0.65, "#047857");
+                gradient.addColorStop(1, "#059669");
+                ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, w, h);
 
-                // Ondas decorativas suaves
-                ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+                ctx.fillStyle = "rgba(251, 191, 36, 0.16)";
                 ctx.beginPath();
                 ctx.moveTo(0, h);
-                for (let x = 0; x <= w; x += 20) {
-                    const y = h - 14 + Math.sin(x * 0.02 + tick * 0.03) * 5;
+                for (let x = 0; x <= w; x += 14) {
+                    const y = h - 14 + Math.sin(x * 0.022 + frame * 0.03) * 5;
                     ctx.lineTo(x, y);
                 }
                 ctx.lineTo(w, h);
                 ctx.closePath();
                 ctx.fill();
 
+                const pulse = Math.sin(frame * 0.04) * 4;
+                ctx.fillStyle = "rgba(251, 191, 36, 0.22)";
+                ctx.beginPath();
+                ctx.arc(Math.max(40, w - 36), h * 0.5, 22 + pulse, 0, Math.PI * 2);
+                ctx.fill();
+
                 ctx.fillStyle = "#ffffff";
-                ctx.font = "800 18px Inter, sans-serif";
+                ctx.font = "900 18px Inter, sans-serif";
                 ctx.textBaseline = "middle";
-                ctx.fillText("Seu mercadinho no celular", 20, h * 0.42);
+                ctx.fillText("Meu Mercadinho Online", 18, h * 0.36);
 
                 ctx.fillStyle = "#fde68a";
-                ctx.font = "600 13px Inter, sans-serif";
-                ctx.fillText("Escolha os itens, cadastre seu endereço ao fechar e peça pelo WhatsApp", 20, h * 0.70);
+                ctx.font = "700 12px Inter, sans-serif";
+                ctx.fillText("Ofertas do dia • Entrega rápida • Pedido direto no WhatsApp", 18, h * 0.67);
 
-                tick++;
-                requestAnimationFrame(renderFrame);
+                frame++;
+                requestAnimationFrame(draw);
             }
 
-            resize();
-            window.addEventListener("resize", resize);
-            requestAnimationFrame(renderFrame);
+            resizeCanvas();
+            window.addEventListener("resize", resizeCanvas);
+            requestAnimationFrame(draw);
         }
 
-        // Navegação entre telas
-        function showView(viewId) {
-            if (viewId === "admin" && !state.isAdmin) {
-                showToast("Acesso disponível apenas para o administrador.", true);
-                return;
+        // Alternância entre seções da aplicação
+        function showView(viewName) {
+            if (viewName === "admin" && !(state.currentUser && state.isAdmin)) {
+                viewName = "store";
             }
-            document.getElementById("view-store").classList.toggle("hidden", viewId !== "store");
-            document.getElementById("view-orders").classList.toggle("hidden", viewId !== "orders");
-            document.getElementById("view-admin").classList.toggle("hidden", viewId !== "admin");
 
-            if (viewId === "orders") renderCustomerOrders();
-            if (viewId === "admin") {
+            document.getElementById("view-store").classList.toggle("hidden", viewName !== "store");
+            document.getElementById("view-profile").classList.toggle("hidden", viewName !== "profile");
+            document.getElementById("view-admin").classList.toggle("hidden", viewName !== "admin");
+
+            if (viewName === "profile") {
+                renderProfileAndOrders();
+            } else if (viewName === "admin") {
+                syncAdminInputs();
                 renderAdminProducts();
                 renderAdminOrders();
             }
@@ -659,154 +1061,314 @@
             renderCart();
         }
 
-        // Categorias e Vitrine
+        // Categorias e filtro de Promoções
         function renderCategories() {
             const container = document.getElementById("category-tabs");
-            container.innerHTML = CATEGORIES.map(cat => {
+            container.innerHTML = CATEGORIES.map((cat) => {
                 const active = state.selectedCategory === cat;
+                const isPromo = cat === "Promoções";
+                let classes = "";
+
+                if (active && isPromo) {
+                    classes = "bg-amber-400 text-slate-950 ring-2 ring-amber-600 shadow-xs";
+                } else if (active) {
+                    classes = "bg-emerald-800 text-white shadow-xs";
+                } else if (isPromo) {
+                    classes = "bg-amber-100 text-amber-950 hover:bg-amber-200 border border-amber-400";
+                } else {
+                    classes = "bg-slate-100 text-slate-800 hover:bg-slate-200";
+                }
+
                 return `
                     <button type="button" onclick="window.app.selectCategory('${cat}')"
-                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                            active
-                                ? "bg-emerald-700 text-white"
-                                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                        }">
-                        ${cat}
+                            class="px-3.5 py-2 rounded-xl text-xs font-black whitespace-nowrap transition ${classes}">
+                        ${isPromo ? '<i class="fa-solid fa-tag mr-1"></i>' : ""}${cat}
                     </button>
                 `;
             }).join("");
         }
 
-        function selectCategory(category) {
-            state.selectedCategory = category;
+        function selectCategory(cat) {
+            state.selectedCategory = cat;
             renderCategories();
             renderCatalog();
         }
 
+        function getEffectivePrice(prod) {
+            const normalPrice = Number(prod.price || 0);
+            if (prod.promo === true && prod.promoPrice !== null && prod.promoPrice !== undefined && prod.promoPrice !== "") {
+                const promoVal = Number(prod.promoPrice);
+                if (!Number.isNaN(promoVal) && promoVal > 0) {
+                    return promoVal;
+                }
+            }
+            return normalPrice;
+        }
+
+        // Catálogo SEMPRE exibido em 2 colunas lado a lado
         function renderCatalog() {
             const grid = document.getElementById("products-grid");
             const emptyBox = document.getElementById("empty-catalog");
+            const emptyTitle = document.getElementById("empty-catalog-title");
+            const emptyDesc = document.getElementById("empty-catalog-desc");
 
-            // Clientes visualizam apenas produtos não ocultos
-            const visibleProducts = state.products.filter(p => !p.hidden).filter(p => {
-                const matchesCat = state.selectedCategory === "Todos" || p.category === state.selectedCategory;
-                const matchesSearch = !state.searchTerm || p.name.toLowerCase().includes(state.searchTerm.toLowerCase());
-                return matchesCat && matchesSearch;
-            });
+            grid.className = "two-col-products-grid";
 
-            if (visibleProducts.length === 0) {
+            const canSeeHidden = Boolean(state.currentUser && state.isAdmin);
+
+            const filteredProducts = state.products
+                .filter((p) => canSeeHidden ? true : p.hidden !== true)
+                .filter((p) => {
+                    let matchesCategory = true;
+                    if (state.selectedCategory === "Promoções") {
+                        matchesCategory = p.promo === true;
+                    } else if (state.selectedCategory !== "Todos") {
+                        matchesCategory = p.category === state.selectedCategory;
+                    }
+
+                    const term = state.searchTerm.trim().toLowerCase();
+                    const matchesSearch = !term ||
+                        String(p.name || "").toLowerCase().includes(term) ||
+                        String(p.category || "").toLowerCase().includes(term) ||
+                        String(p.promoBadge || "").toLowerCase().includes(term);
+
+                    return matchesCategory && matchesSearch;
+                });
+
+            if (filteredProducts.length === 0) {
                 grid.innerHTML = "";
+                emptyTitle.textContent = state.selectedCategory === "Promoções"
+                    ? "Nenhum produto em promoção no momento"
+                    : "Nenhum produto encontrado";
+                emptyDesc.textContent = state.selectedCategory === "Promoções"
+                    ? "Toque em 'Todos' para conferir os demais produtos disponíveis."
+                    : "Tente buscar por outro termo ou selecione 'Todos'.";
                 emptyBox.classList.remove("hidden");
                 return;
             }
 
             emptyBox.classList.add("hidden");
-            grid.innerHTML = visibleProducts.map(prod => {
-                const fallbackImg = `https://placehold.co/400x300/e2e8f0/475569?text=${encodeURIComponent(prod.name.slice(0, 14))}`;
+            grid.innerHTML = filteredProducts.map((prod) => {
+                const fallbackImg = `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent((prod.name || "Produto").slice(0, 14))}`;
+                const imgSrc = (prod.imageUrl && prod.imageUrl.trim()) ? prod.imageUrl.trim() : fallbackImg;
+                const isPromo = prod.promo === true;
+                const isHidden = prod.hidden === true;
+                const finalPrice = getEffectivePrice(prod);
+                const showRegularStrike = isPromo && finalPrice < Number(prod.price || 0);
+                const promoTag = (prod.promoBadge && prod.promoBadge.trim()) ? prod.promoBadge.trim() : "PROMOÇÃO";
+
+                const cartItem = state.cart.find((item) => item.id === prod.id);
+                const qtyInCart = cartItem ? Number(cartItem.qty || 0) : 0;
+
                 return `
-                    <article class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col justify-between">
+                    <article class="bg-white rounded-2xl border-2 ${isPromo ? "border-amber-400" : "border-slate-200"} shadow-sm overflow-hidden flex flex-col justify-between min-w-0 ${isHidden ? "opacity-75" : ""}">
                         <div>
-                            <div class="aspect-4/3 bg-slate-100 overflow-hidden">
-                                <img src="${prod.imageUrl}"
+                            <div class="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+                                <img src="${imgSrc}"
                                      onerror="this.onerror=null;this.src='${fallbackImg}';"
                                      alt="${prod.name}"
                                      class="w-full h-full object-cover">
+
+                                ${isPromo ? `
+                                    <span class="absolute top-2 left-2 bg-amber-400 text-slate-950 text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-lg shadow-xs max-w-[75%] truncate">
+                                        ${promoTag}
+                                    </span>
+                                ` : ""}
+
+                                ${isHidden && canSeeHidden ? `
+                                    <span class="absolute top-2 right-2 bg-slate-950/90 text-amber-300 text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-lg shadow-xs">
+                                        Oculto
+                                    </span>
+                                ` : ""}
                             </div>
-                            <div class="p-4">
-                                <span class="text-[11px] font-bold text-emerald-700 uppercase">${prod.category || "Mercearia"}</span>
-                                <h3 class="font-bold text-slate-900 text-base mt-0.5 line-clamp-2">${prod.name}</h3>
+
+                            <div class="p-2.5 sm:p-3.5">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="text-[10px] sm:text-[11px] font-black text-emerald-800 uppercase truncate">
+                                        ${prod.category || "Mercearia"}
+                                    </span>
+                                    ${prod.unit ? `<span class="text-[10px] sm:text-[11px] font-bold text-slate-500 truncate">${prod.unit}</span>` : ""}
+                                </div>
+                                <h3 class="font-extrabold text-slate-950 text-xs sm:text-sm mt-1 line-clamp-2 leading-snug">
+                                    ${prod.name}
+                                </h3>
                             </div>
                         </div>
-                        <div class="px-4 pb-4 flex items-center justify-between gap-2">
-                            <span class="font-extrabold text-lg text-slate-900">${formatBRL(prod.price)}</span>
-                            <button type="button" onclick="window.app.addToCart('${prod.id}')"
-                                class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 transition">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Adicionar</span>
-                            </button>
+
+                        <div class="px-2.5 sm:px-3.5 pb-2.5 sm:pb-3.5 flex flex-col gap-2">
+                            <div class="min-w-0">
+                                ${showRegularStrike ? `
+                                    <span class="block text-[11px] font-bold text-slate-400 line-through leading-none mb-0.5">
+                                        ${formatBRL(prod.price)}
+                                    </span>
+                                ` : ""}
+                                <span class="font-black text-sm sm:text-base ${isPromo ? "text-amber-700" : "text-slate-950"} block truncate">
+                                    ${formatBRL(finalPrice)}
+                                </span>
+                            </div>
+
+                            ${qtyInCart > 0 ? `
+                                <div class="flex items-center justify-between gap-1 bg-emerald-50 border border-emerald-200 rounded-xl p-1">
+                                    <button type="button" onclick="window.app.changeQty('${prod.id}', -1)"
+                                            aria-label="Diminuir quantidade"
+                                            class="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-900 font-black text-sm shadow-2xs transition">
+                                        -
+                                    </button>
+                                    <span class="text-xs sm:text-sm font-black text-emerald-950 px-1">${qtyInCart}</span>
+                                    <button type="button" onclick="window.app.changeQty('${prod.id}', 1)"
+                                            aria-label="Aumentar quantidade"
+                                            class="w-8 h-8 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm shadow-2xs transition">
+                                        +
+                                    </button>
+                                </div>
+                            ` : `
+                                <button type="button" onclick="window.app.addToCart('${prod.id}')"
+                                        class="w-full py-2 px-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 active:scale-[0.98] text-white text-xs font-black flex items-center justify-center gap-1.5 transition">
+                                    <i class="fa-solid fa-cart-plus"></i>
+                                    <span>Adicionar</span>
+                                </button>
+                            `}
                         </div>
                     </article>
                 `;
             }).join("");
         }
 
-        // Carrinho (sempre salvo no navegador, inclusive durante cadastro/login)
-        function saveCart() {
-            localStorage.setItem("mercadinho_cart", JSON.stringify(state.cart));
+        // Carrinho persistente em localStorage e sincronizado quando autenticado
+        async function persistCart(syncCloud = true) {
+            saveJson(STORAGE_KEYS.cart, state.cart);
             renderCart();
+            renderCatalog();
+
+            if (syncCloud && firebaseReady && db && state.currentUser) {
+                try {
+                    await setDoc(doc(db, "carts", state.currentUser.uid), {
+                        items: state.cart,
+                        updatedAt: serverTimestamp()
+                    }, { merge: true });
+                } catch (_) { /* Mantém carrinho local em segurança */ }
+            }
         }
 
         function addToCart(productId) {
-            const product = state.products.find(p => p.id === productId && !p.hidden);
-            if (!product) return;
+            const prod = state.products.find((p) => p.id === productId);
+            if (!prod) return;
+            if (prod.hidden === true && !(state.currentUser && state.isAdmin)) return;
 
-            const existing = state.cart.find(item => item.id === product.id);
+            const unitPrice = getEffectivePrice(prod);
+            const existing = state.cart.find((item) => item.id === prod.id);
             if (existing) {
                 existing.qty += 1;
+                existing.price = unitPrice;
             } else {
                 state.cart.push({
-                    id: product.id,
-                    name: product.name,
-                    price: Number(product.price),
-                    imageUrl: product.imageUrl,
+                    id: prod.id,
+                    name: prod.name,
+                    price: unitPrice,
+                    unit: prod.unit || "",
+                    imageUrl: prod.imageUrl || "",
+                    promo: prod.promo === true,
                     qty: 1
                 });
             }
-            saveCart();
-            showToast(`"${product.name}" adicionado ao carrinho.`);
+            persistCart(true);
+            showToast(`"${prod.name}" adicionado ao carrinho.`);
         }
 
         function changeQty(productId, delta) {
-            const idx = state.cart.findIndex(item => item.id === productId);
+            const idx = state.cart.findIndex((item) => item.id === productId);
             if (idx === -1) return;
             state.cart[idx].qty += delta;
             if (state.cart[idx].qty <= 0) {
                 state.cart.splice(idx, 1);
             }
-            saveCart();
+            persistCart(true);
+        }
+
+        function removeFromCart(productId) {
+            state.cart = state.cart.filter((item) => item.id !== productId);
+            persistCart(true);
         }
 
         function renderCart() {
-            const count = state.cart.reduce((sum, i) => sum + i.qty, 0);
-            const subtotal = state.cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-            const fee = count > 0 ? Number(state.settings.deliveryFee || 0) : 0;
+            const totalItems = state.cart.reduce((acc, item) => acc + Number(item.qty || 0), 0);
+            const subtotal = state.cart.reduce((acc, item) => acc + Number(item.price || 0) * Number(item.qty || 0), 0);
+            const fee = totalItems > 0 ? Number(state.settings.deliveryFee || 0) : 0;
             const total = subtotal + fee;
 
-            document.getElementById("cart-count-badge").textContent = count;
+            document.getElementById("cart-count-badge").textContent = totalItems;
+            document.getElementById("drawer-cart-count").textContent = totalItems;
             document.getElementById("cart-subtotal").textContent = formatBRL(subtotal);
             document.getElementById("cart-delivery").textContent = fee === 0 ? "Grátis" : formatBRL(fee);
             document.getElementById("cart-total").textContent = formatBRL(total);
 
-            const list = document.getElementById("cart-items-list");
+            const container = document.getElementById("cart-items-list");
             if (state.cart.length === 0) {
-                list.innerHTML = `
-                    <div class="text-center py-12 text-slate-400 space-y-2">
-                        <i class="fa-solid fa-cart-shopping text-3xl"></i>
-                        <p class="text-sm font-semibold text-slate-600">Seu carrinho está vazio</p>
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-500 space-y-2">
+                        <i class="fa-solid fa-cart-shopping text-3xl text-slate-300"></i>
+                        <p class="text-sm font-extrabold text-slate-700">Seu carrinho está vazio</p>
+                        <p class="text-xs font-medium text-slate-400">Adicione itens da vitrine para fazer seu pedido.</p>
                     </div>
                 `;
                 return;
             }
 
-            list.innerHTML = state.cart.map(item => `
-                <div class="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200">
-                    <img src="${item.imageUrl}" onerror="this.src='https://placehold.co/80x80/e2e8f0/475569?text=Item'" alt="${item.name}" class="w-14 h-14 rounded-lg object-cover bg-slate-100 shrink-0">
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-bold text-sm text-slate-900 truncate">${item.name}</h4>
-                        <p class="text-xs font-extrabold text-emerald-700">${formatBRL(item.price * item.qty)}</p>
+            container.innerHTML = state.cart.map((item) => {
+                const fallback = "https://placehold.co/80x80/e2e8f0/1e293b?text=Item";
+                return `
+                    <div class="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200">
+                        <img src="${item.imageUrl || fallback}"
+                             onerror="this.onerror=null;this.src='${fallback}';"
+                             alt="${item.name}"
+                             class="w-14 h-14 rounded-lg object-cover bg-slate-100 shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-extrabold text-sm text-slate-950 truncate">${item.name}</h4>
+                            <p class="text-xs font-black text-emerald-800">${formatBRL(item.price * item.qty)}</p>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button type="button" onclick="window.app.changeQty('${item.id}', -1)"
+                                    aria-label="Diminuir item"
+                                    class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-xs">-</button>
+                            <span class="w-5 text-center text-xs font-black">${item.qty}</span>
+                            <button type="button" onclick="window.app.changeQty('${item.id}', 1)"
+                                    aria-label="Aumentar item"
+                                    class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-xs">+</button>
+                            <button type="button" onclick="window.app.removeFromCart('${item.id}')"
+                                    aria-label="Remover item"
+                                    class="w-7 h-7 rounded-lg text-red-600 hover:bg-red-50 flex items-center justify-center text-xs ml-0.5">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <button type="button" onclick="window.app.changeQty('${item.id}', -1)" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-xs">-</button>
-                        <span class="w-5 text-center text-xs font-extrabold">${item.qty}</span>
-                        <button type="button" onclick="window.app.changeQty('${item.id}', 1)" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-xs">+</button>
-                    </div>
-                </div>
-            `).join("");
+                `;
+            }).join("");
         }
 
-        // Autenticação e fechamento de pedido sem perder itens do carrinho
+        // Cadastro, login e fechamento preservando o carrinho
+        function hasUserSession() {
+            return Boolean(state.currentUser || (state.userProfile && state.userProfile.email));
+        }
+
+        function hasCompleteDeliveryProfile() {
+            const p = state.userProfile;
+            return Boolean(p && p.name && p.phone && p.address && p.landmark && p.email);
+        }
+
         function openAuthModal(mode = "register") {
             setAuthMode(mode);
+            if (state.userProfile) {
+                document.getElementById("auth-name").value = state.userProfile.name || "";
+                document.getElementById("auth-phone").value = state.userProfile.phone || "";
+                document.getElementById("auth-address").value = state.userProfile.address || "";
+                document.getElementById("auth-landmark").value = state.userProfile.landmark || "";
+                if (state.userProfile.email) {
+                    document.getElementById("auth-email").value = state.userProfile.email;
+                }
+            } else if (state.currentUser && state.currentUser.email) {
+                document.getElementById("auth-email").value = state.currentUser.email;
+            }
+
             const modal = document.getElementById("auth-modal");
             modal.classList.remove("hidden");
             modal.classList.add("flex");
@@ -821,38 +1383,34 @@
 
         function setAuthMode(mode) {
             state.authMode = mode;
-            const isReg = mode === "register";
-            document.getElementById("register-extra-fields").classList.toggle("hidden", !isReg);
-            document.getElementById("auth-submit-btn").textContent = isReg ? "Cadastrar e Continuar Pedido" : "Entrar";
+            const isRegister = mode === "register";
+            document.getElementById("register-fields").classList.toggle("hidden", !isRegister);
+            document.getElementById("auth-modal-title").textContent = isRegister
+                ? "Cadastro e Local de Entrega"
+                : "Entrar na Conta";
+            document.getElementById("auth-submit-btn").textContent = isRegister
+                ? "Salvar e Continuar Pedido"
+                : "Entrar";
 
-            document.getElementById("mode-register-btn").className = isReg
-                ? "py-2 rounded-lg text-xs font-extrabold bg-white text-emerald-700 shadow-2xs"
-                : "py-2 rounded-lg text-xs font-bold text-slate-600";
-
-            document.getElementById("mode-login-btn").className = !isReg
-                ? "py-2 rounded-lg text-xs font-extrabold bg-white text-emerald-700 shadow-2xs"
-                : "py-2 rounded-lg text-xs font-bold text-slate-600";
+            document.getElementById("mode-register-btn").className = isRegister
+                ? "py-2 rounded-lg text-xs font-black bg-white text-emerald-800 shadow-2xs transition"
+                : "py-2 rounded-lg text-xs font-extrabold text-slate-600 transition";
+            document.getElementById("mode-login-btn").className = !isRegister
+                ? "py-2 rounded-lg text-xs font-black bg-white text-emerald-800 shadow-2xs transition"
+                : "py-2 rounded-lg text-xs font-extrabold text-slate-600 transition";
         }
 
         function proceedToCheckout() {
             if (state.cart.length === 0) {
-                showToast("Adicione pelo menos um produto ao carrinho.", true);
+                showToast("Adicione pelo menos um produto ao carrinho antes de finalizar.", true);
                 return;
             }
 
-            if (!state.currentUser) {
+            if (!state.currentUser || !hasCompleteDeliveryProfile()) {
                 toggleCart(false);
                 state.pendingCheckout = true;
-                openAuthModal("register");
-                showToast("Faça seu cadastro com endereço para concluir o pedido.");
-                return;
-            }
-
-            if (!state.userProfile?.address) {
-                toggleCart(false);
-                state.pendingCheckout = true;
-                openAuthModal("register");
-                showToast("Informe seu endereço de entrega para continuar.");
+                openAuthModal(hasCompleteDeliveryProfile() ? "login" : "register");
+                showToast("Preencha seu cadastro, endereço e ponto de referência para continuar.");
                 return;
             }
 
@@ -861,12 +1419,16 @@
         }
 
         function openCheckoutModal() {
-            const subtotal = state.cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+            const subtotal = state.cart.reduce((acc, item) => acc + item.price * item.qty, 0);
             const fee = Number(state.settings.deliveryFee || 0);
             const total = subtotal + fee;
+            const p = state.userProfile || {};
 
-            document.getElementById("checkout-client-name").textContent = state.userProfile?.name || state.currentUser.email;
-            document.getElementById("checkout-client-address").textContent = state.userProfile?.address || "";
+            document.getElementById("checkout-client-name").textContent = p.name || "";
+            document.getElementById("checkout-client-phone").textContent = p.phone || "";
+            document.getElementById("checkout-client-email").textContent = p.email || (state.currentUser ? state.currentUser.email : "");
+            document.getElementById("checkout-client-address").textContent = p.address || "";
+            document.getElementById("checkout-client-landmark").textContent = p.landmark || "";
             document.getElementById("checkout-total-label").textContent = formatBRL(total);
 
             const modal = document.getElementById("checkout-modal");
@@ -881,444 +1443,738 @@
         }
 
         async function confirmAndSendWhatsApp() {
-            if (!state.currentUser || state.cart.length === 0) return;
+            if (state.cart.length === 0) return;
 
+            const profile = state.userProfile || {};
             const payment = document.getElementById("checkout-payment").value;
             const note = document.getElementById("checkout-note").value.trim();
-            const subtotal = state.cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+            const subtotal = state.cart.reduce((acc, item) => acc + item.price * item.qty, 0);
             const fee = Number(state.settings.deliveryFee || 0);
             const total = subtotal + fee;
+            const emailText = profile.email || (state.currentUser ? state.currentUser.email : "");
 
-            const orderPayload = {
-                userId: state.currentUser.uid,
-                clientName: state.userProfile?.name || state.currentUser.email,
-                clientEmail: state.currentUser.email,
-                address: state.userProfile?.address || "",
-                items: state.cart,
+            const orderRecord = {
+                id: "ord-" + Date.now(),
+                uid: state.currentUser ? state.currentUser.uid : "guest",
+                clientName: profile.name || "Cliente",
+                clientPhone: profile.phone || "",
+                clientEmail: emailText,
+                address: profile.address || "",
+                landmark: profile.landmark || "",
+                items: [...state.cart],
                 subtotal,
                 deliveryFee: fee,
                 total,
                 payment,
                 note,
-                createdAt: serverTimestamp(),
                 createdAtIso: new Date().toISOString()
             };
 
-            try {
-                await addDoc(collection(db, "orders"), orderPayload);
-            } catch (err) {
-                console.error("Erro ao salvar pedido:", err);
+            state.orders.unshift(orderRecord);
+            saveJson(STORAGE_KEYS.orders, state.orders);
+
+            if (firebaseReady && db) {
+                try {
+                    await addDoc(collection(db, "orders"), {
+                        ...orderRecord,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (_) { /* Mantém pedido salvo localmente se Firestore estiver indisponível */ }
             }
 
-            const itemsText = state.cart
-                .map(i => `• ${i.qty}x ${i.name} (${formatBRL(i.price * i.qty)})`)
+            const itemLines = state.cart
+                .map((item) => `• ${item.qty}x ${item.name}${item.unit ? ` (${item.unit})` : ""}${item.promo ? " [PROMOÇÃO]" : ""} — ${formatBRL(item.price * item.qty)}`)
                 .join("\n");
 
-            const message = [
-                "*NOVO PEDIDO - MEU MERCADINHO ONLINE*",
+            const whatsappMessage = [
+                "*NOVO PEDIDO — MEU MERCADINHO ONLINE*",
                 "",
-                `*Cliente:* ${orderPayload.clientName}`,
-                `*Endereço:* ${orderPayload.address}`,
+                `*Cliente:* ${orderRecord.clientName}`,
+                `*Telefone:* ${orderRecord.clientPhone}`,
+                emailText ? `*E-mail:* ${emailText}` : null,
+                `*Endereço:* ${orderRecord.address}`,
+                `*Ponto de Referência:* ${orderRecord.landmark}`,
                 "",
-                "*Itens:*",
-                itemsText,
+                "*Itens do Pedido:*",
+                itemLines,
                 "",
+                fee > 0 ? `*Taxa de Entrega:* ${formatBRL(fee)}` : "*Taxa de Entrega:* Grátis",
+                `*Total:* *${formatBRL(total)}*`,
                 `*Pagamento:* ${payment}`,
-                note ? `*Observação:* ${note}` : null,
-                `*Total:* ${formatBRL(total)}`,
-                "",
-                "Aguardando confirmação — em poucos minutos o pedido chega aí!"
+                note ? `*Observação:* ${note}` : null
             ].filter(Boolean).join("\n");
 
             const phoneDigits = String(state.settings.whatsapp || "5585999999999").replace(/\D/g, "");
-            const waUrl = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`;
+            const waUrl = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(whatsappMessage)}`;
 
             state.cart = [];
-            saveCart();
+            await persistCart(true);
             closeCheckoutModal();
-            showToast("Pedido enviado! Dentro de poucos minutos chega aí.");
-            window.open(waUrl, "_blank");
+
+            const sentBanner = document.getElementById("order-sent-banner");
+            document.getElementById("order-sent-banner-desc").textContent =
+                `Obrigado, ${orderRecord.clientName}! Seu pedido (${formatBRL(total)}) foi enviado para o WhatsApp e em poucos minutos chega na sua casa.`;
+            sentBanner.classList.remove("hidden");
+            sentBanner.classList.add("flex");
+
+            document.getElementById("order-modal-message").textContent =
+                "Seu pedido foi enviado para o WhatsApp e em poucos minutos chega na sua casa!";
+            document.getElementById("order-modal-subinfo").textContent =
+                `Entrega para ${orderRecord.address} • Referência: ${orderRecord.landmark}`;
+            const successModal = document.getElementById("order-success-modal");
+            successModal.classList.remove("hidden");
+            successModal.classList.add("flex");
+
+            window.open(waUrl, "_blank", "noopener,noreferrer");
         }
 
-        // Formulário de cadastro / login
-        document.getElementById("auth-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
+        document.getElementById("auth-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
             const email = document.getElementById("auth-email").value.trim();
             const password = document.getElementById("auth-password").value;
 
-            try {
-                if (state.authMode === "register") {
-                    const name = document.getElementById("auth-name").value.trim();
-                    const address = document.getElementById("auth-address").value.trim();
+            if (state.authMode === "register") {
+                const name = document.getElementById("auth-name").value.trim();
+                const phone = document.getElementById("auth-phone").value.trim();
+                const address = document.getElementById("auth-address").value.trim();
+                const landmark = document.getElementById("auth-landmark").value.trim();
 
-                    if (!name || !address) {
-                        showToast("Preencha seu nome e endereço completo.", true);
+                if (!name || !phone || !address || !landmark || !email || password.length < 6) {
+                    showToast("Preencha nome, telefone, endereço, ponto de referência, e-mail e senha (mínimo 6 caracteres).", true);
+                    return;
+                }
+
+                const profileData = {
+                    ...(state.userProfile || {}),
+                    name,
+                    phone,
+                    address,
+                    landmark,
+                    email
+                };
+
+                if (firebaseReady && auth && db) {
+                    try {
+                        let activeUid = state.currentUser ? state.currentUser.uid : null;
+                        if (!activeUid) {
+                            const cred = await createUserWithEmailAndPassword(auth, email, password);
+                            state.currentUser = cred.user;
+                            activeUid = cred.user.uid;
+                        }
+                        await setDoc(doc(db, "users", activeUid), {
+                            ...profileData,
+                            updatedAt: serverTimestamp()
+                        }, { merge: true });
+                    } catch (err) {
+                        if (err && err.code === "auth/email-already-in-use") {
+                            try {
+                                const signed = await signInWithEmailAndPassword(auth, email, password);
+                                state.currentUser = signed.user;
+                                await setDoc(doc(db, "users", signed.user.uid), {
+                                    ...profileData,
+                                    updatedAt: serverTimestamp()
+                                }, { merge: true });
+                            } catch (_) {
+                                showToast("E-mail já cadastrado. Confira sua senha ou toque em 'Entrar'.", true);
+                                return;
+                            }
+                        } else {
+                            showToast("Dados salvos neste aparelho para envio do pedido.");
+                        }
+                    }
+                } else {
+                    showToast("Dados salvos neste aparelho para envio do pedido.");
+                }
+
+                state.userProfile = profileData;
+                saveJson(STORAGE_KEYS.profile, state.userProfile);
+                showToast("Cadastro e ponto de referência salvos!");
+            } else {
+                if (firebaseReady && auth && db) {
+                    try {
+                        const cred = await signInWithEmailAndPassword(auth, email, password);
+                        state.currentUser = cred.user;
+                        const userSnap = await getDoc(doc(db, "users", cred.user.uid));
+                        if (userSnap.exists()) {
+                            state.userProfile = {
+                                ...(state.userProfile || {}),
+                                ...userSnap.data(),
+                                email: userSnap.data().email || email
+                            };
+                        } else {
+                            state.userProfile = { ...(state.userProfile || {}), email };
+                        }
+                        saveJson(STORAGE_KEYS.profile, state.userProfile);
+                        showToast("Login realizado com sucesso!");
+                    } catch (_) {
+                        showToast("Não foi possível entrar. Verifique seu e-mail e senha.", true);
                         return;
                     }
-
-                    if (state.currentUser) {
-                        // Atualiza endereço de usuário já autenticado
-                        await setDoc(doc(db, "users", state.currentUser.uid), {
-                            name,
-                            address,
-                            email: state.currentUser.email
-                        }, { merge: true });
-                        state.userProfile = { ...state.userProfile, name, address };
-                    } else {
-                        const cred = await createUserWithEmailAndPassword(auth, email, password);
-                        await setDoc(doc(db, "users", cred.user.uid), {
-                            name,
-                            address,
-                            email,
-                            isAdmin: false,
-                            createdAt: serverTimestamp()
-                        });
-                        state.userProfile = { name, address, email, isAdmin: false };
-                    }
-                    showToast("Cadastro salvo com sucesso!");
                 } else {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    showToast("Login realizado!");
+                    state.userProfile = { ...(state.userProfile || {}), email };
+                    saveJson(STORAGE_KEYS.profile, state.userProfile);
+                    showToast("Sessão salva neste aparelho.");
                 }
+            }
 
-                const shouldContinueCheckout = state.pendingCheckout;
-                closeAuthModal();
-                await syncUserRole();
-                updateAccountUI();
+            const shouldContinueCheckout = state.pendingCheckout;
+            closeAuthModal();
 
-                if (shouldContinueCheckout && state.cart.length > 0) {
+            if (state.currentUser) {
+                const adminAuthorized = await checkAdminAuthorization(state.currentUser);
+                applyAdminAuthorization(adminAuthorized);
+            }
+            updateAccountUI();
+
+            if (shouldContinueCheckout && state.cart.length > 0) {
+                if (hasCompleteDeliveryProfile()) {
                     openCheckoutModal();
+                } else {
+                    showToast("Preencha seu endereço e ponto de referência para finalizar o pedido.", true);
                 }
-            } catch (err) {
-                console.error(err);
-                showToast("Não foi possível concluir. Verifique e-mail e senha.", true);
             }
         });
 
         async function logoutUser() {
-            await signOut(auth);
+            if (firebaseReady && auth) {
+                try { await signOut(auth); } catch (_) { /* Ignora erro ao sair */ }
+            }
             state.currentUser = null;
-            state.userProfile = null;
-            state.isAdmin = false;
+            applyAdminAuthorization(false);
             updateAccountUI();
-            showView("store");
             toggleDrawer(false);
-            showToast("Você saiu da sua conta.");
+            showView("store");
+            showToast("Você saiu da conta.");
         }
 
-        async function syncUserRole() {
-            if (!state.currentUser) {
-                state.userProfile = null;
-                state.isAdmin = false;
-                return;
+        // Verificação silenciosa de permissão apenas via Firestore ("admins" por e-mail ou "users" por uid)
+        async function checkAdminAuthorization(user) {
+            if (!firebaseReady || !db || !user) {
+                return false;
             }
 
-            const userRef = doc(db, "users", state.currentUser.uid);
-            const snap = await getDoc(userRef);
-            if (snap.exists()) {
-                state.userProfile = snap.data();
-                state.isAdmin = state.userProfile.isAdmin === true;
-            } else {
-                state.userProfile = { email: state.currentUser.email, isAdmin: false };
-                state.isAdmin = false;
+            let authorized = false;
+
+            if (user.email) {
+                const normalizedEmail = String(user.email).trim().toLowerCase();
+                try {
+                    const adminDoc = await getDoc(doc(db, "admins", normalizedEmail));
+                    if (adminDoc.exists() && adminDoc.data()?.active === true) {
+                        authorized = true;
+                    }
+                } catch (_) {
+                    // Segue para verificação por uid
+                }
             }
+
+            if (!authorized && user.uid) {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const uData = userDoc.data() || {};
+                        if (uData.isAdmin === true || uData.role === "admin") {
+                            authorized = true;
+                        }
+                    }
+                } catch (_) {
+                    authorized = false;
+                }
+            }
+
+            return authorized;
+        }
+
+        function applyAdminAuthorization(isAuthorized) {
+            state.isAdmin = Boolean(isAuthorized);
+            document.getElementById("admin-menu-section").classList.toggle("hidden", !(state.currentUser && state.isAdmin));
 
             if (!state.isAdmin) {
-                try {
-                    const qAdmin = query(collection(db, "users"), where("isAdmin", "==", true), limit(1));
-                    const adminSnap = await getDocs(qAdmin);
-                    state.hasAnyAdmin = !adminSnap.empty;
-                } catch (_) {
-                    state.hasAnyAdmin = true;
+                const adminSection = document.getElementById("view-admin");
+                if (adminSection && !adminSection.classList.contains("hidden")) {
+                    showView("store");
                 }
-            } else {
-                state.hasAnyAdmin = true;
             }
+            renderCatalog();
         }
 
-        async function claimFirstAdmin() {
-            if (!state.currentUser) return;
-            try {
-                const qAdmin = query(collection(db, "users"), where("isAdmin", "==", true), limit(1));
-                const adminSnap = await getDocs(qAdmin);
-                if (!adminSnap.empty) {
-                    showToast("Já existe um administrador configurado.", true);
-                    return;
-                }
-
-                await setDoc(doc(db, "users", state.currentUser.uid), { isAdmin: true }, { merge: true });
-                state.isAdmin = true;
-                state.hasAnyAdmin = true;
-                updateAccountUI();
-                toggleDrawer(false);
-                showView("admin");
-                showToast("Conta ativada como Administradora!");
-            } catch (err) {
-                console.error(err);
-                showToast("Erro ao ativar administrador.", true);
+        function openAdminPanel() {
+            toggleDrawer(false);
+            if (!(state.currentUser && state.isAdmin)) {
+                showView("store");
+                return;
             }
+            showView("admin");
         }
 
         function updateAccountUI() {
-            const logged = Boolean(state.currentUser);
-            const label = logged ? (state.userProfile?.name || state.currentUser.email) : "Visitante";
+            const p = state.userProfile;
+            const hasProfile = Boolean(p && p.name);
+            const displayLabel = hasProfile
+                ? p.name
+                : (state.currentUser && state.currentUser.email ? state.currentUser.email : "Visitante");
 
-            document.getElementById("header-user-label").textContent = label;
-            document.getElementById("drawer-account-name").textContent = label;
-            document.getElementById("drawer-account-sub").textContent = logged
-                ? (state.userProfile?.address || state.currentUser.email)
-                : "Navegue à vontade e cadastre-se ao fechar o pedido";
+            document.getElementById("header-user-label").textContent = displayLabel;
+            document.getElementById("drawer-account-name").textContent = displayLabel;
 
-            document.getElementById("drawer-login-btn").classList.toggle("hidden", logged);
-            document.getElementById("drawer-logout-btn").classList.toggle("hidden", !logged);
-            document.getElementById("drawer-my-orders-btn").classList.toggle("hidden", !logged);
-            document.getElementById("drawer-admin-btn").classList.toggle("hidden", !(logged && state.isAdmin));
-            document.getElementById("drawer-claim-admin-wrap").classList.toggle("hidden", !(logged && !state.isAdmin && !state.hasAnyAdmin));
+            const pill = document.getElementById("drawer-role-pill");
+            if (state.currentUser && state.isAdmin) {
+                pill.textContent = "Loja";
+                pill.className = "text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 shrink-0";
+            } else if (state.currentUser || hasProfile) {
+                pill.textContent = "Cliente";
+                pill.className = "text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-700 text-white shrink-0";
+            } else {
+                pill.textContent = "Visitante";
+                pill.className = "text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-100 shrink-0";
+            }
+
+            const phoneEl = document.getElementById("drawer-account-phone");
+            const addrEl = document.getElementById("drawer-account-address");
+            const landEl = document.getElementById("drawer-account-landmark");
+
+            if (p && p.phone) {
+                phoneEl.textContent = `Tel: ${p.phone}`;
+                phoneEl.classList.remove("hidden");
+            } else {
+                phoneEl.classList.add("hidden");
+            }
+
+            if (p && p.address) {
+                addrEl.textContent = p.address;
+            } else {
+                addrEl.textContent = "Veja os produtos e monte seu carrinho à vontade. Na hora de fechar o pedido, informe seu endereço e ponto de referência.";
+            }
+
+            if (p && p.landmark) {
+                landEl.textContent = `Referência: ${p.landmark}`;
+                landEl.classList.remove("hidden");
+            } else {
+                landEl.classList.add("hidden");
+            }
+
+            document.getElementById("drawer-login-btn").classList.toggle("hidden", Boolean(state.currentUser));
+            document.getElementById("drawer-edit-profile-btn").classList.toggle("hidden", !Boolean(state.currentUser || hasProfile));
+            document.getElementById("drawer-logout-btn").classList.toggle("hidden", !Boolean(state.currentUser || hasProfile));
         }
 
-        // Administração de produtos (cadastrar, editar, ocultar, excluir)
+        function renderProfileAndOrders() {
+            const p = state.userProfile || {};
+            document.getElementById("profile-name-display").textContent = p.name || (state.currentUser ? state.currentUser.email : "Visitante");
+            document.getElementById("profile-phone-display").textContent = p.phone || "Não informado";
+            document.getElementById("profile-email-display").textContent = p.email || (state.currentUser ? state.currentUser.email : "Não informado");
+            document.getElementById("profile-address-display").textContent = p.address || "Endereço ainda não cadastrado";
+            document.getElementById("profile-landmark-display").textContent = p.landmark || "Ponto de referência ainda não cadastrado";
+
+            const list = document.getElementById("customer-orders-list");
+            if (state.orders.length === 0) {
+                list.innerHTML = `<p class="text-sm font-medium text-slate-500">Nenhum pedido realizado até o momento.</p>`;
+                return;
+            }
+
+            list.innerHTML = state.orders.map((order) => `
+                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm space-y-1">
+                    <div class="flex items-center justify-between font-black text-slate-950">
+                        <span>Total: ${formatBRL(order.total)}</span>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900">${order.payment || "WhatsApp"}</span>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-700"><strong>Endereço:</strong> ${order.address}</p>
+                    <p class="text-xs font-extrabold text-amber-950"><strong>Ponto de Referência:</strong> ${order.landmark}</p>
+                    <p class="text-xs text-slate-700 pt-1">${(order.items || []).map((i) => `${i.qty}x ${i.name}`).join(", ")}</p>
+                </div>
+            `).join("");
+        }
+
+        // Gestão de produtos, promoções, visibilidade e WhatsApp
+        function syncAdminInputs() {
+            document.getElementById("admin-whatsapp-input").value = state.settings.whatsapp || "";
+            document.getElementById("admin-delivery-fee-input").value = state.settings.deliveryFee ?? 0;
+        }
+
+        document.getElementById("admin-settings-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!(state.currentUser && state.isAdmin)) return;
+
+            const whatsapp = document.getElementById("admin-whatsapp-input").value.trim().replace(/\D/g, "");
+            const deliveryFee = parseFloat(document.getElementById("admin-delivery-fee-input").value) || 0;
+
+            if (!whatsapp || whatsapp.length < 10) {
+                showToast("Informe um número de WhatsApp válido com DDI e DDD.", true);
+                return;
+            }
+
+            state.settings = { whatsapp, deliveryFee };
+            saveJson(STORAGE_KEYS.settings, state.settings);
+            renderCart();
+            showToast("WhatsApp da loja atualizado!");
+
+            if (firebaseReady && db) {
+                try {
+                    await setDoc(doc(db, "storeConfig", "main"), {
+                        ...state.settings,
+                        updatedAt: serverTimestamp()
+                    }, { merge: true });
+                } catch (_) { /* Mantém salvo localmente */ }
+            }
+        });
+
+        function togglePromoFields() {
+            const isPromo = document.getElementById("product-promo").checked;
+            const priceInput = document.getElementById("product-promo-price");
+            const badgeInput = document.getElementById("product-promo-badge");
+            priceInput.disabled = !isPromo;
+            badgeInput.disabled = !isPromo;
+            priceInput.classList.toggle("opacity-50", !isPromo);
+            badgeInput.classList.toggle("opacity-50", !isPromo);
+        }
+
         function resetProductForm() {
             document.getElementById("product-edit-id").value = "";
             document.getElementById("product-name").value = "";
             document.getElementById("product-price").value = "";
             document.getElementById("product-category").value = "Mercearia";
+            document.getElementById("product-promo").checked = false;
+            document.getElementById("product-promo-price").value = "";
+            document.getElementById("product-promo-badge").value = "";
             document.getElementById("product-image-url").value = "";
+            document.getElementById("product-unit").value = "";
             document.getElementById("product-hidden").checked = false;
-            document.getElementById("admin-form-title").textContent = "Cadastrar Novo Produto";
+            document.getElementById("admin-product-form-title").textContent = "Cadastrar Novo Produto";
             document.getElementById("cancel-edit-product-btn").classList.add("hidden");
+            togglePromoFields();
         }
 
-        function startEditProduct(id) {
-            const prod = state.products.find(p => p.id === id);
+        function startEditProduct(productId) {
+            if (!(state.currentUser && state.isAdmin)) return;
+            const prod = state.products.find((p) => p.id === productId);
             if (!prod) return;
 
             document.getElementById("product-edit-id").value = prod.id;
-            document.getElementById("product-name").value = prod.name;
-            document.getElementById("product-price").value = prod.price;
+            document.getElementById("product-name").value = prod.name || "";
+            document.getElementById("product-price").value = prod.price ?? "";
             document.getElementById("product-category").value = prod.category || "Mercearia";
-            document.getElementById("product-image-url").value = prod.imageUrl;
-            document.getElementById("product-hidden").checked = Boolean(prod.hidden);
-            document.getElementById("admin-form-title").textContent = "Editar Produto";
+            document.getElementById("product-promo").checked = prod.promo === true;
+            document.getElementById("product-promo-price").value = (prod.promoPrice !== null && prod.promoPrice !== undefined) ? prod.promoPrice : "";
+            document.getElementById("product-promo-badge").value = prod.promoBadge || "";
+            document.getElementById("product-image-url").value = prod.imageUrl || "";
+            document.getElementById("product-unit").value = prod.unit || "";
+            document.getElementById("product-hidden").checked = prod.hidden === true;
+            document.getElementById("admin-product-form-title").textContent = "Editar Produto";
             document.getElementById("cancel-edit-product-btn").classList.remove("hidden");
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            togglePromoFields();
+            document.getElementById("admin-product-form").scrollIntoView({ behavior: "smooth", block: "start" });
         }
 
-        document.getElementById("admin-product-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            if (!state.isAdmin) return;
+        document.getElementById("admin-product-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (!(state.currentUser && state.isAdmin)) return;
 
             const editId = document.getElementById("product-edit-id").value;
-            const payload = {
+            const isPromo = document.getElementById("product-promo").checked;
+            const rawPromoPrice = document.getElementById("product-promo-price").value.trim();
+            const parsedPromo = rawPromoPrice !== "" ? parseFloat(rawPromoPrice) : null;
+            const promoBadge = isPromo ? document.getElementById("product-promo-badge").value.trim() : "";
+
+            const productPayload = {
                 name: document.getElementById("product-name").value.trim(),
                 price: parseFloat(document.getElementById("product-price").value),
                 category: document.getElementById("product-category").value,
+                promo: isPromo,
+                promoPrice: (isPromo && parsedPromo !== null && !Number.isNaN(parsedPromo) && parsedPromo > 0) ? parsedPromo : null,
+                promoBadge,
                 imageUrl: document.getElementById("product-image-url").value.trim(),
+                unit: document.getElementById("product-unit").value.trim(),
                 hidden: document.getElementById("product-hidden").checked
             };
 
-            try {
-                if (editId) {
-                    await updateDoc(doc(db, "products", editId), payload);
-                    showToast("Produto atualizado!");
-                } else {
-                    await addDoc(collection(db, "products"), {
-                        ...payload,
-                        createdAt: serverTimestamp()
-                    });
-                    showToast("Produto cadastrado com sucesso!");
-                }
+            if (!productPayload.name || Number.isNaN(productPayload.price) || productPayload.price <= 0 || !productPayload.imageUrl) {
+                showToast("Preencha nome, preço válido e link da foto.", true);
+                return;
+            }
+
+            if (editId) {
+                state.products = state.products.map((p) => (p.id === editId ? { ...p, ...productPayload } : p));
+                saveJson(STORAGE_KEYS.products, state.products);
+                renderCatalog();
+                renderAdminProducts();
                 resetProductForm();
-            } catch (err) {
-                console.error(err);
-                showToast("Erro ao salvar produto.", true);
+                showToast("Produto atualizado!");
+
+                if (firebaseReady && db) {
+                    try {
+                        await setDoc(doc(db, "products", editId), {
+                            ...productPayload,
+                            updatedAt: serverTimestamp()
+                        }, { merge: true });
+                    } catch (_) { /* Mantém salvo localmente */ }
+                }
+            } else {
+                const tempId = "prod-" + Date.now();
+                state.products.unshift({ id: tempId, ...productPayload });
+                saveJson(STORAGE_KEYS.products, state.products);
+                renderCatalog();
+                renderAdminProducts();
+                resetProductForm();
+                showToast("Produto cadastrado!");
+
+                if (firebaseReady && db) {
+                    try {
+                        const docRef = await addDoc(collection(db, "products"), {
+                            ...productPayload,
+                            createdAt: serverTimestamp()
+                        });
+                        state.products = state.products.map((p) => (p.id === tempId ? { ...p, id: docRef.id } : p));
+                        saveJson(STORAGE_KEYS.products, state.products);
+                        renderCatalog();
+                        renderAdminProducts();
+                    } catch (_) { /* Mantém salvo localmente */ }
+                }
             }
         });
 
-        async function toggleHideProduct(id) {
-            const prod = state.products.find(p => p.id === id);
+        async function toggleHideProduct(productId) {
+            if (!(state.currentUser && state.isAdmin)) return;
+            const prod = state.products.find((p) => p.id === productId);
             if (!prod) return;
-            const nextHidden = !prod.hidden;
-            try {
-                await updateDoc(doc(db, "products", id), { hidden: nextHidden });
-                showToast(nextHidden ? `"${prod.name}" ocultado da loja.` : `"${prod.name}" visível na loja.`);
-            } catch (err) {
-                console.error(err);
-                showToast("Erro ao alterar visibilidade.", true);
+
+            const nextHidden = prod.hidden !== true;
+            state.products = state.products.map((p) => (p.id === productId ? { ...p, hidden: nextHidden } : p));
+            saveJson(STORAGE_KEYS.products, state.products);
+            renderCatalog();
+            renderAdminProducts();
+            showToast(nextHidden ? `"${prod.name}" ocultado.` : `"${prod.name}" exibido na loja.`);
+
+            if (firebaseReady && db) {
+                try {
+                    await updateDoc(doc(db, "products", productId), { hidden: nextHidden });
+                } catch (_) { /* Mantém salvo localmente */ }
             }
         }
 
-        async function removeProduct(id) {
-            const prod = state.products.find(p => p.id === id);
+        async function deleteProductItem(productId) {
+            if (!(state.currentUser && state.isAdmin)) return;
+            const prod = state.products.find((p) => p.id === productId);
             if (!prod) return;
-            const ok = await askConfirm("Excluir produto", `Deseja excluir "${prod.name}"?`);
+
+            const ok = await askConfirm(
+                "Excluir produto",
+                `Deseja excluir "${prod.name}"?`
+            );
             if (!ok) return;
 
-            try {
-                await deleteDoc(doc(db, "products", id));
-                showToast("Produto excluído.");
-            } catch (err) {
-                console.error(err);
-                showToast("Erro ao excluir produto.", true);
+            state.products = state.products.filter((p) => p.id !== productId);
+            saveJson(STORAGE_KEYS.products, state.products);
+            renderCatalog();
+            renderAdminProducts();
+            showToast("Produto excluído.");
+
+            if (firebaseReady && db) {
+                try {
+                    await deleteDoc(doc(db, "products", productId));
+                } catch (_) { /* Mantém salvo localmente */ }
             }
         }
 
         function renderAdminProducts() {
             const container = document.getElementById("admin-products-list");
+            const countEl = document.getElementById("admin-product-count");
             if (!container) return;
 
+            countEl.textContent = `${state.products.length} ${state.products.length === 1 ? "item" : "itens"}`;
+
             if (state.products.length === 0) {
-                container.innerHTML = `<p class="text-sm text-slate-500 py-4">Nenhum produto cadastrado ainda.</p>`;
+                container.innerHTML = `<p class="text-sm font-medium text-slate-500 py-4">Nenhum produto cadastrado.</p>`;
                 return;
             }
 
-            container.innerHTML = state.products.map(prod => `
-                <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <img src="${prod.imageUrl}" onerror="this.src='https://placehold.co/64x64/e2e8f0/475569?text=Foto'" alt="${prod.name}" class="w-12 h-12 rounded-lg object-cover bg-slate-100 shrink-0 ${prod.hidden ? "opacity-45" : ""}">
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2">
-                                <p class="font-bold text-sm text-slate-900 truncate">${prod.name}</p>
-                                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${prod.hidden ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}">
-                                    ${prod.hidden ? "Oculto" : "Visível"}
-                                </span>
+            container.innerHTML = state.products.map((prod) => {
+                const isHidden = prod.hidden === true;
+                const fallback = "https://placehold.co/64x64/e2e8f0/1e293b?text=Foto";
+                return `
+                    <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <img src="${prod.imageUrl || fallback}"
+                                 onerror="this.onerror=null;this.src='${fallback}';"
+                                 alt="${prod.name}"
+                                 class="w-12 h-12 rounded-xl object-cover bg-slate-100 shrink-0 ${isHidden ? "opacity-40" : ""}">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <p class="font-extrabold text-sm text-slate-950 truncate">${prod.name}</p>
+                                    <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                        isHidden ? "bg-amber-100 text-amber-950" : "bg-emerald-100 text-emerald-900"
+                                    }">
+                                        ${isHidden ? "Oculto" : "Visível"}
+                                    </span>
+                                    ${prod.promo === true ? `
+                                        <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-300 text-slate-950">
+                                            ${(prod.promoBadge && prod.promoBadge.trim()) ? prod.promoBadge.trim() : "Em Promoção"}
+                                        </span>
+                                    ` : ""}
+                                </div>
+                                <p class="text-xs font-semibold text-slate-600">
+                                    ${prod.promo === true && prod.promoPrice
+                                        ? `<span class="line-through mr-1">${formatBRL(prod.price)}</span><strong class="text-amber-800">${formatBRL(prod.promoPrice)}</strong>`
+                                        : formatBRL(prod.price)} • ${prod.category || "Mercearia"}${prod.unit ? ` • ${prod.unit}` : ""}
+                                </p>
                             </div>
-                            <p class="text-xs text-slate-500">${formatBRL(prod.price)} • ${prod.category || "Mercearia"}</p>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                            <button type="button" onclick="window.app.toggleHideProduct('${prod.id}')"
+                                    class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-extrabold transition">
+                                ${isHidden ? "Exibir" : "Ocultar"}
+                            </button>
+                            <button type="button" onclick="window.app.startEditProduct('${prod.id}')"
+                                    class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-extrabold transition">
+                                Editar
+                            </button>
+                            <button type="button" onclick="window.app.deleteProductItem('${prod.id}')"
+                                    class="px-3 py-1.5 rounded-xl bg-red-100 hover:bg-red-200 text-red-800 text-xs font-extrabold transition">
+                                Excluir
+                            </button>
                         </div>
                     </div>
+                `;
+            }).join("");
+        }
 
-                    <div class="flex items-center gap-2 shrink-0">
-                        <button type="button" onclick="window.app.toggleHideProduct('${prod.id}')" class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold">
-                            ${prod.hidden ? "Mostrar" : "Ocultar"}
-                        </button>
-                        <button type="button" onclick="window.app.startEditProduct('${prod.id}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold">
-                            Editar
-                        </button>
-                        <button type="button" onclick="window.app.removeProduct('${prod.id}')" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold">
-                            Excluir
-                        </button>
+        function renderAdminOrders() {
+            const container = document.getElementById("admin-orders-list");
+            if (!container) return;
+
+            if (state.orders.length === 0) {
+                container.innerHTML = `<p class="text-sm font-medium text-slate-500">Nenhum pedido registrado ainda.</p>`;
+                return;
+            }
+
+            container.innerHTML = state.orders.map((order) => `
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                    <div class="flex items-center justify-between font-black text-slate-950">
+                        <span>${order.clientName} (${order.clientPhone || "Sem tel."}) — ${formatBRL(order.total)}</span>
+                        <span>${order.payment || "WhatsApp"}</span>
                     </div>
+                    <p class="text-slate-700 font-semibold"><strong>Endereço:</strong> ${order.address}</p>
+                    <p class="text-amber-950 font-bold"><strong>Ponto de Referência:</strong> ${order.landmark}</p>
+                    <p class="text-slate-700 pt-0.5">
+                        <strong>Itens:</strong> ${(order.items || []).map((i) => `${i.qty}x ${i.name}`).join(", ")}
+                    </p>
                 </div>
             `).join("");
         }
 
-        // Salvar número de WhatsApp e taxa de entrega
-        document.getElementById("admin-whatsapp-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            if (!state.isAdmin) return;
-            const whatsapp = document.getElementById("admin-whatsapp-input").value.replace(/\D/g, "");
-            const deliveryFee = parseFloat(document.getElementById("admin-delivery-fee-input").value || 0);
+        // Sincronização em tempo real com Firestore quando disponível
+        if (firebaseReady && db) {
+            onSnapshot(collection(db, "products"), (snapshot) => {
+                if (!snapshot.empty) {
+                    state.products = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    saveJson(STORAGE_KEYS.products, state.products);
+                    renderCatalog();
+                    renderAdminProducts();
+                }
+            }, () => { /* Mantém dados locais */ });
 
-            try {
-                await setDoc(doc(db, "settings", "store"), { whatsapp, deliveryFee }, { merge: true });
-                state.settings = { whatsapp, deliveryFee };
-                renderCart();
-                showToast("WhatsApp da loja atualizado!");
-            } catch (err) {
-                console.error(err);
-                showToast("Erro ao salvar configurações.", true);
-            }
-        });
-
-        async function renderCustomerOrders() {
-            const addrEl = document.getElementById("profile-address-display");
-            const listEl = document.getElementById("customer-orders-list");
-            if (!state.currentUser) return;
-
-            addrEl.textContent = state.userProfile?.address
-                ? `${state.userProfile.name || ""} — ${state.userProfile.address}`
-                : "Endereço não cadastrado.";
-
-            const q = query(collection(db, "orders"), where("userId", "==", state.currentUser.uid));
-            const snap = await getDocs(q);
-            const orders = snap.docs.map(d => d.data()).sort((a, b) => (b.createdAtIso || "").localeCompare(a.createdAtIso || ""));
-
-            listEl.innerHTML = orders.length
-                ? orders.map(o => `
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 text-sm space-y-1">
-                        <div class="flex justify-between font-bold">
-                            <span>${formatBRL(o.total)}</span>
-                            <span class="text-xs text-slate-500">${o.payment}</span>
-                        </div>
-                        <p class="text-xs text-slate-600">${(o.items || []).map(i => `${i.qty}x ${i.name}`).join(", ")}</p>
-                    </div>
-                `).join("")
-                : `<p class="text-sm text-slate-500">Você ainda não fez pedidos.</p>`;
+            onSnapshot(doc(db, "storeConfig", "main"), (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data() || {};
+                    state.settings = {
+                        whatsapp: data.whatsapp || state.settings.whatsapp,
+                        deliveryFee: data.deliveryFee ?? state.settings.deliveryFee
+                    };
+                    saveJson(STORAGE_KEYS.settings, state.settings);
+                    syncAdminInputs();
+                    renderCart();
+                }
+            }, () => { /* Mantém configuração local */ });
         }
 
-        async function renderAdminOrders() {
-            const listEl = document.getElementById("admin-orders-list");
-            if (!state.isAdmin) return;
+        if (firebaseReady && auth && db) {
+            onAuthStateChanged(auth, async (user) => {
+                state.currentUser = user;
+                if (user) {
+                    try {
+                        const userSnap = await getDoc(doc(db, "users", user.uid));
+                        if (userSnap.exists()) {
+                            const uData = userSnap.data() || {};
+                            state.userProfile = {
+                                ...(state.userProfile || {}),
+                                ...uData,
+                                email: uData.email || user.email
+                            };
+                            saveJson(STORAGE_KEYS.profile, state.userProfile);
+                        } else if (!state.userProfile) {
+                            state.userProfile = { email: user.email };
+                            saveJson(STORAGE_KEYS.profile, state.userProfile);
+                        }
+                    } catch (_) {
+                        if (!state.userProfile) {
+                            state.userProfile = { email: user.email };
+                            saveJson(STORAGE_KEYS.profile, state.userProfile);
+                        }
+                    }
 
-            const snap = await getDocs(collection(db, "orders"));
-            const orders = snap.docs.map(d => d.data()).sort((a, b) => (b.createdAtIso || "").localeCompare(a.createdAtIso || ""));
+                    try {
+                        const cartSnap = await getDoc(doc(db, "carts", user.uid));
+                        if (cartSnap.exists() && Array.isArray(cartSnap.data()?.items)) {
+                            const cloudItems = cartSnap.data().items;
+                            if (state.cart.length === 0 && cloudItems.length > 0) {
+                                state.cart = cloudItems;
+                                saveJson(STORAGE_KEYS.cart, state.cart);
+                                renderCart();
+                                renderCatalog();
+                            } else if (state.cart.length > 0) {
+                                await persistCart(true);
+                            }
+                        }
+                    } catch (_) { /* Ignora se coleção carts não estiver acessível */ }
 
-            listEl.innerHTML = orders.length
-                ? orders.map(o => `
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
-                        <div class="flex justify-between font-bold text-slate-900">
-                            <span>${o.clientName} (${formatBRL(o.total)})</span>
-                            <span>${o.payment}</span>
-                        </div>
-                        <p class="text-slate-600"><strong>Endereço:</strong> ${o.address}</p>
-                        <p class="text-slate-700">${(o.items || []).map(i => `${i.qty}x ${i.name}`).join(", ")}</p>
-                    </div>
-                `).join("")
-                : `<p class="text-sm text-slate-500">Nenhum pedido recebido ainda.</p>`;
+                    const authorizedAdmin = await checkAdminAuthorization(user);
+                    applyAdminAuthorization(authorizedAdmin);
+                } else {
+                    applyAdminAuthorization(false);
+                }
+                updateAccountUI();
+            });
         }
 
-        // Listeners em tempo real do Firestore
-        onSnapshot(collection(db, "products"), (snap) => {
-            state.products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            renderCatalog();
-            if (state.isAdmin) renderAdminProducts();
-        });
-
-        onSnapshot(doc(db, "settings", "store"), (snap) => {
-            if (snap.exists()) {
-                state.settings = { ...state.settings, ...snap.data() };
-                document.getElementById("admin-whatsapp-input").value = state.settings.whatsapp || "";
-                document.getElementById("admin-delivery-fee-input").value = state.settings.deliveryFee ?? 0;
-                renderCart();
-            }
-        });
-
-        onAuthStateChanged(auth, async (user) => {
-            state.currentUser = user;
-            await syncUserRole();
-            updateAccountUI();
-        });
-
-        document.getElementById("search-input").addEventListener("input", (e) => {
-            state.searchTerm = e.target.value;
+        document.getElementById("search-input").addEventListener("input", (event) => {
+            state.searchTerm = event.target.value;
             renderCatalog();
         });
 
         window.app = {
             hideToast,
+            hideOrderSentBanner,
+            closeOrderSuccessModal,
             showView,
             toggleDrawer,
             toggleCart,
             selectCategory,
             addToCart,
             changeQty,
+            removeFromCart,
+            hasUserSession,
             openAuthModal,
             closeAuthModal,
             setAuthMode,
             proceedToCheckout,
+            openCheckoutModal,
             closeCheckoutModal,
             confirmAndSendWhatsApp,
             logoutUser,
-            claimFirstAdmin,
+            openAdminPanel,
+            togglePromoFields,
             resetProductForm,
             startEditProduct,
             toggleHideProduct,
-            removeProduct
+            deleteProductItem
         };
 
         window.addEventListener("load", () => {
-            initCanvasHeader();
+            initCanvasBanner();
             renderCategories();
+            renderCatalog();
             renderCart();
+            syncAdminInputs();
+            togglePromoFields();
             updateAccountUI();
         });
     </script>
