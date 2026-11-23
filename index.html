@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Mercadinho Delivery</title>
+  <title>Mercadinho do Célio</title>
   <style>
     :root {
       --primary: #0f9d58;
@@ -79,7 +79,7 @@
     }
 
     .brand h1 {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 800;
       letter-spacing: -0.5px;
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -449,7 +449,6 @@
       transform: scale(0.98);
     }
 
-    /* Estado de clique/processamento: muda de cor claramente */
     .submit-btn.loading {
       background: #d97706;
       color: #ffffff;
@@ -522,7 +521,7 @@
       <div class="top-bar">
         <div class="brand">
           <span style="font-size: 1.5rem;">🛒</span>
-          <h1>Mercadinho Express</h1>
+          <h1>Mercadinho do Célio</h1>
         </div>
         <div class="header-actions">
           <button id="adminBtn" class="icon-btn btn-admin" style="display: none;" onclick="openModal('adminModal')">
@@ -557,7 +556,7 @@
   <!-- CATÁLOGO DE PRODUTOS (2 COLUNAS) -->
   <main class="container">
     <div class="products-grid" id="productsGrid">
-      <div class="empty-state">Carregando produtos do mercadinho...</div>
+      <div class="empty-state">Carregando produtos do Mercadinho do Célio...</div>
     </div>
   </main>
 
@@ -696,14 +695,12 @@
       getFirestore,
       collection,
       addDoc,
-      getDocs,
       doc,
       setDoc,
       getDoc,
       onSnapshot,
       query,
-      orderBy,
-      limit
+      orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -857,18 +854,15 @@
           if (userDoc.exists()) {
             currentUserProfile = userDoc.data();
           } else {
-            // Se o usuário já existe no Auth mas não tinha doc no Firestore (ex: travou antes), cria agora
-            const existingSnap = await getDocs(query(collection(db, "usuarios"), limit(1)));
-            const isFirst = existingSnap.empty;
             currentUserProfile = {
               nome: user.email.split('@')[0],
               email: user.email,
               endereco: 'Endereço não informado',
               referencia: 'Sem referência',
-              role: isFirst ? 'admin' : 'cliente',
+              role: 'cliente',
               criadoEm: new Date().toISOString()
             };
-            await setDoc(doc(db, "usuarios", user.uid), currentUserProfile);
+            setDoc(doc(db, "usuarios", user.uid), currentUserProfile).catch(console.error);
           }
 
           const firstName = (currentUserProfile.nome || user.email).split(' ')[0];
@@ -903,12 +897,9 @@
       const endereco = document.getElementById('regAddress').value.trim();
       const referencia = document.getElementById('regReference').value.trim();
 
-      setButtonLoading('regSubmitBtn', true, '⏳ Criando conta e salvando...', 'Criar Conta e Continuar');
+      setButtonLoading('regSubmitBtn', true, '⏳ Salvando...', 'Criar Conta e Continuar');
 
       try {
-        const usersSnap = await getDocs(query(collection(db, "usuarios"), limit(1)));
-        const isFirstUser = usersSnap.empty;
-
         const cred = await createUserWithEmailAndPassword(auth, email, senha);
 
         const profileData = {
@@ -916,21 +907,24 @@
           email,
           endereco,
           referencia,
-          role: isFirstUser ? 'admin' : 'cliente',
+          role: 'cliente',
           criadoEm: new Date().toISOString()
         };
 
-        await setDoc(doc(db, "usuarios", cred.user.uid), profileData);
-        currentUserProfile = profileData;
+        // Envia direto para o Firestore sem prender o usuário se a rede oscilar
+        setDoc(doc(db, "usuarios", cred.user.uid), profileData)
+          .catch(err => {
+            console.error('Erro ao gravar no Firestore:', err);
+            showToast('Aviso Firestore: ' + err.message);
+          });
 
+        currentUserProfile = profileData;
         const firstName = nome.split(' ')[0];
         document.getElementById('authHeaderBtn').textContent = `👋 ${firstName} (Sair)`;
-        document.getElementById('adminBtn').style.display = isFirstUser ? 'flex' : 'none';
+        document.getElementById('adminBtn').style.display = 'none';
 
         closeModal('authModal');
-        showToast(isFirstUser
-          ? 'Conta Administrador criada e salva no Firestore!'
-          : 'Cadastro concluído com sucesso!');
+        showToast('Cadastro realizado com sucesso!');
 
         if (pendingCheckout) {
           pendingCheckout = false;
@@ -939,12 +933,12 @@
       } catch (err) {
         console.error('Erro no cadastro:', err);
         if (err.code === 'auth/email-already-in-use') {
-          showToast('Este e-mail já existe no Authentication. Vá na aba "Já tenho conta" para entrar.');
+          showToast('Este e-mail já tem cadastro. Vá em "Já tenho conta" para entrar.');
         } else {
-          showToast('Erro ao cadastrar: ' + (err.message || 'verifique o Firestore'));
+          showToast('Erro ao cadastrar: ' + (err.message || 'tente novamente'));
         }
       } finally {
-        setButtonLoading('regSubmitBtn', false, '⏳ Criando conta e salvando...', 'Criar Conta e Continuar');
+        setButtonLoading('regSubmitBtn', false, '⏳ Salvando...', 'Criar Conta e Continuar');
       }
     };
 
