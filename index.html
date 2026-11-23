@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Mercadinho do Célio</title>
+  <title>Mercadinho do Célio 2</title>
   <style>
     :root {
       --primary: #0f9d58;
@@ -79,7 +79,7 @@
     }
 
     .brand h1 {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 800;
       letter-spacing: -0.5px;
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -521,7 +521,7 @@
       <div class="top-bar">
         <div class="brand">
           <span style="font-size: 1.5rem;">🛒</span>
-          <h1>Mercadinho do Célio</h1>
+          <h1>Mercadinho do Célio 2</h1>
         </div>
         <div class="header-actions">
           <button id="adminBtn" class="icon-btn btn-admin" style="display: none;" onclick="openModal('adminModal')">
@@ -556,7 +556,7 @@
   <!-- CATÁLOGO DE PRODUTOS (2 COLUNAS) -->
   <main class="container">
     <div class="products-grid" id="productsGrid">
-      <div class="empty-state">Carregando produtos do Mercadinho do Célio...</div>
+      <div class="empty-state">Carregando produtos do Mercadinho do Célio 2...</div>
     </div>
   </main>
 
@@ -704,13 +704,12 @@
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyBJVYL08cR3bnSjouskRFAUTf-bS515ApU",
-      authDomain: "mercadinho-87f71.firebaseapp.com",
-      projectId: "mercadinho-87f71",
-      storageBucket: "mercadinho-87f71.firebasestorage.app",
-      messagingSenderId: "360566859200",
-      appId: "1:360566859200:web:0514c13946b957c02c1425",
-      measurementId: "G-L75ES3XGJW"
+      apiKey: "AIzaSyB2M6J8KHvFvJJm2OlrWTlzjejFelczhAY",
+      authDomain: "mercadinho2.firebaseapp.com",
+      projectId: "mercadinho2",
+      storageBucket: "mercadinho2.firebasestorage.app",
+      messagingSenderId: "1031963453955",
+      appId: "1:1031963453955:web:caec01860023030d213c36"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -718,7 +717,7 @@
     const db = getFirestore(app);
 
     let allProducts = [];
-    let cart = JSON.parse(localStorage.getItem('mercadinho_cart') || '[]');
+    let cart = JSON.parse(localStorage.getItem('mercadinho2_cart') || '[]');
     let currentCategory = 'Todas';
     let currentUser = null;
     let currentUserProfile = null;
@@ -862,7 +861,7 @@
               role: 'cliente',
               criadoEm: new Date().toISOString()
             };
-            setDoc(doc(db, "usuarios", user.uid), currentUserProfile).catch(console.error);
+            await setDoc(doc(db, "usuarios", user.uid), currentUserProfile);
           }
 
           const firstName = (currentUserProfile.nome || user.email).split(' ')[0];
@@ -911,12 +910,7 @@
           criadoEm: new Date().toISOString()
         };
 
-        // Envia direto para o Firestore sem prender o usuário se a rede oscilar
-        setDoc(doc(db, "usuarios", cred.user.uid), profileData)
-          .catch(err => {
-            console.error('Erro ao gravar no Firestore:', err);
-            showToast('Aviso Firestore: ' + err.message);
-          });
+        await setDoc(doc(db, "usuarios", cred.user.uid), profileData);
 
         currentUserProfile = profileData;
         const firstName = nome.split(' ')[0];
@@ -924,7 +918,7 @@
         document.getElementById('adminBtn').style.display = 'none';
 
         closeModal('authModal');
-        showToast('Cadastro realizado com sucesso!');
+        showToast('Cadastro salvo no Firestore!');
 
         if (pendingCheckout) {
           pendingCheckout = false;
@@ -1080,7 +1074,7 @@
     };
 
     function saveCart() {
-      localStorage.setItem('mercadinho_cart', JSON.stringify(cart));
+      localStorage.setItem('mercadinho2_cart', JSON.stringify(cart));
       const totalItems = cart.reduce((acc, i) => acc + i.qtd, 0);
       const totalPrice = cart.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
       document.getElementById('cartCount').textContent = totalItems;
