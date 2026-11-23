@@ -28,7 +28,7 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      padding-top: 175px; /* Espaço para o header fixo */
+      padding-top: 175px;
       padding-bottom: 85px;
     }
 
@@ -174,7 +174,7 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
 
-    /* GRADE DE PRODUTOS EM 2 COLUNAS (ESTILO MERCANTIL) */
+    /* GRADE DE PRODUTOS EM 2 COLUNAS */
     .container {
       padding: 12px;
       max-width: 900px;
@@ -308,7 +308,7 @@
       font-size: 0.85rem;
     }
 
-    /* MODAIS (LOGIN, CADASTRO, CARRINHO, ADMIN) */
+    /* MODAIS */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -362,7 +362,6 @@
       font-weight: bold;
     }
 
-    /* ABAS LOGIN / CADASTRO */
     .auth-tabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -413,6 +412,25 @@
       border-color: var(--primary);
     }
 
+    .img-preview-box {
+      width: 100%;
+      height: 110px;
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 6px;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+
+    .img-preview-box img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
     .submit-btn {
       width: 100%;
       background: var(--primary);
@@ -426,7 +444,6 @@
       margin-top: 6px;
     }
 
-    /* LISTA DO CARRINHO */
     .cart-item {
       display: flex;
       justify-content: space-between;
@@ -451,7 +468,6 @@
       cursor: pointer;
     }
 
-    /* TOAST NOTIFICAÇÃO PERSONALIZADA */
     .toast {
       position: fixed;
       top: 185px;
@@ -468,6 +484,8 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s;
+      text-align: center;
+      max-width: 90%;
     }
 
     .toast.show {
@@ -636,8 +654,11 @@
           </select>
         </div>
         <div class="form-group">
-          <label>URL da Imagem (ou deixe vazio para ícone padrão)</label>
-          <input type="url" id="prodImage" placeholder="https://exemplo.com/foto.jpg" />
+          <label>Link da Imagem da Internet (URL)</label>
+          <input type="url" id="prodImage" oninput="previewProductImage(this.value)" placeholder="https://..." />
+          <div class="img-preview-box" id="imgPreviewBox">
+            <span style="font-size: 0.8rem; color: #94a3b8;">Pré-visualização da foto</span>
+          </div>
         </div>
         <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
           <input type="checkbox" id="prodPromo" style="width: auto;" />
@@ -671,23 +692,21 @@
       orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // =========================================================================
-    // COLE AQUI AS CREDENCIAIS DO SEU PROJETO FIREBASE
-    // =========================================================================
+    // SUAS CREDENCIAIS DO FIREBASE
     const firebaseConfig = {
-      apiKey: "SUA_API_KEY",
-      authDomain: "SEU_PROJETO.firebaseapp.com",
-      projectId: "SEU_PROJETO",
-      storageBucket: "SEU_PROJETO.appspot.com",
-      messagingSenderId: "SEU_SENDER_ID",
-      appId: "SEU_APP_ID"
+      apiKey: "AIzaSyBJVYL08cR3bnSjouskRFAUTf-bS515ApU",
+      authDomain: "mercadinho-87f71.firebaseapp.com",
+      projectId: "mercadinho-87f71",
+      storageBucket: "mercadinho-87f71.firebasestorage.app",
+      messagingSenderId: "360566859200",
+      appId: "1:360566859200:web:0514c13946b957c02c1425",
+      measurementId: "G-L75ES3XGJW"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Estado global
     let allProducts = [];
     let cart = JSON.parse(localStorage.getItem('mercadinho_cart') || '[]');
     let currentCategory = 'Todas';
@@ -773,7 +792,7 @@
       const toast = document.getElementById('toast');
       toast.textContent = msg;
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
+      setTimeout(() => toast.classList.remove('show'), 3200);
     };
 
     window.openModal = (id) => {
@@ -783,6 +802,15 @@
 
     window.closeModal = (id) => {
       document.getElementById(id).classList.remove('open');
+    };
+
+    window.previewProductImage = (url) => {
+      const box = document.getElementById('imgPreviewBox');
+      if (!url.trim()) {
+        box.innerHTML = '<span style="font-size: 0.8rem; color: #94a3b8;">Pré-visualização da foto</span>';
+        return;
+      }
+      box.innerHTML = `<img src="${url.trim()}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:0.8rem;color:#ef4444;\\'>Link inválido ou bloqueado</span>'" />`;
     };
 
     window.switchAuthTab = (tab) => {
@@ -795,7 +823,7 @@
     };
 
     // =========================================================================
-    // AUTENTICAÇÃO E PERFIL NO FIRESTORE (SEM SENHA NO CÓDIGO)
+    // AUTENTICAÇÃO E PERFIL NO FIRESTORE (100% GRATUITO)
     // =========================================================================
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
@@ -835,7 +863,6 @@
       const referencia = document.getElementById('regReference').value.trim();
 
       try {
-        // Verifica se já existe algum usuário cadastrado para definir o 1º como Admin
         const usersSnap = await getDocs(collection(db, "usuarios"));
         const isFirstUser = usersSnap.empty;
 
@@ -851,8 +878,8 @@
 
         closeModal('authModal');
         showToast(isFirstUser
-          ? 'Conta Administrador criada com sucesso!'
-          : 'Cadastro realizado! Bem-vindo ao mercadinho.');
+          ? 'Conta Administrador criada! Botão Painel Admin liberado.'
+          : 'Cadastro realizado com sucesso!');
 
         if (pendingCheckout) {
           pendingCheckout = false;
@@ -889,11 +916,10 @@
     onSnapshot(productsQuery, (snapshot) => {
       allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderProducts();
-    }, () => {
-      // Fallback caso as regras do Firebase ainda não tenham sido configuradas
+    }, (error) => {
       document.getElementById('productsGrid').innerHTML = `
         <div class="empty-state">
-          Configure suas chaves do Firebase no código para carregar e cadastrar produtos em tempo real.
+          Aguardando liberação do Firestore Database no Console do Firebase.<br><small>${error.message}</small>
         </div>`;
     });
 
@@ -920,6 +946,7 @@
           criadoEm: new Date().toISOString()
         });
         e.target.reset();
+        previewProductImage('');
         closeModal('adminModal');
         showToast('Produto adicionado ao catálogo!');
       } catch (err) {
@@ -950,14 +977,14 @@
       });
 
       if (filtered.length === 0) {
-        grid.innerHTML = `<div class="empty-state">Nenhum produto encontrado nesta categoria.</div>`;
+        grid.innerHTML = `<div class="empty-state">Nenhum produto cadastrado ainda nesta categoria.</div>`;
         return;
       }
 
       grid.innerHTML = filtered.map(prod => `
         <div class="product-card">
           ${prod.promocao ? '<span class="promo-badge">Oferta</span>' : ''}
-          <img src="${prod.imagem}" alt="${prod.nome}" class="product-img" />
+          <img src="${prod.imagem}" alt="${prod.nome}" class="product-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3081/3081986.png'" />
           <div>
             <div class="product-cat">${prod.categoria}</div>
             <div class="product-title">${prod.nome}</div>
@@ -1041,7 +1068,6 @@
         return;
       }
 
-      // Exige login/cadastro apenas na hora de finalizar
       if (!currentUser) {
         pendingCheckout = true;
         closeModal('cartModal');
