@@ -9,10 +9,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Meu Mercadinho Online</title>
 
-    <!-- Tailwind CSS para espaçamento e responsividade -->
+    <!-- Tailwind CSS para layout responsivo e espaçamento -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonte Inter para leitura clara em celular e desktop -->
+    <!-- Fonte Inter para excelente legibilidade em telas móveis e desktop -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        /* Estilo base com alto contraste para uso diário */
+        /* Tipografia e superfície de alto contraste */
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #f1f5f9;
@@ -30,7 +30,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Grade de produtos SEMPRE em 2 colunas lado a lado em qualquer largura */
+        /* Grade de produtos SEMPRE em 2 colunas lado a lado */
         .two-col-products-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -46,10 +46,10 @@
 
         /* Transição suave para gavetas laterais */
         .drawer-panel {
-            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        /* Barra horizontal oculta mantendo rolagem por toque/arrasto */
+        /* Rolagem horizontal limpa sem barra visível */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -62,7 +62,7 @@
 <body class="min-h-screen flex flex-col bg-slate-100 text-slate-950">
 
     <!-- =====================================================================
-         AVISO VISUAL NA TELA (Substitui alert() nativo)
+         AVISO VISUAL NÃO-BLOQUEANTE (Substitui alert() nativo)
          ===================================================================== -->
     <div id="toast-banner" role="status" aria-live="polite"
          class="fixed top-4 left-1/2 -translate-x-1/2 z-[140] hidden w-[92%] max-w-md bg-slate-950 text-white px-4 py-3.5 rounded-2xl shadow-2xl border-2 border-emerald-400 items-center justify-between gap-3">
@@ -77,7 +77,7 @@
     </div>
 
     <!-- =====================================================================
-         MODAL DE CONFIRMAÇÃO NA TELA (Substitui confirm() nativo)
+         MODAL DE CONFIRMAÇÃO CUSTOMIZADO (Substitui confirm() nativo)
          ===================================================================== -->
     <div id="confirm-modal"
          class="fixed inset-0 bg-slate-950/70 backdrop-blur-[2px] z-[135] hidden items-center justify-center p-4">
@@ -98,7 +98,7 @@
     </div>
 
     <!-- =====================================================================
-         MODAL DE CONFIRMAÇÃO DE PEDIDO ENVIADO AO WHATSAPP
+         MODAL DE CONFIRMAÇÃO DE PEDIDO ENVIADO PARA WHATSAPP
          ===================================================================== -->
     <div id="order-success-modal"
          class="fixed inset-0 bg-slate-950/75 backdrop-blur-[2px] z-[130] hidden items-center justify-center p-4">
@@ -116,14 +116,14 @@
             <div class="pt-2">
                 <button type="button" onclick="window.app.closeOrderSuccessModal()"
                         class="w-full py-3 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm transition">
-                    Continuar na Loja
+                    Continuar Navegando
                 </button>
             </div>
         </div>
     </div>
 
     <!-- =====================================================================
-         CABEÇALHO FIXO SUPERIOR
+         CABEÇALHO FIXO SUPERIOR COM BOTÃO DO CARRINHO NO TOPO
          ===================================================================== -->
     <header class="sticky top-0 z-30 bg-emerald-800 text-white shadow-lg border-b border-emerald-950/30">
         <div class="max-w-5xl mx-auto px-3 sm:px-5 h-16 flex items-center justify-between gap-2">
@@ -197,7 +197,7 @@
                 </div>
                 <p id="drawer-account-phone" class="text-xs text-emerald-300 font-bold hidden"></p>
                 <p id="drawer-account-address" class="text-xs text-slate-300 leading-relaxed">
-                    Veja os produtos e monte seu carrinho à vontade. Na hora de fechar o pedido, informe seu endereço e ponto de referência.
+                    Navegue livremente e adicione itens ao carrinho. Na hora de fechar o pedido, informe seu endereço e ponto de referência.
                 </p>
                 <p id="drawer-account-landmark" class="text-xs text-amber-300 font-bold hidden"></p>
             </div>
@@ -231,7 +231,7 @@
                     <span>Endereço e Referência</span>
                 </button>
 
-                <!-- Opção "Painel" exibida apenas quando a conta autenticada possui permissão -->
+                <!-- Painel visível apenas quando a conta autenticada possui permissão no Firestore -->
                 <div id="admin-menu-section" class="hidden pt-2 mt-2 border-t border-slate-800">
                     <button type="button" onclick="window.app.openAdminPanel()"
                             class="w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left font-black text-sm bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-md transition">
@@ -270,7 +270,7 @@
          ===================================================================== -->
     <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-5 py-4 space-y-4">
 
-        <!-- Banner Promocional em HTML5 Canvas -->
+        <!-- Banner Animado em HTML5 <canvas> -->
         <div class="w-full rounded-2xl overflow-hidden shadow-md border-2 border-emerald-900/20 bg-emerald-900">
             <canvas id="promo-canvas" class="w-full h-28 sm:h-32 block"></canvas>
         </div>
@@ -297,7 +297,6 @@
              VIEW 1: VITRINE PRINCIPAL (2 COLUNAS LADO A LADO + PROMOÇÕES)
              ================================================================= -->
         <section id="view-store" class="space-y-4">
-            <!-- Busca e Filtros de Categoria + Promoções -->
             <div class="bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
@@ -379,7 +378,7 @@
         </section>
 
         <!-- =================================================================
-             VIEW 3: PAINEL DE PRODUTOS E LOJA
+             VIEW 3: PAINEL DE PRODUTOS E LOJA (SOMENTE QUANDO AUTORIZADO)
              ================================================================= -->
         <section id="view-admin" class="hidden space-y-4">
             <div class="bg-slate-950 text-white p-5 rounded-2xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-800">
@@ -771,7 +770,7 @@
             serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Configuração Firebase do projeto 'mercadinho-oline'
+        // Configuração oficial do Firebase para 'mercadinho-oline'
         const firebaseConfig = {
             apiKey: "AIzaSyBcLkzbgLJKJkm7nnYqg6UT0XHYRTqGgQA",
             authDomain: "mercadinho-oline.firebaseapp.com",
@@ -806,7 +805,6 @@
             orders: "meu_mercadinho_orders_v1"
         };
 
-        // Catálogo inicial para manter a vitrine pronta mesmo antes do primeiro item cadastrado
         const DEFAULT_PRODUCTS = [
             {
                 id: "default-arroz-5kg",
@@ -870,7 +868,7 @@
         function saveJson(key, value) {
             try {
                 localStorage.setItem(key, JSON.stringify(value));
-            } catch (_) { /* Ignora erro de armazenamento local em modo restrito */ }
+            } catch (_) { /* Ignora erro de armazenamento local em contexto restrito */ }
         }
 
         const state = {
@@ -902,7 +900,7 @@
             });
         }
 
-        // Notificação visual própria na página (sem alert())
+        // Aviso visual na tela sem bloquear navegação (substitui alert())
         let toastTimer = null;
         function showToast(message, isError = false) {
             const banner = document.getElementById("toast-banner");
@@ -918,7 +916,7 @@
             banner.classList.add("flex");
 
             clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => hideToast(), 4000);
+            toastTimer = setTimeout(() => hideToast(), 4200);
         }
 
         function hideToast() {
@@ -939,7 +937,7 @@
             modal.classList.remove("flex");
         }
 
-        // Confirmação visual própria na página (sem confirm())
+        // Confirmação visual customizada na tela (substitui confirm())
         function askConfirm(title, message) {
             return new Promise((resolve) => {
                 const modal = document.getElementById("confirm-modal");
@@ -964,7 +962,7 @@
             });
         }
 
-        // Banner promocional animado em HTML5 <canvas>
+        // Banner animado em HTML5 <canvas>
         function initCanvasBanner() {
             const canvas = document.getElementById("promo-canvas");
             if (!canvas) return;
@@ -1031,7 +1029,7 @@
             requestAnimationFrame(draw);
         }
 
-        // Alternância entre seções da aplicação
+        // Navegação entre telas
         function showView(viewName) {
             if (viewName === "admin" && !(state.currentUser && state.isAdmin)) {
                 viewName = "store";
@@ -1105,7 +1103,7 @@
             return normalPrice;
         }
 
-        // Catálogo SEMPRE exibido em 2 colunas lado a lado
+        // Catálogo em 2 colunas lado a lado
         function renderCatalog() {
             const grid = document.getElementById("products-grid");
             const emptyBox = document.getElementById("empty-catalog");
@@ -1234,7 +1232,7 @@
             }).join("");
         }
 
-        // Carrinho persistente em localStorage e sincronizado quando autenticado
+        // Carrinho persistente durante cadastro/login e sincronizado com Firestore
         async function persistCart(syncCloud = true) {
             saveJson(STORAGE_KEYS.cart, state.cart);
             renderCart();
@@ -1389,8 +1387,8 @@
                 ? "Cadastro e Local de Entrega"
                 : "Entrar na Conta";
             document.getElementById("auth-submit-btn").textContent = isRegister
-                ? "Salvar e Continuar Pedido"
-                : "Entrar";
+                ? "Criar Conta e Continuar"
+                : "Entrar na Conta";
 
             document.getElementById("mode-register-btn").className = isRegister
                 ? "py-2 rounded-lg text-xs font-black bg-white text-emerald-800 shadow-2xs transition"
@@ -1528,110 +1526,155 @@
             window.open(waUrl, "_blank", "noopener,noreferrer");
         }
 
+        // Grava/atualiza documento em 'users/{uid}' no Firestore e entra imediatamente sem overlays travados
+        async function upsertUserFirestoreDocument(uid, profileFields) {
+            if (!firebaseReady || !db || !uid) return;
+            await setDoc(doc(db, "users", uid), {
+                uid,
+                name: profileFields.name || "",
+                phone: profileFields.phone || "",
+                address: profileFields.address || "",
+                landmark: profileFields.landmark || "",
+                email: (profileFields.email || "").trim().toLowerCase(),
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+        }
+
         document.getElementById("auth-form").addEventListener("submit", async (event) => {
             event.preventDefault();
-            const email = document.getElementById("auth-email").value.trim();
-            const password = document.getElementById("auth-password").value;
+            const submitBtn = document.getElementById("auth-submit-btn");
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Aguarde...";
 
-            if (state.authMode === "register") {
-                const name = document.getElementById("auth-name").value.trim();
-                const phone = document.getElementById("auth-phone").value.trim();
-                const address = document.getElementById("auth-address").value.trim();
-                const landmark = document.getElementById("auth-landmark").value.trim();
+            try {
+                const email = document.getElementById("auth-email").value.trim();
+                const password = document.getElementById("auth-password").value;
 
-                if (!name || !phone || !address || !landmark || !email || password.length < 6) {
-                    showToast("Preencha nome, telefone, endereço, ponto de referência, e-mail e senha (mínimo 6 caracteres).", true);
-                    return;
-                }
+                if (state.authMode === "register") {
+                    const name = document.getElementById("auth-name").value.trim();
+                    const phone = document.getElementById("auth-phone").value.trim();
+                    const address = document.getElementById("auth-address").value.trim();
+                    const landmark = document.getElementById("auth-landmark").value.trim();
 
-                const profileData = {
-                    ...(state.userProfile || {}),
-                    name,
-                    phone,
-                    address,
-                    landmark,
-                    email
-                };
-
-                if (firebaseReady && auth && db) {
-                    try {
-                        let activeUid = state.currentUser ? state.currentUser.uid : null;
-                        if (!activeUid) {
-                            const cred = await createUserWithEmailAndPassword(auth, email, password);
-                            state.currentUser = cred.user;
-                            activeUid = cred.user.uid;
-                        }
-                        await setDoc(doc(db, "users", activeUid), {
-                            ...profileData,
-                            updatedAt: serverTimestamp()
-                        }, { merge: true });
-                    } catch (err) {
-                        if (err && err.code === "auth/email-already-in-use") {
-                            try {
-                                const signed = await signInWithEmailAndPassword(auth, email, password);
-                                state.currentUser = signed.user;
-                                await setDoc(doc(db, "users", signed.user.uid), {
-                                    ...profileData,
-                                    updatedAt: serverTimestamp()
-                                }, { merge: true });
-                            } catch (_) {
-                                showToast("E-mail já cadastrado. Confira sua senha ou toque em 'Entrar'.", true);
-                                return;
-                            }
-                        } else {
-                            showToast("Dados salvos neste aparelho para envio do pedido.");
-                        }
-                    }
-                } else {
-                    showToast("Dados salvos neste aparelho para envio do pedido.");
-                }
-
-                state.userProfile = profileData;
-                saveJson(STORAGE_KEYS.profile, state.userProfile);
-                showToast("Cadastro e ponto de referência salvos!");
-            } else {
-                if (firebaseReady && auth && db) {
-                    try {
-                        const cred = await signInWithEmailAndPassword(auth, email, password);
-                        state.currentUser = cred.user;
-                        const userSnap = await getDoc(doc(db, "users", cred.user.uid));
-                        if (userSnap.exists()) {
-                            state.userProfile = {
-                                ...(state.userProfile || {}),
-                                ...userSnap.data(),
-                                email: userSnap.data().email || email
-                            };
-                        } else {
-                            state.userProfile = { ...(state.userProfile || {}), email };
-                        }
-                        saveJson(STORAGE_KEYS.profile, state.userProfile);
-                        showToast("Login realizado com sucesso!");
-                    } catch (_) {
-                        showToast("Não foi possível entrar. Verifique seu e-mail e senha.", true);
+                    if (!name || !phone || !address || !landmark || !email || password.length < 6) {
+                        showToast("Preencha nome, telefone, endereço, ponto de referência, e-mail e senha (mínimo 6 caracteres).", true);
                         return;
                     }
-                } else {
-                    state.userProfile = { ...(state.userProfile || {}), email };
+
+                    const profileData = {
+                        ...(state.userProfile || {}),
+                        name,
+                        phone,
+                        address,
+                        landmark,
+                        email
+                    };
+
+                    let createdNewAccount = false;
+
+                    if (firebaseReady && auth && db) {
+                        try {
+                            let activeUser = state.currentUser;
+                            if (!activeUser) {
+                                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                                activeUser = cred.user;
+                                state.currentUser = cred.user;
+                                createdNewAccount = true;
+                            }
+                            await upsertUserFirestoreDocument(activeUser.uid, profileData);
+                        } catch (err) {
+                            if (err && err.code === "auth/email-already-in-use") {
+                                try {
+                                    const signed = await signInWithEmailAndPassword(auth, email, password);
+                                    state.currentUser = signed.user;
+                                    await upsertUserFirestoreDocument(signed.user.uid, profileData);
+                                } catch (_) {
+                                    showToast("E-mail já cadastrado. Confira sua senha ou mude para 'Entrar'.", true);
+                                    return;
+                                }
+                            } else {
+                                showToast("Cadastro salvo neste aparelho para envio do pedido.");
+                            }
+                        }
+                    } else {
+                        showToast("Cadastro salvo neste aparelho para envio do pedido.");
+                    }
+
+                    state.userProfile = profileData;
                     saveJson(STORAGE_KEYS.profile, state.userProfile);
-                    showToast("Sessão salva neste aparelho.");
-                }
-            }
 
-            const shouldContinueCheckout = state.pendingCheckout;
-            closeAuthModal();
+                    const shouldContinueCheckout = state.pendingCheckout;
+                    closeAuthModal();
 
-            if (state.currentUser) {
-                const adminAuthorized = await checkAdminAuthorization(state.currentUser);
-                applyAdminAuthorization(adminAuthorized);
-            }
-            updateAccountUI();
+                    if (state.currentUser) {
+                        const adminAuthorized = await checkAdminAuthorization(state.currentUser);
+                        applyAdminAuthorization(adminAuthorized);
+                        await persistCart(true);
+                    }
+                    updateAccountUI();
+                    showView("store");
 
-            if (shouldContinueCheckout && state.cart.length > 0) {
-                if (hasCompleteDeliveryProfile()) {
-                    openCheckoutModal();
+                    showToast(
+                        createdNewAccount
+                            ? "Conta criada com sucesso! Você já está conectado para navegar."
+                            : "Cadastro salvo com sucesso! Você já está conectado para navegar."
+                    );
+
+                    if (shouldContinueCheckout && state.cart.length > 0 && hasCompleteDeliveryProfile()) {
+                        openCheckoutModal();
+                    }
                 } else {
-                    showToast("Preencha seu endereço e ponto de referência para finalizar o pedido.", true);
+                    if (firebaseReady && auth && db) {
+                        try {
+                            const cred = await signInWithEmailAndPassword(auth, email, password);
+                            state.currentUser = cred.user;
+                            const userSnap = await getDoc(doc(db, "users", cred.user.uid));
+                            if (userSnap.exists()) {
+                                const uData = userSnap.data() || {};
+                                state.userProfile = {
+                                    ...(state.userProfile || {}),
+                                    ...uData,
+                                    email: uData.email || email
+                                };
+                            } else {
+                                state.userProfile = { ...(state.userProfile || {}), email };
+                                await upsertUserFirestoreDocument(cred.user.uid, state.userProfile);
+                            }
+                            saveJson(STORAGE_KEYS.profile, state.userProfile);
+                        } catch (_) {
+                            showToast("Não foi possível entrar. Verifique seu e-mail e senha.", true);
+                            return;
+                        }
+                    } else {
+                        state.userProfile = { ...(state.userProfile || {}), email };
+                        saveJson(STORAGE_KEYS.profile, state.userProfile);
+                    }
+
+                    const shouldContinueCheckout = state.pendingCheckout;
+                    closeAuthModal();
+
+                    if (state.currentUser) {
+                        const adminAuthorized = await checkAdminAuthorization(state.currentUser);
+                        applyAdminAuthorization(adminAuthorized);
+                        await persistCart(true);
+                    }
+                    updateAccountUI();
+                    showView("store");
+                    showToast("Login realizado! Você já pode navegar.");
+
+                    if (shouldContinueCheckout && state.cart.length > 0) {
+                        if (hasCompleteDeliveryProfile()) {
+                            openCheckoutModal();
+                        } else {
+                            openAuthModal("register");
+                            showToast("Complete seu endereço e ponto de referência para finalizar o pedido.");
+                        }
+                    }
                 }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
             }
         });
 
@@ -1647,7 +1690,7 @@
             showToast("Você saiu da conta.");
         }
 
-        // Verificação silenciosa de permissão apenas via Firestore ("admins" por e-mail ou "users" por uid)
+        // Detecção silenciosa de permissão apenas via Firestore ('users/{uid}' ou 'admins/{email}')
         async function checkAdminAuthorization(user) {
             if (!firebaseReady || !db || !user) {
                 return false;
@@ -1655,19 +1698,7 @@
 
             let authorized = false;
 
-            if (user.email) {
-                const normalizedEmail = String(user.email).trim().toLowerCase();
-                try {
-                    const adminDoc = await getDoc(doc(db, "admins", normalizedEmail));
-                    if (adminDoc.exists() && adminDoc.data()?.active === true) {
-                        authorized = true;
-                    }
-                } catch (_) {
-                    // Segue para verificação por uid
-                }
-            }
-
-            if (!authorized && user.uid) {
+            if (user.uid) {
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (userDoc.exists()) {
@@ -1675,6 +1706,18 @@
                         if (uData.isAdmin === true || uData.role === "admin") {
                             authorized = true;
                         }
+                    }
+                } catch (_) {
+                    // Segue para checagem da coleção admins
+                }
+            }
+
+            if (!authorized && user.email) {
+                const normalizedEmail = String(user.email).trim().toLowerCase();
+                try {
+                    const adminDoc = await getDoc(doc(db, "admins", normalizedEmail));
+                    if (adminDoc.exists() && adminDoc.data()?.active === true) {
+                        authorized = true;
                     }
                 } catch (_) {
                     authorized = false;
@@ -1742,7 +1785,7 @@
             if (p && p.address) {
                 addrEl.textContent = p.address;
             } else {
-                addrEl.textContent = "Veja os produtos e monte seu carrinho à vontade. Na hora de fechar o pedido, informe seu endereço e ponto de referência.";
+                addrEl.textContent = "Navegue livremente e adicione itens ao carrinho. Na hora de fechar o pedido, informe seu endereço e ponto de referência.";
             }
 
             if (p && p.landmark) {
@@ -1784,7 +1827,7 @@
             `).join("");
         }
 
-        // Gestão de produtos, promoções, visibilidade e WhatsApp
+        // Gestão de produtos, promoções, estoque visível/oculto e WhatsApp
         function syncAdminInputs() {
             document.getElementById("admin-whatsapp-input").value = state.settings.whatsapp || "";
             document.getElementById("admin-delivery-fee-input").value = state.settings.deliveryFee ?? 0;
@@ -2061,7 +2104,7 @@
             `).join("");
         }
 
-        // Sincronização em tempo real com Firestore quando disponível
+        // Sincronização em tempo real com Firestore
         if (firebaseReady && db) {
             onSnapshot(collection(db, "products"), (snapshot) => {
                 if (!snapshot.empty) {
@@ -2100,9 +2143,14 @@
                                 email: uData.email || user.email
                             };
                             saveJson(STORAGE_KEYS.profile, state.userProfile);
-                        } else if (!state.userProfile) {
-                            state.userProfile = { email: user.email };
+                        } else {
+                            const fallbackProfile = {
+                                ...(state.userProfile || {}),
+                                email: user.email || ""
+                            };
+                            state.userProfile = fallbackProfile;
                             saveJson(STORAGE_KEYS.profile, state.userProfile);
+                            await upsertUserFirestoreDocument(user.uid, fallbackProfile);
                         }
                     } catch (_) {
                         if (!state.userProfile) {
