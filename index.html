@@ -442,6 +442,19 @@
       font-weight: 700;
       cursor: pointer;
       margin-top: 6px;
+      transition: background-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Estado de clique/processamento: muda de cor claramente */
+    .submit-btn.loading {
+      background: #d97706;
+      color: #ffffff;
+      opacity: 0.92;
+      cursor: wait;
     }
 
     .cart-item {
@@ -580,7 +593,7 @@
           <label>Senha</label>
           <input type="password" id="loginPassword" required placeholder="••••••••" />
         </div>
-        <button type="submit" class="submit-btn">Entrar no Mercadinho</button>
+        <button type="submit" id="loginSubmitBtn" class="submit-btn">Entrar no Mercadinho</button>
       </form>
 
       <!-- FORMULÁRIO DE CADASTRO -->
@@ -605,7 +618,7 @@
           <label>Ponto de Referência</label>
           <input type="text" id="regReference" required placeholder="Próximo à praça / portão azul" />
         </div>
-        <button type="submit" class="submit-btn">Criar Conta e Continuar</button>
+        <button type="submit" id="regSubmitBtn" class="submit-btn">Criar Conta e Continuar</button>
       </form>
     </div>
   </div>
@@ -623,7 +636,7 @@
         <span>Total do Pedido:</span>
         <span id="modalCartTotal">R$ 0,00</span>
       </div>
-      <button class="submit-btn" onclick="checkoutOrder()">Finalizar Compra</button>
+      <button type="button" id="checkoutBtn" class="submit-btn" onclick="checkoutOrder()">Finalizar Compra</button>
     </div>
   </div>
 
@@ -664,7 +677,7 @@
           <input type="checkbox" id="prodPromo" style="width: auto;" />
           <label for="prodPromo" style="margin: 0;">Destacar em Promoções 🔥</label>
         </div>
-        <button type="submit" class="submit-btn">Salvar Produto no Catálogo</button>
+        <button type="submit" id="prodSubmitBtn" class="submit-btn">Salvar Produto no Catálogo</button>
       </form>
     </div>
   </div>
@@ -689,10 +702,10 @@
       getDoc,
       onSnapshot,
       query,
-      orderBy
+      orderBy,
+      limit
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // SUAS CREDENCIAIS DO FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyBJVYL08cR3bnSjouskRFAUTf-bS515ApU",
       authDomain: "mercadinho-87f71.firebaseapp.com",
@@ -786,14 +799,22 @@
     animateCanvas();
 
     // =========================================================================
-    // UTILITÁRIOS DE INTERFACE
+    // UTILITÁRIOS DE INTERFACE E ESTADO DOS BOTÕES
     // =========================================================================
     window.showToast = (msg) => {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3200);
+      setTimeout(() => toast.classList.remove('show'), 3500);
     };
+
+    function setButtonLoading(btnId, isLoading, loadingText, defaultText) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.disabled = isLoading;
+      btn.classList.toggle('loading', isLoading);
+      btn.textContent = isLoading ? loadingText : defaultText;
+    }
 
     window.openModal = (id) => {
       if (id === 'cartModal') renderCartModal();
@@ -823,7 +844,7 @@
     };
 
     // =========================================================================
-    // AUTENTICAÇÃO E PERFIL NO FIRESTORE (100% GRATUITO)
+    // AUTENTICAÇÃO E SINCRONIZAÇÃO COM FIRESTORE
     // =========================================================================
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
@@ -831,12 +852,32 @@
       const adminBtn = document.getElementById('adminBtn');
 
       if (user) {
-        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        currentUserProfile = userDoc.exists() ? userDoc.data() : { nome: user.email, role: 'cliente' };
+        try {
+          const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+          if (userDoc.exists()) {
+            currentUserProfile = userDoc.data();
+          } else {
+            // Se o usuário já existe no Auth mas não tinha doc no Firestore (ex: travou antes), cria agora
+            const existingSnap = await getDocs(query(collection(db, "usuarios"), limit(1)));
+            const isFirst = existingSnap.empty;
+            currentUserProfile = {
+              nome: user.email.split('@')[0],
+              email: user.email,
+              endereco: 'Endereço não informado',
+              referencia: 'Sem referência',
+              role: isFirst ? 'admin' : 'cliente',
+              criadoEm: new Date().toISOString()
+            };
+            await setDoc(doc(db, "usuarios", user.uid), currentUserProfile);
+          }
 
-        const firstName = currentUserProfile.nome.split(' ')[0];
-        authBtn.textContent = `👋 ${firstName} (Sair)`;
-        adminBtn.style.display = currentUserProfile.role === 'admin' ? 'flex' : 'none';
+          const firstName = (currentUserProfile.nome || user.email).split(' ')[0];
+          authBtn.textContent = `👋 ${firstName} (Sair)`;
+          adminBtn.style.display = currentUserProfile.role === 'admin' ? 'flex' : 'none';
+        } catch (err) {
+          console.error('Erro ao carregar perfil:', err);
+          authBtn.textContent = '👋 Conta (Sair)';
+        }
       } else {
         currentUserProfile = null;
         authBtn.textContent = '👤 Entrar';
@@ -862,31 +903,48 @@
       const endereco = document.getElementById('regAddress').value.trim();
       const referencia = document.getElementById('regReference').value.trim();
 
+      setButtonLoading('regSubmitBtn', true, '⏳ Criando conta e salvando...', 'Criar Conta e Continuar');
+
       try {
-        const usersSnap = await getDocs(collection(db, "usuarios"));
+        const usersSnap = await getDocs(query(collection(db, "usuarios"), limit(1)));
         const isFirstUser = usersSnap.empty;
 
         const cred = await createUserWithEmailAndPassword(auth, email, senha);
-        await setDoc(doc(db, "usuarios", cred.user.uid), {
+
+        const profileData = {
           nome,
           email,
           endereco,
           referencia,
           role: isFirstUser ? 'admin' : 'cliente',
           criadoEm: new Date().toISOString()
-        });
+        };
+
+        await setDoc(doc(db, "usuarios", cred.user.uid), profileData);
+        currentUserProfile = profileData;
+
+        const firstName = nome.split(' ')[0];
+        document.getElementById('authHeaderBtn').textContent = `👋 ${firstName} (Sair)`;
+        document.getElementById('adminBtn').style.display = isFirstUser ? 'flex' : 'none';
 
         closeModal('authModal');
         showToast(isFirstUser
-          ? 'Conta Administrador criada! Botão Painel Admin liberado.'
-          : 'Cadastro realizado com sucesso!');
+          ? 'Conta Administrador criada e salva no Firestore!'
+          : 'Cadastro concluído com sucesso!');
 
         if (pendingCheckout) {
           pendingCheckout = false;
           openModal('cartModal');
         }
       } catch (err) {
-        showToast('Erro ao cadastrar: ' + err.message);
+        console.error('Erro no cadastro:', err);
+        if (err.code === 'auth/email-already-in-use') {
+          showToast('Este e-mail já existe no Authentication. Vá na aba "Já tenho conta" para entrar.');
+        } else {
+          showToast('Erro ao cadastrar: ' + (err.message || 'verifique o Firestore'));
+        }
+      } finally {
+        setButtonLoading('regSubmitBtn', false, '⏳ Criando conta e salvando...', 'Criar Conta e Continuar');
       }
     };
 
@@ -894,6 +952,8 @@
       e.preventDefault();
       const email = document.getElementById('loginEmail').value.trim();
       const senha = document.getElementById('loginPassword').value;
+
+      setButtonLoading('loginSubmitBtn', true, '⏳ Entrando...', 'Entrar no Mercadinho');
 
       try {
         await signInWithEmailAndPassword(auth, email, senha);
@@ -905,7 +965,10 @@
           openModal('cartModal');
         }
       } catch (err) {
+        console.error('Erro no login:', err);
         showToast('E-mail ou senha inválidos.');
+      } finally {
+        setButtonLoading('loginSubmitBtn', false, '⏳ Entrando...', 'Entrar no Mercadinho');
       }
     };
 
@@ -919,7 +982,7 @@
     }, (error) => {
       document.getElementById('productsGrid').innerHTML = `
         <div class="empty-state">
-          Aguardando liberação do Firestore Database no Console do Firebase.<br><small>${error.message}</small>
+          Aguardando configuração/regras do Firestore Database.<br><small>${error.message}</small>
         </div>`;
     });
 
@@ -936,6 +999,8 @@
       const imagem = document.getElementById('prodImage').value.trim() || 'https://cdn-icons-png.flaticon.com/512/3081/3081986.png';
       const promocao = document.getElementById('prodPromo').checked;
 
+      setButtonLoading('prodSubmitBtn', true, '⏳ Salvando produto...', 'Salvar Produto no Catálogo');
+
       try {
         await addDoc(collection(db, "produtos"), {
           nome,
@@ -951,6 +1016,8 @@
         showToast('Produto adicionado ao catálogo!');
       } catch (err) {
         showToast('Erro ao salvar produto: ' + err.message);
+      } finally {
+        setButtonLoading('prodSubmitBtn', false, '⏳ Salvando produto...', 'Salvar Produto no Catálogo');
       }
     };
 
@@ -1078,13 +1145,14 @@
       }
 
       const total = cart.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+      setButtonLoading('checkoutBtn', true, '⏳ Enviando pedido...', 'Finalizar Compra');
 
       try {
         await addDoc(collection(db, "pedidos"), {
           clienteId: currentUser.uid,
-          clienteNome: currentUserProfile.nome,
-          endereco: currentUserProfile.endereco,
-          referencia: currentUserProfile.referencia,
+          clienteNome: currentUserProfile ? currentUserProfile.nome : currentUser.email,
+          endereco: currentUserProfile ? currentUserProfile.endereco : '',
+          referencia: currentUserProfile ? currentUserProfile.referencia : '',
           itens: cart,
           total,
           status: 'Novo Pedido',
@@ -1097,6 +1165,8 @@
         showToast('Pedido enviado com sucesso! Em breve sairá para entrega.');
       } catch (err) {
         showToast('Erro ao enviar pedido: ' + err.message);
+      } finally {
+        setButtonLoading('checkoutBtn', false, '⏳ Enviando pedido...', 'Finalizar Compra');
       }
     };
 
