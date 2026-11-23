@@ -1,2354 +1,1924 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="theme-color" content="#065f46">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Meu Mercadinho Online</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Mercadinho Online</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --surface-2: #eef2f6;
+      --text: #141b24;
+      --muted: #5c6b7c;
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --accent: #ea580c;
+      --accent-soft: #ffedd5;
+      --danger: #dc2626;
+      --success: #15803d;
+      --border: #dce3ec;
+      --shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+    }
 
-    <!-- Tailwind CSS via CDN para layout responsivo e espaçamento -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-    <!-- Fonte Inter para excelente legibilidade em telas móveis e desktop -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
 
-    <!-- Ícones Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    /* Cabeçalho */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
 
-    <style>
-        /* Tipografia principal e superfície de alto contraste */
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #f1f5f9;
-            color: #0f172a;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
 
-        /* Grade de produtos SEMPRE em 2 colunas lado a lado */
-        .two-col-products-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.75rem;
-            width: 100%;
-        }
+    .icon-btn {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
 
-        @media (min-width: 640px) {
-            .two-col-products-grid {
-                gap: 1rem;
-            }
-        }
+    .icon-btn:hover {
+      background: #e2e8f0;
+    }
 
-        /* Animação suave das gavetas laterais */
-        .drawer-panel {
-            transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-        }
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-        /* Barra de rolagem horizontal oculta em abas de categoria */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
+    .cart-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 13px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .cart-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .cart-badge {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    /* Banner Canvas */
+    .banner-wrap {
+      max-width: 960px;
+      margin: 12px auto 0;
+      padding: 0 12px;
+    }
+
+    .banner-box {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background: #0f172a;
+      height: 125px;
+    }
+
+    #promoCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .banner-overlay {
+      position: absolute;
+      inset: 0;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.82) 0%, rgba(15, 23, 42, 0.35) 100%);
+      color: #fff;
+      pointer-events: none;
+    }
+
+    .banner-overlay h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .banner-overlay p {
+      font-size: 0.88rem;
+      color: #e2e8f0;
+    }
+
+    /* Container principal */
+    .container {
+      max-width: 960px;
+      margin: 14px auto 0;
+      padding: 0 12px;
+    }
+
+    /* Avisos na tela */
+    .notice-bar {
+      display: none;
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      line-height: 1.4;
+      border: 1px solid transparent;
+    }
+
+    .notice-bar.show {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .notice-info {
+      background: #e0f2fe;
+      color: #0c4a6e;
+      border-color: #bae6fd;
+    }
+
+    .notice-success {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #bbf7d0;
+    }
+
+    .notice-error {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border-color: #fecaca;
+    }
+
+    .notice-close {
+      background: transparent;
+      border: none;
+      color: inherit;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+
+    /* Barra de busca e categorias */
+    .toolbar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .search-input:focus {
+      outline: 2px solid var(--primary);
+      background: #fff;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 13px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .chip.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .chip.promo-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Grade obrigatória de 2 colunas */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .promo-tag {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      z-index: 2;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .hidden-tag {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      background: #334155;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 999px;
+    }
+
+    .product-img-wrap {
+      width: 100%;
+      height: 132px;
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .product-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-body {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .product-cat {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .product-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+      line-height: 1.25;
+      color: var(--text);
+    }
+
+    .price-box {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .price-old {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .price-now {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .price-promo {
+      color: var(--accent);
+    }
+
+    .add-btn {
+      width: 100%;
+      margin-top: 4px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 8px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .add-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .admin-mini-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .mini-btn {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      border-radius: 7px;
+      padding: 5px 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mini-btn.del {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    /* Painel do Administrador */
+    .admin-panel {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-top: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .admin-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .form-grid.two-col {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .products-grid {
+        gap: 14px;
+      }
+      .product-img-wrap {
+        height: 165px;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.94rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .checkbox-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 6px 0;
+    }
+
+    .checkbox-line input {
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-dark);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+    }
+
+    .btn-whatsapp {
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 0.96rem;
+      font-weight: 800;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn-whatsapp:hover {
+      background: #15803d;
+    }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* Menu gaveta lateral */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 60;
+      display: none;
+    }
+
+    .drawer-backdrop.open {
+      display: block;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 290px;
+      max-width: 85vw;
+      background: var(--surface);
+      z-index: 70;
+      transform: translateX(-100%);
+      transition: transform 0.22s ease;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .user-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.86rem;
+      line-height: 1.4;
+    }
+
+    .drawer-item {
+      width: 100%;
+      text-align: left;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .drawer-item:hover {
+      background: #e2e8f0;
+    }
+
+    /* Modais (Carrinho e Conta/Cadastro) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.58);
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    .modal-head h2 {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .close-x {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cart-item-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .cart-item-name {
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .cart-item-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.08rem;
+      font-weight: 800;
+      padding: 8px 0;
+    }
+
+    .auth-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--surface-2);
+      padding: 4px;
+      border-radius: 10px;
+    }
+
+    .auth-switch button {
+      border: none;
+      background: transparent;
+      padding: 8px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .auth-switch button.active {
+      background: #fff;
+      color: var(--primary-dark);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .inline-msg {
+      display: none;
+      padding: 9px 11px;
+      border-radius: 9px;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .inline-msg.show {
+      display: block;
+    }
+
+    .inline-msg.ok {
+      background: #dcfce7;
+      color: #14532d;
+    }
+
+    .inline-msg.err {
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 600;
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col bg-slate-100 text-slate-950">
+<body>
 
-    <!-- =====================================================================
-         AVISO VISUAL NÃO-BLOQUEANTE NA TELA (Substitui alert() nativo)
-         ===================================================================== -->
-    <div id="toast-banner" role="status" aria-live="polite"
-         class="fixed top-4 left-1/2 -translate-x-1/2 z-[140] hidden w-[92%] max-w-md bg-slate-950 text-white px-4 py-3.5 rounded-2xl shadow-2xl border-2 border-emerald-400 items-center justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-            <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-xl shrink-0"></i>
-            <span id="toast-text" class="text-sm font-bold leading-snug break-words"></span>
-        </div>
-        <button type="button" onclick="window.app.hideToast()" aria-label="Fechar aviso"
-                class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition shrink-0">
-            <i class="fa-solid fa-xmark text-base"></i>
-        </button>
+  <header>
+    <div class="header-left">
+      <button class="icon-btn" id="openDrawerBtn" type="button">☰ Menu</button>
+      <div class="brand-title">Meu Mercadinho Online</div>
+    </div>
+    <button class="cart-btn" id="openCartBtn" type="button">
+      🛒 Carrinho <span class="cart-badge" id="cartCount">0</span>
+    </button>
+  </header>
+
+  <div class="banner-wrap">
+    <div class="banner-box">
+      <canvas id="promoCanvas"></canvas>
+      <div class="banner-overlay">
+        <h1>Meu Mercadinho Online</h1>
+        <p>Monte seu carrinho e receba na porta de casa em poucos minutos.</p>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <div id="globalNotice" class="notice-bar" role="status">
+      <span id="globalNoticeText"></span>
+      <button class="notice-close" id="closeNoticeBtn" type="button" aria-label="Fechar aviso">✕</button>
     </div>
 
-    <!-- =====================================================================
-         MODAL DE CONFIRMAÇÃO CUSTOMIZADO (Substitui confirm() nativo)
-         ===================================================================== -->
-    <div id="confirm-modal"
-         class="fixed inset-0 bg-slate-950/70 backdrop-blur-[2px] z-[135] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border-2 border-slate-300 space-y-4">
-            <h3 id="confirm-title" class="text-lg font-black text-slate-950">Confirmar ação</h3>
-            <p id="confirm-message" class="text-sm font-medium text-slate-700 leading-relaxed"></p>
-            <div class="flex justify-end gap-2.5 pt-2">
-                <button type="button" id="confirm-cancel-btn"
-                        class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-900 font-extrabold text-sm transition">
-                    Cancelar
-                </button>
-                <button type="button" id="confirm-ok-btn"
-                        class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm transition">
-                    Confirmar
-                </button>
+    <section class="toolbar">
+      <input
+        type="search"
+        id="searchInput"
+        class="search-input"
+        placeholder="Buscar produto no mercadinho..."
+        autocomplete="off"
+      />
+      <div class="filter-row" id="categoryRow">
+        <button class="chip active" data-filter="all" type="button">Todos</button>
+        <button class="chip promo-chip" data-filter="promo" type="button">🔥 Promoções</button>
+        <button class="chip" data-filter="Mercearia" type="button">Mercearia</button>
+        <button class="chip" data-filter="Bebidas" type="button">Bebidas</button>
+        <button class="chip" data-filter="Limpeza" type="button">Limpeza</button>
+        <button class="chip" data-filter="Hortifruti" type="button">Hortifruti</button>
+        <button class="chip" data-filter="Padaria" type="button">Padaria</button>
+      </div>
+    </section>
+
+    <section class="products-grid" id="productsGrid"></section>
+
+    <!-- Painel do Administrador (exibido apenas quando a conta estiver autorizada no Firestore) -->
+    <section class="admin-panel" id="adminPanel">
+      <div class="admin-header">
+        <h2>Gerenciamento da Loja</h2>
+        <button class="icon-btn" id="closeAdminPanelBtn" type="button">Fechar</button>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="chip active" id="tabProductBtn" type="button">Produto</button>
+        <button class="chip" id="tabStoreBtn" type="button">WhatsApp da Loja</button>
+      </div>
+
+      <div id="adminProductTab">
+        <form id="productForm" class="form-grid">
+          <input type="hidden" id="editProductId" />
+          <div class="form-grid two-col">
+            <div class="field">
+              <label for="prodName">Nome do produto *</label>
+              <input type="text" id="prodName" required placeholder="Ex.: Arroz Branco 5kg" />
             </div>
-        </div>
+            <div class="field">
+              <label for="prodCategory">Categoria *</label>
+              <select id="prodCategory" required>
+                <option value="Mercearia">Mercearia</option>
+                <option value="Bebidas">Bebidas</option>
+                <option value="Limpeza">Limpeza</option>
+                <option value="Hortifruti">Hortifruti</option>
+                <option value="Padaria">Padaria</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid two-col">
+            <div class="field">
+              <label for="prodPrice">Preço normal (R$) *</label>
+              <input type="number" id="prodPrice" step="0.01" min="0.01" required placeholder="Ex.: 24.90" />
+            </div>
+            <div class="field">
+              <label for="prodPromoPrice">Preço promocional (R$)</label>
+              <input type="number" id="prodPromoPrice" step="0.01" min="0.01" placeholder="Ex.: 21.50" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="prodPhoto">Link da foto do produto (GitHub Raw ou URL da imagem) *</label>
+            <input type="url" id="prodPhoto" required placeholder="https://raw.githubusercontent.com/..." />
+          </div>
+
+          <div class="form-grid two-col">
+            <label class="checkbox-line">
+              <input type="checkbox" id="prodIsPromo" />
+              <span>Marcar como Promoção</span>
+            </label>
+            <label class="checkbox-line">
+              <input type="checkbox" id="prodHidden" />
+              <span>Ocultar produto dos clientes</span>
+            </label>
+          </div>
+
+          <div class="form-grid two-col">
+            <button type="submit" class="btn-primary" id="saveProductBtn">Salvar produto</button>
+            <button type="button" class="btn-secondary" id="resetProductFormBtn">Limpar campos</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="adminStoreTab" style="display: none;">
+        <form id="storeConfigForm" class="form-grid">
+          <div class="field">
+            <label for="storeWhatsapp">Número do WhatsApp para receber pedidos (com DDD e código do país)</label>
+            <input type="text" id="storeWhatsapp" placeholder="Ex.: 5585999999999" required />
+          </div>
+          <button type="submit" class="btn-primary" id="saveStoreBtn">Salvar WhatsApp</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Menu Gaveta -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-top">
+      <strong>Menu</strong>
+      <button class="close-x" id="closeDrawerBtn" type="button">✕</button>
     </div>
 
-    <!-- =====================================================================
-         MODAL DE CONFIRMAÇÃO DE PEDIDO ENVIADO PARA WHATSAPP
-         ===================================================================== -->
-    <div id="order-success-modal"
-         class="fixed inset-0 bg-slate-950/75 backdrop-blur-[2px] z-[130] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-emerald-500 space-y-4 text-center">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-2xl">
-                <i class="fa-solid fa-motorcycle"></i>
-            </div>
-            <div class="space-y-1.5">
-                <h3 class="text-xl font-black text-slate-950">Pedido Enviado!</h3>
-                <p id="order-modal-message" class="text-sm font-bold text-emerald-800 leading-relaxed">
-                    Seu pedido foi enviado para o WhatsApp e em poucos minutos chega na sua casa!
-                </p>
-                <p id="order-modal-subinfo" class="text-xs font-medium text-slate-600 leading-relaxed"></p>
-            </div>
-            <div class="pt-2">
-                <button type="button" onclick="window.app.closeOrderSuccessModal()"
-                        class="w-full py-3 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm transition">
-                    Continuar Navegando
-                </button>
-            </div>
-        </div>
+    <div class="user-box" id="drawerUserBox">
+      Visitante — adicione itens ao carrinho e cadastre-se na hora de fechar o pedido.
     </div>
 
-    <!-- =====================================================================
-         CABEÇALHO FIXO SUPERIOR COM MENU GAVETA E CARRINHO
-         ===================================================================== -->
-    <header class="sticky top-0 z-30 bg-emerald-800 text-white shadow-lg border-b border-emerald-950/30">
-        <div class="max-w-5xl mx-auto px-3 sm:px-5 h-16 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2.5 min-w-0">
-                <button type="button" onclick="window.app.toggleDrawer(true)" aria-label="Abrir menu gaveta"
-                        class="p-2.5 rounded-xl bg-emerald-900/75 hover:bg-emerald-950 active:scale-95 text-white transition shrink-0">
-                    <i class="fa-solid fa-bars text-xl"></i>
-                </button>
-                <button type="button" onclick="window.app.returnToStorefront()"
-                        class="flex items-center gap-2.5 text-left min-w-0">
-                    <span class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
-                        <i class="fa-solid fa-store text-lg"></i>
-                    </span>
-                    <span class="font-black text-base sm:text-xl tracking-tight truncate text-white">
-                        Meu Mercadinho Online
-                    </span>
-                </button>
-            </div>
+    <button class="drawer-item" id="drawerHomeBtn" type="button">🛍️ Catálogo</button>
+    <button class="drawer-item" id="drawerPromoBtn" type="button">🔥 Promoções</button>
+    <button class="drawer-item" id="drawerCartBtn" type="button">🛒 Meu Carrinho</button>
+    <button class="drawer-item" id="drawerAuthBtn" type="button">👤 Entrar ou Cadastrar</button>
+    <button class="drawer-item" id="drawerAdminBtn" type="button" style="display: none;">📦 Gerenciar Produtos</button>
+    <button class="drawer-item" id="drawerLogoutBtn" type="button" style="display: none;">🚪 Sair da Conta</button>
+  </aside>
 
-            <div class="flex items-center gap-2 shrink-0">
-                <button type="button" onclick="window.app.openAuthModal(window.app.hasUserSession() ? 'register' : 'login')"
-                        id="header-account-btn"
-                        class="hidden md:inline-flex items-center gap-2 bg-emerald-950/65 hover:bg-emerald-950 text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl transition max-w-[195px]">
-                    <i class="fa-regular fa-user text-amber-300 shrink-0"></i>
-                    <span id="header-user-label" class="truncate">Visitante</span>
-                </button>
-
-                <button type="button" onclick="window.app.toggleCart(true)"
-                        aria-label="Abrir carrinho"
-                        class="relative flex items-center gap-2 bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 font-black px-3.5 py-2.5 rounded-xl shadow-md transition">
-                    <i class="fa-solid fa-cart-shopping text-base"></i>
-                    <span class="hidden sm:inline text-sm">Carrinho</span>
-                    <span id="cart-count-badge"
-                          class="bg-slate-950 text-amber-300 text-xs font-black px-2 py-0.5 rounded-full">
-                        0
-                    </span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- =====================================================================
-         MENU GAVETA LATERAL DESLIZANTE
-         ===================================================================== -->
-    <div id="drawer-backdrop" onclick="window.app.toggleDrawer(false)"
-         class="fixed inset-0 bg-slate-950/65 z-40 hidden"></div>
-
-    <aside id="side-drawer"
-           class="fixed top-0 left-0 h-full w-80 max-w-[88vw] bg-slate-950 text-white z-50 shadow-2xl -translate-x-full drawer-panel flex flex-col justify-between border-r border-slate-800">
-        <div class="overflow-y-auto">
-            <!-- Cabeçalho da Gaveta -->
-            <div class="p-5 bg-emerald-800 text-white flex items-center justify-between border-b border-emerald-700">
-                <div>
-                    <p class="text-[11px] uppercase tracking-wider text-amber-300 font-black">Menu</p>
-                    <h2 class="font-black text-lg leading-tight mt-0.5">Meu Mercadinho Online</h2>
-                </div>
-                <button type="button" onclick="window.app.toggleDrawer(false)" aria-label="Fechar menu"
-                        class="p-2.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-950 text-white transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <!-- Resumo do Cliente / Visitante -->
-            <div class="p-4 bg-slate-900 border-b border-slate-800 space-y-1.5">
-                <div class="flex items-center justify-between gap-2">
-                    <p id="drawer-account-name" class="font-extrabold text-white text-sm truncate">Visitante</p>
-                    <span id="drawer-role-pill"
-                          class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-100 shrink-0">
-                        Visitante
-                    </span>
-                </div>
-                <p id="drawer-account-address" class="text-xs text-slate-300 leading-relaxed">
-                    Navegue livremente e monte seu carrinho. Ao finalizar o pedido, informe endereço e ponto de referência.
-                </p>
-                <p id="drawer-account-landmark" class="text-xs text-amber-300 font-bold hidden"></p>
-            </div>
-
-            <!-- Navegação Principal -->
-            <nav class="p-3 space-y-1.5">
-                <button type="button" onclick="window.app.returnToStorefront(); window.app.toggleDrawer(false);"
-                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-extrabold text-sm text-white hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-store w-5 text-emerald-400"></i>
-                    <span>Catálogo da Loja</span>
-                </button>
-
-                <button type="button" onclick="window.app.selectCategory('Promoções'); window.app.returnToStorefront(); window.app.toggleDrawer(false);"
-                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-extrabold text-sm text-amber-300 hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-tags w-5 text-amber-400"></i>
-                    <span>Promoções</span>
-                </button>
-
-                <button type="button" onclick="window.app.toggleDrawer(false); window.app.toggleCart(true);"
-                        class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left font-extrabold text-sm text-white hover:bg-slate-800 transition">
-                    <span class="flex items-center gap-3">
-                        <i class="fa-solid fa-cart-shopping w-5 text-amber-400"></i>
-                        <span>Meu Carrinho</span>
-                    </span>
-                    <span id="drawer-cart-count" class="text-xs font-black bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full">0</span>
-                </button>
-
-                <button type="button" onclick="window.app.showView('profile'); window.app.toggleDrawer(false);"
-                        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-extrabold text-sm text-white hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-location-dot w-5 text-sky-400"></i>
-                    <span>Endereço e Referência</span>
-                </button>
-
-                <!-- Seção administrativa exibida apenas quando autorizado pelo Firestore -->
-                <div id="admin-menu-section" class="hidden pt-2 mt-2 border-t border-slate-800">
-                    <button type="button" onclick="window.app.openAdminPanel()"
-                            class="w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left font-black text-sm bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-md transition">
-                        <span class="flex items-center gap-3">
-                            <i class="fa-solid fa-sliders w-5"></i>
-                            <span>Gerenciar Loja</span>
-                        </span>
-                        <i class="fa-solid fa-chevron-right text-xs"></i>
-                    </button>
-                </div>
-            </nav>
-        </div>
-
-        <!-- Rodapé da Gaveta -->
-        <div class="p-4 border-t border-slate-800 bg-slate-900 space-y-2">
-            <button type="button" id="drawer-login-btn"
-                    onclick="window.app.toggleDrawer(false); window.app.openAuthModal('register');"
-                    class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm transition">
-                Criar Conta ou Entrar
-            </button>
-            <button type="button" id="drawer-edit-profile-btn"
-                    onclick="window.app.toggleDrawer(false); window.app.openAuthModal('register');"
-                    class="hidden w-full py-3 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm transition">
-                Atualizar Endereço e Referência
-            </button>
-            <button type="button" id="drawer-logout-btn"
-                    onclick="window.app.logoutUser()"
-                    class="hidden w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold text-sm transition">
-                Sair da Conta
-            </button>
-        </div>
-    </aside>
-
-    <!-- =====================================================================
-         CONTEÚDO PRINCIPAL
-         ===================================================================== -->
-    <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-5 py-4 space-y-4">
-
-        <!-- Banner Animado em HTML5 <canvas> no topo da vitrine -->
-        <div class="w-full rounded-2xl overflow-hidden shadow-md border-2 border-emerald-900/20 bg-emerald-900">
-            <canvas id="promo-canvas" class="w-full h-28 sm:h-32 block"></canvas>
-        </div>
-
-        <!-- Aviso fixo na tela após envio do pedido ao WhatsApp -->
-        <div id="order-sent-banner"
-             class="hidden bg-emerald-900 text-white border-2 border-emerald-400 px-4 py-4 rounded-2xl shadow-lg items-start justify-between gap-3">
-            <div class="flex items-start gap-3">
-                <i class="fa-solid fa-motorcycle text-amber-300 text-2xl mt-0.5 shrink-0"></i>
-                <div class="space-y-1">
-                    <p class="font-black text-sm sm:text-base text-amber-300">
-                        Pedido enviado para o WhatsApp! Em poucos minutos chega na sua casa.
-                    </p>
-                    <p id="order-sent-banner-desc" class="text-xs sm:text-sm text-emerald-50 font-medium leading-relaxed"></p>
-                </div>
-            </div>
-            <button type="button" onclick="window.app.hideOrderSentBanner()" aria-label="Fechar aviso de pedido enviado"
-                    class="p-1.5 rounded-lg text-emerald-200 hover:text-white hover:bg-emerald-800 transition shrink-0">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <!-- =================================================================
-             VIEW 1: VITRINE PRINCIPAL (2 COLUNAS LADO A LADO + PROMOÇÕES)
-             ================================================================= -->
-        <section id="view-store" class="space-y-4">
-            <div class="bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                    <input type="search" id="search-input"
-                           placeholder="Buscar produto, categoria ou promoção..."
-                           class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold text-slate-900">
-                </div>
-
-                <div class="flex items-center justify-between gap-2 flex-wrap">
-                    <div id="category-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5 flex-1">
-                        <!-- Preenchido via JS -->
-                    </div>
-                    <button type="button" id="quick-promo-btn" onclick="window.app.togglePromoFilter()"
-                            class="px-3.5 py-2 rounded-xl text-xs font-black bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 transition shrink-0">
-                        <i class="fa-solid fa-tags mr-1"></i>
-                        <span>Promoções</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Grade de Produtos SEMPRE em 2 colunas lado a lado -->
-            <div id="products-grid" class="two-col-products-grid">
-                <!-- Cards gerados via JS -->
-            </div>
-
-            <!-- Estado Vazio -->
-            <div id="empty-catalog"
-                 class="hidden bg-white rounded-2xl p-10 text-center border border-slate-200 space-y-2">
-                <i class="fa-solid fa-basket-shopping text-4xl text-slate-300"></i>
-                <p id="empty-catalog-title" class="font-black text-slate-800 text-base">Nenhum produto encontrado</p>
-                <p id="empty-catalog-desc" class="text-sm font-medium text-slate-500">Tente outra palavra ou toque em "Todos".</p>
-            </div>
-        </section>
-
-        <!-- =================================================================
-             VIEW 2: ENDEREÇO E PONTO DE REFERÊNCIA DO CLIENTE
-             ================================================================= -->
-        <section id="view-profile" class="hidden space-y-4">
-            <div class="flex items-center justify-between gap-2">
-                <h2 class="text-xl font-black text-slate-950">Endereço e Ponto de Referência</h2>
-                <button type="button" onclick="window.app.returnToStorefront()"
-                        class="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-extrabold transition">
-                    ← Voltar à Loja
-                </button>
-            </div>
-
-            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                    <div>
-                        <p class="text-xs font-black uppercase text-emerald-800">Cadastro do Cliente</p>
-                        <h3 id="profile-name-display" class="text-lg font-black text-slate-950">Visitante</h3>
-                    </div>
-                    <button type="button" onclick="window.app.openAuthModal('register')"
-                            class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition">
-                        Editar Endereço / Referência
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                        <p class="text-xs font-extrabold text-slate-500 uppercase">E-mail</p>
-                        <p id="profile-email-display" class="font-bold text-slate-900 mt-0.5 break-all">Não informado</p>
-                    </div>
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                        <p class="text-xs font-extrabold text-slate-500 uppercase">Endereço de Entrega</p>
-                        <p id="profile-address-display" class="font-bold text-slate-900 mt-0.5">Rua, número e bairro</p>
-                    </div>
-                    <div class="sm:col-span-2 p-3.5 rounded-xl bg-amber-100/90 border-2 border-amber-400">
-                        <p class="text-xs font-black text-amber-950 uppercase">
-                            <i class="fa-solid fa-location-crosshairs mr-1"></i>
-                            Ponto de Referência / Lugar mais próximo
-                        </p>
-                        <p id="profile-landmark-display" class="font-black text-amber-950 mt-0.5">Não informado</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <h3 class="font-black text-slate-950 text-base">Meus Pedidos</h3>
-                <div id="customer-orders-list" class="space-y-3"></div>
-            </div>
-        </section>
-
-        <!-- =================================================================
-             VIEW 3: PAINEL ADMINISTRATIVO (APENAS QUANDO AUTORIZADO NO FIRESTORE)
-             ================================================================= -->
-        <section id="view-admin" class="hidden space-y-4">
-            <div class="bg-slate-950 text-white p-5 rounded-2xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-800">
-                <div>
-                    <span class="text-[11px] font-black uppercase tracking-wider text-amber-300">Administração</span>
-                    <h2 class="text-xl font-black mt-0.5">Gerenciar Produtos, Promoções e WhatsApp</h2>
-                    <p class="text-xs sm:text-sm text-slate-300 mt-0.5">
-                        Cadastre itens com foto do GitHub, promoções, oculte ou exiba produtos e configure o WhatsApp.
-                    </p>
-                </div>
-                <button type="button" onclick="window.app.returnToStorefront()"
-                        class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm transition self-start sm:self-auto shrink-0">
-                    Voltar à Vitrine
-                </button>
-            </div>
-
-            <!-- Configuração do WhatsApp da Loja -->
-            <form id="admin-settings-form"
-                  class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
-                <div class="sm:col-span-2">
-                    <label for="admin-whatsapp-input" class="block text-xs font-black uppercase text-slate-700 mb-1">
-                        WhatsApp da Loja (DDI + DDD + Número) *
-                    </label>
-                    <input type="text" id="admin-whatsapp-input" required
-                           placeholder="Ex: 5585999999999"
-                           class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-bold">
-                </div>
-                <div>
-                    <label for="admin-delivery-fee-input" class="block text-xs font-black uppercase text-slate-700 mb-1">
-                        Taxa de Entrega (R$)
-                    </label>
-                    <input type="number" step="0.01" min="0" id="admin-delivery-fee-input"
-                           placeholder="0.00"
-                           class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-bold">
-                </div>
-                <button type="submit" id="admin-settings-save-btn"
-                        class="w-full py-3 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm transition">
-                    Salvar WhatsApp
-                </button>
-            </form>
-
-            <!-- Formulário de Cadastro / Edição de Produto e Promoção -->
-            <form id="admin-product-form"
-                  class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm space-y-4">
-                <div class="flex items-center justify-between gap-2">
-                    <h3 id="admin-product-form-title" class="font-black text-slate-950 text-base">
-                        Cadastrar Novo Produto
-                    </h3>
-                    <button type="button" id="cancel-edit-product-btn"
-                            onclick="window.app.resetProductForm()"
-                            class="hidden text-xs font-extrabold text-red-700 hover:underline">
-                        Cancelar edição
-                    </button>
-                </div>
-
-                <input type="hidden" id="product-edit-id">
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div class="lg:col-span-2">
-                        <label for="product-name" class="block text-xs font-extrabold text-slate-800 mb-1">
-                            Nome do Produto *
-                        </label>
-                        <input type="text" id="product-name" required
-                               placeholder="Ex: Arroz Branco Tipo 1 5kg"
-                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
-                    </div>
-
-                    <div>
-                        <label for="product-price" class="block text-xs font-extrabold text-slate-800 mb-1">
-                            Preço Normal (R$) *
-                        </label>
-                        <input type="number" step="0.01" min="0.01" id="product-price" required
-                               placeholder="25.00"
-                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
-                    </div>
-
-                    <div>
-                        <label for="product-category" class="block text-xs font-extrabold text-slate-800 mb-1">
-                            Categoria
-                        </label>
-                        <select id="product-category"
-                                class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-bold bg-white">
-                            <option value="Mercearia">Mercearia</option>
-                            <option value="Bebidas">Bebidas</option>
-                            <option value="Limpeza">Limpeza</option>
-                            <option value="Hortifrúti">Hortifrúti</option>
-                            <option value="Padaria">Padaria</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Configuração de Promoção -->
-                <div class="p-3.5 rounded-xl bg-amber-50 border-2 border-amber-300 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-                    <label class="inline-flex items-center gap-2.5 cursor-pointer select-none py-1.5">
-                        <input type="checkbox" id="product-promo" onchange="window.app.togglePromoFields()"
-                               class="w-4 h-4 accent-amber-600 rounded">
-                        <span class="text-sm font-black text-amber-950">
-                            Produto em Promoção
-                        </span>
-                    </label>
-
-                    <div>
-                        <label for="product-promo-price" class="block text-xs font-extrabold text-amber-950 mb-1">
-                            Preço Promocional (R$)
-                        </label>
-                        <input type="number" step="0.01" min="0.01" id="product-promo-price"
-                               placeholder="Ex: 19.90"
-                               class="w-full px-3 py-2 rounded-xl border-2 border-amber-300 bg-white focus:border-amber-600 focus:outline-none text-sm font-bold">
-                    </div>
-
-                    <div>
-                        <label for="product-promo-badge" class="block text-xs font-extrabold text-amber-950 mb-1">
-                            Selo / Desconto
-                        </label>
-                        <input type="text" id="product-promo-badge"
-                               placeholder="Ex: -20%, OFERTA, LEVE MAIS"
-                               class="w-full px-3 py-2 rounded-xl border-2 border-amber-300 bg-white focus:border-amber-600 focus:outline-none text-sm font-bold">
-                    </div>
-                </div>
-
-                <!-- Link da Foto do GitHub + Unidade + Prévia -->
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-3 items-start">
-                    <div class="lg:col-span-2">
-                        <label for="product-image-url" class="block text-xs font-extrabold text-slate-800 mb-1">
-                            Link da Foto (GitHub Raw / URL) *
-                        </label>
-                        <input type="url" id="product-image-url" required
-                               oninput="window.app.updatePhotoPreview()"
-                               placeholder="https://raw.githubusercontent.com/usuario/repo/main/foto.jpg"
-                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
-                    </div>
-
-                    <div>
-                        <label for="product-unit" class="block text-xs font-extrabold text-slate-800 mb-1">
-                            Unidade / Embalagem
-                        </label>
-                        <input type="text" id="product-unit"
-                               placeholder="Ex: Pacote 5kg, 1L"
-                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
-                    </div>
-
-                    <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                        <img id="product-image-preview"
-                             src="https://placehold.co/96x96/e2e8f0/1e293b?text=Foto"
-                             onerror="this.onerror=null;this.src='https://placehold.co/96x96/e2e8f0/1e293b?text=Foto';"
-                             alt="Prévia da foto do produto"
-                             class="w-14 h-14 rounded-lg object-cover bg-white border border-slate-200 shrink-0">
-                        <span class="text-[11px] font-bold text-slate-600 leading-tight">
-                            Prévia da foto do produto
-                        </span>
-                    </div>
-                </div>
-
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                    <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
-                        <input type="checkbox" id="product-hidden" class="w-4 h-4 accent-emerald-800 rounded">
-                        <span class="text-sm font-bold text-slate-800">
-                            Ocultar produto para os clientes (sem estoque / indisponível)
-                        </span>
-                    </label>
-
-                    <button type="submit" id="admin-product-save-btn"
-                            class="px-6 py-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm transition">
-                        Salvar Produto
-                    </button>
-                </div>
-            </form>
-
-            <!-- Lista de Produtos Cadastrados -->
-            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm space-y-3">
-                <div class="flex items-center justify-between">
-                    <h3 class="font-black text-slate-950 text-base">Produtos Cadastrados</h3>
-                    <span id="admin-product-count" class="text-xs font-extrabold text-slate-600">0 itens</span>
-                </div>
-                <div id="admin-products-list" class="divide-y divide-slate-100"></div>
-            </div>
-
-            <!-- Pedidos Registrados -->
-            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-sm space-y-3">
-                <h3 class="font-black text-slate-950 text-base">Pedidos Recebidos / Enviados</h3>
-                <div id="admin-orders-list" class="space-y-3"></div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- =====================================================================
-         GAVETA LATERAL DO CARRINHO PERSISTENTE
-         ===================================================================== -->
-    <div id="cart-backdrop" onclick="window.app.toggleCart(false)"
-         class="fixed inset-0 bg-slate-950/65 z-40 hidden"></div>
-
-    <aside id="cart-drawer"
-           class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl translate-x-full drawer-panel flex flex-col justify-between">
-        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-            <h2 class="font-black text-lg text-slate-950 flex items-center gap-2">
-                <i class="fa-solid fa-cart-shopping text-emerald-800"></i>
-                <span>Meu Carrinho</span>
-            </h2>
-            <button type="button" onclick="window.app.toggleCart(false)" aria-label="Fechar carrinho"
-                    class="p-2 rounded-xl hover:bg-slate-200 text-slate-800 transition">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-        </div>
-
-        <div id="cart-items-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-
-        <div class="p-5 border-t border-slate-200 bg-slate-50 space-y-3">
-            <div class="flex justify-between text-sm font-bold text-slate-700">
-                <span>Subtotal</span>
-                <span id="cart-subtotal" class="font-black text-slate-950">R$ 0,00</span>
-            </div>
-            <div class="flex justify-between text-sm font-bold text-slate-700">
-                <span>Taxa de Entrega</span>
-                <span id="cart-delivery" class="font-black text-emerald-800">Grátis</span>
-            </div>
-            <div class="flex justify-between text-base font-black text-slate-950 pt-2 border-t border-slate-200">
-                <span>Total</span>
-                <span id="cart-total">R$ 0,00</span>
-            </div>
-            <button type="button" onclick="window.app.proceedToCheckout()"
-                    class="w-full py-3.5 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 active:scale-[0.99] text-white font-black text-sm shadow-md transition">
-                Fechar Pedido
-            </button>
-        </div>
-    </aside>
-
-    <!-- =====================================================================
-         MODAL DE CADASTRO ("CRIAR CONTA") E LOGIN ("ENTRAR")
-         ===================================================================== -->
-    <div id="auth-modal"
-         class="fixed inset-0 bg-slate-950/70 backdrop-blur-[2px] z-[80] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 id="auth-modal-title" class="text-lg font-black text-slate-950">Criar Conta para Entrega</h3>
-                    <p class="text-xs font-semibold text-slate-600 mt-0.5">
-                        Seus itens do carrinho continuam guardados sem perder nada.
-                    </p>
-                </div>
-                <button type="button" onclick="window.app.closeAuthModal()" aria-label="Fechar janela de conta"
-                        class="p-2 rounded-xl hover:bg-slate-100 text-slate-600">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl">
-                <button type="button" id="mode-register-btn" onclick="window.app.setAuthMode('register')"
-                        class="py-2 rounded-lg text-xs font-black bg-white text-emerald-800 shadow-2xs transition">
-                    Criar conta
-                </button>
-                <button type="button" id="mode-login-btn" onclick="window.app.setAuthMode('login')"
-                        class="py-2 rounded-lg text-xs font-extrabold text-slate-600 transition">
-                    Entrar
-                </button>
-            </div>
-
-            <form id="auth-form" class="space-y-3">
-                <div id="register-fields" class="space-y-3">
-                    <div>
-                        <label for="auth-name" class="block text-xs font-extrabold text-slate-800 mb-1">
-                            Nome Completo *
-                        </label>
-                        <input type="text" id="auth-name"
-                               placeholder="Ex: Maria da Silva"
-                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
-                    </div>
-
-                    <div>
-                        <label for="auth-address" class="block text-xs font-extrabold text-slate-800 mb-1">
-                            Endereço Completo de Entrega *
-                        </label>
-                        <input type="text" id="auth-address"
-                               placeholder="Ex: Rua das Flores, 120 - Centro"
-                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
-                    </div>
-
-                    <div class="p-3 rounded-xl bg-amber-100/80 border-2 border-amber-400">
-                        <label for="auth-reference-point" class="block text-xs font-black text-amber-950 mb-1">
-                            <i class="fa-solid fa-location-crosshairs mr-1 text-amber-800"></i>
-                            Ponto de referência / lugar mais próximo *
-                        </label>
-                        <input type="text" id="auth-reference-point"
-                               placeholder="Ex: Em frente à padaria, perto da praça"
-                               class="w-full px-3.5 py-2.5 rounded-xl border-2 border-amber-400 bg-white focus:border-amber-700 focus:outline-none text-sm font-bold">
-                    </div>
-                </div>
-
-                <div>
-                    <label for="auth-email" class="block text-xs font-extrabold text-slate-800 mb-1">
-                        E-mail *
-                    </label>
-                    <input type="email" id="auth-email" required
-                           placeholder="cliente@exemplo.com"
-                           class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
-                </div>
-
-                <div>
-                    <label for="auth-password" class="block text-xs font-extrabold text-slate-800 mb-1">
-                        Senha (mínimo 6 caracteres) *
-                    </label>
-                    <input type="password" id="auth-password" required minlength="6"
-                           placeholder="••••••••"
-                           class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-emerald-700 focus:outline-none text-sm font-semibold">
-                </div>
-
-                <button type="submit" id="auth-submit-btn"
-                        class="w-full py-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm transition">
-                    Salvar e Continuar
-                </button>
-            </form>
-        </div>
+  <!-- Modal do Carrinho -->
+  <div class="modal-backdrop" id="cartModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Seu Carrinho</h2>
+        <button class="close-x" id="closeCartModalBtn" type="button">✕</button>
+      </div>
+      <div id="cartItemsList"></div>
+      <div class="total-line">
+        <span>Total</span>
+        <span id="cartTotalText">R$ 0,00</span>
+      </div>
+      <div id="checkoutCustomerBox" class="user-box" style="display: none;"></div>
+      <button type="button" class="btn-whatsapp" id="finishOrderBtn">
+        Enviar pedido no WhatsApp
+      </button>
     </div>
+  </div>
 
-    <!-- =====================================================================
-         MODAL DE CONFIRMAÇÃO FINAL DO PEDIDO PARA WHATSAPP
-         ===================================================================== -->
-    <div id="checkout-modal"
-         class="fixed inset-0 bg-slate-950/70 backdrop-blur-[2px] z-[90] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-black text-slate-950">Enviar Pedido no WhatsApp</h3>
-                <button type="button" onclick="window.app.closeCheckoutModal()" aria-label="Fechar confirmação"
-                        class="p-2 rounded-xl hover:bg-slate-100 text-slate-600">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
+  <!-- Modal de Cadastro e Login -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Sua Conta</h2>
+        <button class="close-x" id="closeAuthModalBtn" type="button">✕</button>
+      </div>
 
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-1.5">
-                <p><strong class="text-slate-950">Cliente:</strong> <span id="checkout-client-name" class="font-bold"></span></p>
-                <p><strong class="text-slate-950">E-mail:</strong> <span id="checkout-client-email" class="font-bold"></span></p>
-                <p><strong class="text-slate-950">Endereço:</strong> <span id="checkout-client-address" class="font-bold"></span></p>
-                <p class="text-amber-950 font-extrabold bg-amber-100 px-2.5 py-1.5 rounded-lg border border-amber-300">
-                    <strong>Ponto de referência / lugar mais próximo:</strong> <span id="checkout-client-landmark"></span>
-                </p>
-                <p class="pt-1 text-sm"><strong class="text-slate-950">Total:</strong> <span id="checkout-total-label" class="font-black text-emerald-800"></span></p>
-            </div>
+      <div class="auth-switch">
+        <button type="button" id="switchRegisterBtn" class="active">Cadastrar</button>
+        <button type="button" id="switchLoginBtn">Entrar</button>
+      </div>
 
-            <div>
-                <label for="checkout-payment" class="block text-xs font-extrabold text-slate-800 mb-1">
-                    Forma de Pagamento
-                </label>
-                <select id="checkout-payment"
-                        class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 text-sm font-bold bg-white focus:border-emerald-700 focus:outline-none">
-                    <option value="Pix">Pix</option>
-                    <option value="Dinheiro">Dinheiro</option>
-                    <option value="Cartão na entrega">Cartão na entrega</option>
-                </select>
-            </div>
+      <div id="authInlineMsg" class="inline-msg"></div>
 
-            <div>
-                <label for="checkout-note" class="block text-xs font-extrabold text-slate-800 mb-1">
-                    Observação / Troco (opcional)
-                </label>
-                <input type="text" id="checkout-note"
-                       placeholder="Ex: Troco para R$ 50,00"
-                       class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 text-sm font-semibold focus:border-emerald-700 focus:outline-none">
-            </div>
-
-            <button type="button" onclick="window.app.confirmAndSendWhatsApp()"
-                    class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md transition">
-                <i class="fa-brands fa-whatsapp text-xl"></i>
-                <span>Enviar para o WhatsApp</span>
-            </button>
+      <!-- Formulário de Cadastro -->
+      <form id="registerForm" class="form-grid">
+        <div class="field">
+          <label for="regName">Nome completo *</label>
+          <input type="text" id="regName" required placeholder="Seu nome completo" />
         </div>
+        <div class="field">
+          <label for="regEmail">E-mail *</label>
+          <input type="email" id="regEmail" required placeholder="seuemail@exemplo.com" />
+        </div>
+        <div class="field">
+          <label for="regPassword">Senha (mínimo 6 caracteres) *</label>
+          <input type="password" id="regPassword" minlength="6" required placeholder="Crie uma senha" />
+        </div>
+        <div class="field">
+          <label for="regAddress">Endereço de entrega (Rua, número, bairro) *</label>
+          <input type="text" id="regAddress" required placeholder="Ex.: Rua das Flores, 120 - Centro" />
+        </div>
+        <div class="field">
+          <label for="regLandmark">Ponto de referência / lugar mais próximo *</label>
+          <input type="text" id="regLandmark" required placeholder="Ex.: Próximo à padaria da esquina ou igreja" />
+        </div>
+        <button type="submit" class="btn-primary" id="registerSubmitBtn">Salvar cadastro</button>
+      </form>
+
+      <!-- Formulário de Login -->
+      <form id="loginForm" class="form-grid" style="display: none;">
+        <div class="field">
+          <label for="loginEmail">E-mail *</label>
+          <input type="email" id="loginEmail" required placeholder="seuemail@exemplo.com" />
+        </div>
+        <div class="field">
+          <label for="loginPassword">Senha *</label>
+          <input type="password" id="loginPassword" required placeholder="Sua senha" />
+        </div>
+        <button type="submit" class="btn-primary" id="loginSubmitBtn">Entrar na conta</button>
+      </form>
     </div>
+  </div>
 
-    <!-- =====================================================================
-         LÓGICA COMPLETA: FIREBASE AUTH + FIRESTORE + CANVAS + CARRINHO + LOJA
-         ===================================================================== -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-        import {
-            getAuth,
-            onAuthStateChanged,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signOut
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import {
-            getFirestore,
-            collection,
-            doc,
-            getDoc,
-            setDoc,
-            addDoc,
-            updateDoc,
-            deleteDoc,
-            onSnapshot,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      updateDoc,
+      deleteDoc,
+      getDoc,
+      onSnapshot,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-        // Configuração oficial do Firebase para o projeto 'mercadinho-oline'
-        const firebaseConfig = {
-            apiKey: "AIzaSyBcLkzbgLJKJkm7nnYqg6UT0XHYRTqGgQA",
-            authDomain: "mercadinho-oline.firebaseapp.com",
-            projectId: "mercadinho-oline",
-            storageBucket: "mercadinho-oline.firebasestorage.app",
-            messagingSenderId: "521985833583",
-            appId: "1:521985833583:web:d51535344b2b173fb66b9a",
-            measurementId: "G-83JPHJG1QT"
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcLkzbgLJKJkm7nnYqg6UT0XHYRTqGgQA",
+      authDomain: "mercadinho-oline.firebaseapp.com",
+      projectId: "mercadinho-oline",
+      storageBucket: "mercadinho-oline.firebasestorage.app",
+      messagingSenderId: "521985833583",
+      appId: "1:521985833583:web:d51535344b2b173fb66b9a",
+      measurementId: "G-83JPHJG1QT"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const STORAGE_CART_KEY = "mmo_cart_v1";
+    const STORAGE_PRODUCTS_KEY = "mmo_products_cache_v1";
+    const STORAGE_STORE_KEY = "mmo_store_cache_v1";
+    const STORAGE_USER_PROFILE_KEY = "mmo_user_profile_v1";
+
+    const DEFAULT_PRODUCTS = [
+      {
+        id: "demo-1",
+        name: "Arroz Parboilizado 5kg",
+        category: "Mercearia",
+        price: 26.50,
+        promoPrice: 22.90,
+        isPromo: true,
+        hidden: false,
+        photo: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=75"
+      },
+      {
+        id: "demo-2",
+        name: "Refrigerante Cola 2L",
+        category: "Bebidas",
+        price: 9.50,
+        promoPrice: null,
+        isPromo: false,
+        hidden: false,
+        photo: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=600&auto=format&fit=crop&q=75"
+      },
+      {
+        id: "demo-3",
+        name: "Detergente Líquido 500ml",
+        category: "Limpeza",
+        price: 2.80,
+        promoPrice: 2.20,
+        isPromo: true,
+        hidden: false,
+        photo: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=600&auto=format&fit=crop&q=75"
+      },
+      {
+        id: "demo-4",
+        name: "Banana Prata (kg)",
+        category: "Hortifruti",
+        price: 6.40,
+        promoPrice: null,
+        isPromo: false,
+        hidden: false,
+        photo: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=600&auto=format&fit=crop&q=75"
+      }
+    ];
+
+    let state = {
+      products: loadJSON(STORAGE_PRODUCTS_KEY, DEFAULT_PRODUCTS),
+      cart: loadJSON(STORAGE_CART_KEY, []),
+      store: loadJSON(STORAGE_STORE_KEY, { whatsapp: "5585999999999" }),
+      user: null,
+      profile: loadJSON(STORAGE_USER_PROFILE_KEY, null),
+      isAdmin: false,
+      filter: "all",
+      search: "",
+      pendingCheckoutAfterAuth: false
+    };
+
+    function loadJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJSON(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch {}
+    }
+
+    function formatBRL(val) {
+      return Number(val || 0).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
+    }
+
+    function getEffectivePrice(prod) {
+      if (prod.isPromo && prod.promoPrice && Number(prod.promoPrice) > 0 && Number(prod.promoPrice) < Number(prod.price)) {
+        return Number(prod.promoPrice);
+      }
+      return Number(prod.price || 0);
+    }
+
+    function withTimeout(promise, ms = 8000) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Tempo limite excedido.")), ms))
+      ]);
+    }
+
+    // Banner animado em HTML5 Canvas
+    const canvas = document.getElementById("promoCanvas");
+    const ctx = canvas.getContext("2d");
+    let animAngle = 0;
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.floor(rect.width));
+      canvas.height = Math.max(1, Math.floor(rect.height));
+    }
+
+    function drawBanner() {
+      resizeCanvas();
+      animAngle += 0.015;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, "#0f766e");
+      grad.addColorStop(0.55, "#115e59");
+      grad.addColorStop(1, "#ea580c");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.save();
+      ctx.globalAlpha = 0.22;
+      for (let i = 0; i < 6; i++) {
+        const cx = ((i * 150 + Math.sin(animAngle + i) * 28) % (w + 80));
+        const cy = 22 + ((i * 29 + Math.cos(animAngle + i * 0.7) * 14) % Math.max(30, h - 20));
+        const r = 18 + (i % 3) * 10;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#fed7aa";
+        ctx.fill();
+      }
+      ctx.restore();
+
+      requestAnimationFrame(drawBanner);
+    }
+    requestAnimationFrame(drawBanner);
+
+    // Avisos na tela
+    const globalNotice = document.getElementById("globalNotice");
+    const globalNoticeText = document.getElementById("globalNoticeText");
+    document.getElementById("closeNoticeBtn").addEventListener("click", () => {
+      globalNotice.classList.remove("show");
+    });
+
+    function showNotice(message, type = "info") {
+      globalNotice.className = `notice-bar show notice-${type}`;
+      globalNoticeText.textContent = message;
+    }
+
+    // Menu gaveta
+    const drawer = document.getElementById("drawer");
+    const drawerBackdrop = document.getElementById("drawerBackdrop");
+
+    function openDrawer() {
+      drawer.classList.add("open");
+      drawerBackdrop.classList.add("open");
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove("open");
+      drawerBackdrop.classList.remove("open");
+    }
+
+    document.getElementById("openDrawerBtn").addEventListener("click", openDrawer);
+    document.getElementById("closeDrawerBtn").addEventListener("click", closeDrawer);
+    drawerBackdrop.addEventListener("click", closeDrawer);
+
+    document.getElementById("drawerHomeBtn").addEventListener("click", () => {
+      state.filter = "all";
+      updateFilterChips();
+      renderProducts();
+      closeDrawer();
+    });
+
+    document.getElementById("drawerPromoBtn").addEventListener("click", () => {
+      state.filter = "promo";
+      updateFilterChips();
+      renderProducts();
+      closeDrawer();
+    });
+
+    document.getElementById("drawerCartBtn").addEventListener("click", () => {
+      closeDrawer();
+      openCartModal();
+    });
+
+    document.getElementById("drawerAuthBtn").addEventListener("click", () => {
+      closeDrawer();
+      openAuthModal("register");
+    });
+
+    document.getElementById("drawerAdminBtn").addEventListener("click", () => {
+      closeDrawer();
+      if (state.isAdmin) {
+        document.getElementById("adminPanel").classList.add("active");
+        document.getElementById("adminPanel").scrollIntoView({ behavior: "smooth" });
+      }
+    });
+
+    document.getElementById("drawerLogoutBtn").addEventListener("click", async () => {
+      closeDrawer();
+      try {
+        await signOut(auth);
+      } catch {}
+      state.user = null;
+      state.profile = null;
+      state.isAdmin = false;
+      saveJSON(STORAGE_USER_PROFILE_KEY, null);
+      document.getElementById("adminPanel").classList.remove("active");
+      updateUserUI();
+      renderProducts();
+      showNotice("Você saiu da conta.", "info");
+    });
+
+    function updateUserUI() {
+      const box = document.getElementById("drawerUserBox");
+      const adminBtn = document.getElementById("drawerAdminBtn");
+      const logoutBtn = document.getElementById("drawerLogoutBtn");
+      const authBtn = document.getElementById("drawerAuthBtn");
+
+      if (state.user) {
+        const nome = (state.profile && state.profile.name) || state.user.email || "Cliente";
+        const end = (state.profile && state.profile.address) ? `<br>📍 ${state.profile.address}` : "";
+        const ref = (state.profile && state.profile.landmark) ? `<br>🧭 Ref.: ${state.profile.landmark}` : "";
+        box.innerHTML = `<strong>${escapeHTML(nome)}</strong><br>${escapeHTML(state.user.email || "")}${end}${ref}`;
+        authBtn.textContent = "✏️ Atualizar Cadastro";
+        logoutBtn.style.display = "block";
+        adminBtn.style.display = state.isAdmin ? "block" : "none";
+        if (!state.isAdmin) {
+          document.getElementById("adminPanel").classList.remove("active");
+        }
+      } else {
+        box.innerHTML = "Visitante — adicione itens ao carrinho e cadastre-se na hora de fechar o pedido.";
+        authBtn.textContent = "👤 Entrar ou Cadastrar";
+        logoutBtn.style.display = "none";
+        adminBtn.style.display = "none";
+        document.getElementById("adminPanel").classList.remove("active");
+      }
+    }
+
+    function escapeHTML(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // Filtros e busca
+    function updateFilterChips() {
+      document.querySelectorAll("#categoryRow .chip").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.filter === state.filter);
+      });
+    }
+
+    document.querySelectorAll("#categoryRow .chip").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.filter = btn.dataset.filter;
+        updateFilterChips();
+        renderProducts();
+      });
+    });
+
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      state.search = e.target.value.trim().toLowerCase();
+      renderProducts();
+    });
+
+    // Renderização da vitrine (sempre 2 colunas)
+    const productsGrid = document.getElementById("productsGrid");
+
+    function renderProducts() {
+      const list = state.products.filter((prod) => {
+        if (!state.isAdmin && prod.hidden) return false;
+        if (state.filter === "promo" && !prod.isPromo) return false;
+        if (state.filter !== "all" && state.filter !== "promo" && prod.category !== state.filter) return false;
+        if (state.search) {
+          const hay = `${prod.name || ""} ${prod.category || ""}`.toLowerCase();
+          if (!hay.includes(state.search)) return false;
+        }
+        return true;
+      });
+
+      if (!list.length) {
+        productsGrid.innerHTML = `<div class="empty-state">Nenhum produto encontrado nesta seção.</div>`;
+        return;
+      }
+
+      productsGrid.innerHTML = list.map((prod) => {
+        const hasPromo = Boolean(prod.isPromo && prod.promoPrice && Number(prod.promoPrice) > 0 && Number(prod.promoPrice) < Number(prod.price));
+        const finalPrice = getEffectivePrice(prod);
+        const fallbackImg = "https://via.placeholder.com/400x300?text=Produto";
+
+        const adminActions = state.isAdmin ? `
+          <div class="admin-mini-actions">
+            <button type="button" class="mini-btn" onclick="window.__editProd('${prod.id}')">Editar</button>
+            <button type="button" class="mini-btn" onclick="window.__toggleHideProd('${prod.id}')">${prod.hidden ? "Mostrar" : "Ocultar"}</button>
+            <button type="button" class="mini-btn del" onclick="window.__deleteProd('${prod.id}')">Excluir</button>
+          </div>
+        ` : "";
+
+        return `
+          <article class="product-card">
+            ${hasPromo ? `<span class="promo-tag">Promoção</span>` : ""}
+            ${state.isAdmin && prod.hidden ? `<span class="hidden-tag">Oculto</span>` : ""}
+            <div class="product-img-wrap">
+              <img src="${escapeHTML(prod.photo || fallbackImg)}" alt="${escapeHTML(prod.name)}" onerror="this.src='${fallbackImg}'" />
+            </div>
+            <div class="product-body">
+              <span class="product-cat">${escapeHTML(prod.category || "Geral")}</span>
+              <h3 class="product-name">${escapeHTML(prod.name)}</h3>
+              <div class="price-box">
+                ${hasPromo ? `<span class="price-old">${formatBRL(prod.price)}</span>` : ""}
+                <span class="price-now ${hasPromo ? "price-promo" : ""}">${formatBRL(finalPrice)}</span>
+              </div>
+              <button type="button" class="add-btn" onclick="window.__addToCart('${prod.id}')">+ Adicionar</button>
+              ${adminActions}
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    // Carrinho
+    function updateCartBadge() {
+      const totalQty = state.cart.reduce((acc, item) => acc + item.qty, 0);
+      document.getElementById("cartCount").textContent = totalQty;
+    }
+
+    window.__addToCart = function (productId) {
+      const prod = state.products.find((p) => p.id === productId);
+      if (!prod) return;
+      const existing = state.cart.find((item) => item.id === productId);
+      if (existing) {
+        existing.qty += 1;
+        existing.price = getEffectivePrice(prod);
+        existing.name = prod.name;
+      } else {
+        state.cart.push({
+          id: prod.id,
+          name: prod.name,
+          price: getEffectivePrice(prod),
+          qty: 1
+        });
+      }
+      saveJSON(STORAGE_CART_KEY, state.cart);
+      updateCartBadge();
+      showNotice(`"${prod.name}" adicionado ao carrinho.`, "success");
+    };
+
+    window.__changeQty = function (productId, delta) {
+      const idx = state.cart.findIndex((i) => i.id === productId);
+      if (idx === -1) return;
+      state.cart[idx].qty += delta;
+      if (state.cart[idx].qty <= 0) {
+        state.cart.splice(idx, 1);
+      }
+      saveJSON(STORAGE_CART_KEY, state.cart);
+      updateCartBadge();
+      renderCartModal();
+    };
+
+    const cartModal = document.getElementById("cartModal");
+
+    function openCartModal() {
+      renderCartModal();
+      cartModal.classList.add("open");
+    }
+
+    function closeCartModal() {
+      cartModal.classList.remove("open");
+    }
+
+    document.getElementById("openCartBtn").addEventListener("click", openCartModal);
+    document.getElementById("closeCartModalBtn").addEventListener("click", closeCartModal);
+    cartModal.addEventListener("click", (e) => {
+      if (e.target === cartModal) closeCartModal();
+    });
+
+    function renderCartModal() {
+      const listEl = document.getElementById("cartItemsList");
+      const totalEl = document.getElementById("cartTotalText");
+      const custBox = document.getElementById("checkoutCustomerBox");
+
+      if (!state.cart.length) {
+        listEl.innerHTML = `<p style="padding:14px 0; color:var(--muted); text-align:center;">Seu carrinho está vazio.</p>`;
+        totalEl.textContent = formatBRL(0);
+        custBox.style.display = "none";
+        return;
+      }
+
+      let total = 0;
+      listEl.innerHTML = state.cart.map((item) => {
+        const sub = Number(item.price) * Number(item.qty);
+        total += sub;
+        return `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <div class="cart-item-name">${escapeHTML(item.name)}</div>
+              <div class="cart-item-sub">${formatBRL(item.price)} cada • Subtotal: ${formatBRL(sub)}</div>
+            </div>
+            <div class="qty-controls">
+              <button type="button" class="qty-btn" onclick="window.__changeQty('${item.id}', -1)">-</button>
+              <strong>${item.qty}</strong>
+              <button type="button" class="qty-btn" onclick="window.__changeQty('${item.id}', 1)">+</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      totalEl.textContent = formatBRL(total);
+
+      if (state.user && state.profile) {
+        custBox.style.display = "block";
+        custBox.innerHTML = `
+          <strong>Entrega para:</strong> ${escapeHTML(state.profile.name || state.user.email)}<br>
+          <strong>Endereço:</strong> ${escapeHTML(state.profile.address || "")}<br>
+          <strong>Ponto de referência:</strong> ${escapeHTML(state.profile.landmark || "")}
+        `;
+      } else {
+        custBox.style.display = "block";
+        custBox.innerHTML = `Para fechar o pedido sem perder seus itens, faça seu cadastro ou entre na sua conta.`;
+      }
+    }
+
+    document.getElementById("finishOrderBtn").addEventListener("click", () => {
+      if (!state.cart.length) {
+        showNotice("Adicione ao menos um item ao carrinho antes de fechar o pedido.", "error");
+        return;
+      }
+
+      const hasAddress = state.profile && state.profile.address && state.profile.landmark;
+      if (!state.user || !hasAddress) {
+        state.pendingCheckoutAfterAuth = true;
+        closeCartModal();
+        openAuthModal("register");
+        setAuthMsg("Preencha seu cadastro com endereço e ponto de referência para fechar o pedido. Seu carrinho está salvo!", "ok");
+        return;
+      }
+
+      sendOrderToWhatsApp();
+    });
+
+    function sendOrderToWhatsApp() {
+      const phone = String((state.store && state.store.whatsapp) || "5585999999999").replace(/\D/g, "");
+      let total = 0;
+      const lines = state.cart.map((item) => {
+        const sub = Number(item.price) * Number(item.qty);
+        total += sub;
+        return `- ${item.qty}x ${item.name} (${formatBRL(sub)})`;
+      });
+
+      const msg = [
+        "*NOVO PEDIDO - MEU MERCADINHO ONLINE*",
+        "",
+        "*Itens:*",
+        ...lines,
+        "",
+        `*Total:* ${formatBRL(total)}`,
+        "",
+        "*Dados para entrega:*",
+        `Cliente: ${state.profile.name || state.user.email}`,
+        `E-mail: ${state.user.email || ""}`,
+        `Endereço: ${state.profile.address}`,
+        `Ponto de referência: ${state.profile.landmark}`
+      ].join("\n");
+
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+      closeCartModal();
+      showNotice("Pedido preparado para o WhatsApp! Dentro de poucos minutos chega na sua casa.", "success");
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    // Modal de Cadastro e Login
+    const authModal = document.getElementById("authModal");
+    const registerForm = document.getElementById("registerForm");
+    const loginForm = document.getElementById("loginForm");
+    const switchRegisterBtn = document.getElementById("switchRegisterBtn");
+    const switchLoginBtn = document.getElementById("switchLoginBtn");
+    const authInlineMsg = document.getElementById("authInlineMsg");
+
+    function setAuthMsg(text, kind = "ok") {
+      authInlineMsg.textContent = text;
+      authInlineMsg.className = `inline-msg show ${kind}`;
+    }
+
+    function clearAuthMsg() {
+      authInlineMsg.textContent = "";
+      authInlineMsg.className = "inline-msg";
+    }
+
+    function openAuthModal(mode = "register") {
+      clearAuthMsg();
+      if (state.profile) {
+        document.getElementById("regName").value = state.profile.name || "";
+        document.getElementById("regAddress").value = state.profile.address || "";
+        document.getElementById("regLandmark").value = state.profile.landmark || "";
+      }
+      if (state.user && state.user.email) {
+        document.getElementById("regEmail").value = state.user.email;
+        document.getElementById("loginEmail").value = state.user.email;
+      }
+      switchAuthMode(mode);
+      authModal.classList.add("open");
+    }
+
+    function closeAuthModal() {
+      authModal.classList.remove("open");
+    }
+
+    function switchAuthMode(mode) {
+      const isReg = mode === "register";
+      switchRegisterBtn.classList.toggle("active", isReg);
+      switchLoginBtn.classList.toggle("active", !isReg);
+      registerForm.style.display = isReg ? "grid" : "none";
+      loginForm.style.display = isReg ? "none" : "grid";
+      clearAuthMsg();
+    }
+
+    switchRegisterBtn.addEventListener("click", () => switchAuthMode("register"));
+    switchLoginBtn.addEventListener("click", () => switchAuthMode("login"));
+    document.getElementById("closeAuthModalBtn").addEventListener("click", () => {
+      state.pendingCheckoutAfterAuth = false;
+      closeAuthModal();
+    });
+    authModal.addEventListener("click", (e) => {
+      if (e.target === authModal) {
+        state.pendingCheckoutAfterAuth = false;
+        closeAuthModal();
+      }
+    });
+
+    async function saveCustomerProfileToFirestore(uid, data) {
+      const userRef = doc(db, "users", uid);
+      try {
+        await withTimeout(setDoc(userRef, data, { merge: true }), 7000);
+        return { ok: true, error: null };
+      } catch (err) {
+        return { ok: false, error: err && err.message ? err.message : String(err) };
+      }
+    }
+
+    // Cadastro: Aguarde... -> Salvo! -> fecha modal e volta à tela principal
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("registerSubmitBtn");
+      const name = document.getElementById("regName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value;
+      const address = document.getElementById("regAddress").value.trim();
+      const landmark = document.getElementById("regLandmark").value.trim();
+
+      if (!name || !email || !password || !address || !landmark) {
+        setAuthMsg("Preencha todos os campos, incluindo endereço e ponto de referência.", "err");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Aguarde...";
+      clearAuthMsg();
+
+      try {
+        let uid = state.user ? state.user.uid : null;
+        if (!uid) {
+          const cred = await withTimeout(createUserWithEmailAndPassword(auth, email, password), 9000);
+          uid = cred.user.uid;
+          state.user = cred.user;
+        }
+
+        const profileData = {
+          name,
+          email: email.toLowerCase(),
+          address,
+          landmark,
+          updatedAt: serverTimestamp()
         };
 
-        let app = null;
-        let auth = null;
-        let db = null;
-        let firebaseReady = false;
-
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            try { getAnalytics(app); } catch (_) { /* Analytics opcional */ }
-            firebaseReady = true;
-        } catch (_) {
-            firebaseReady = false;
-        }
-
-        const CATEGORIES = ["Todos", "Promoções", "Mercearia", "Bebidas", "Limpeza", "Hortifrúti", "Padaria", "Outros"];
-        const STORAGE_KEYS = {
-            cart: "meu_mercadinho_cart_v1",
-            products: "meu_mercadinho_products_v1",
-            settings: "meu_mercadinho_settings_v1",
-            profile: "meu_mercadinho_profile_v1",
-            orders: "meu_mercadinho_orders_v1"
-        };
-
-        // Produtos padrão de demonstração caso a coleção 'products' esteja vazia ou inacessível
-        const DEFAULT_PRODUCTS = [
-            {
-                id: "demo-arroz-5kg",
-                name: "Arroz Branco Tipo 1 5kg",
-                price: 25.00,
-                promo: true,
-                promoPrice: 21.90,
-                promoBadge: "-12%",
-                category: "Mercearia",
-                unit: "Pacote 5kg",
-                imageUrl: "https://placehold.co/400x300/ecfdf5/065f46?text=Arroz+5kg",
-                hidden: false
-            },
-            {
-                id: "demo-feijao-1kg",
-                name: "Feijão Carioca 1kg",
-                price: 8.50,
-                promo: false,
-                promoPrice: null,
-                promoBadge: "",
-                category: "Mercearia",
-                unit: "Pacote 1kg",
-                imageUrl: "https://placehold.co/400x300/fef3c7/78350f?text=Feijao+1kg",
-                hidden: false
-            },
-            {
-                id: "demo-refri-2l",
-                name: "Refrigerante Cola 2L",
-                price: 9.50,
-                promo: true,
-                promoPrice: 7.90,
-                promoBadge: "PROMO",
-                category: "Bebidas",
-                unit: "Garrafa 2L",
-                imageUrl: "https://placehold.co/400x300/fee2e2/7f1d1d?text=Refri+2L",
-                hidden: false
-            },
-            {
-                id: "demo-detergente",
-                name: "Detergente Líquido 500ml",
-                price: 2.80,
-                promo: false,
-                promoPrice: null,
-                promoBadge: "",
-                category: "Limpeza",
-                unit: "Frasco 500ml",
-                imageUrl: "https://placehold.co/400x300/e0f2fe/0c4a6e?text=Detergente",
-                hidden: false
-            }
-        ];
-
-        function loadJson(key, fallback) {
-            try {
-                const raw = localStorage.getItem(key);
-                return raw ? JSON.parse(raw) : fallback;
-            } catch (_) {
-                return fallback;
-            }
-        }
-
-        function saveJson(key, value) {
-            try {
-                localStorage.setItem(key, JSON.stringify(value));
-            } catch (_) { /* Ignora bloqueio de armazenamento local */ }
-        }
-
-        const state = {
-            products: loadJson(STORAGE_KEYS.products, DEFAULT_PRODUCTS),
-            cart: loadJson(STORAGE_KEYS.cart, []),
-            orders: loadJson(STORAGE_KEYS.orders, []),
-            selectedCategory: "Todos",
-            searchTerm: "",
-            currentUser: null,
-            userProfile: loadJson(STORAGE_KEYS.profile, null),
-            isAdmin: false,
-            authMode: "register",
-            pendingCheckout: false,
-            settings: loadJson(STORAGE_KEYS.settings, {
-                whatsapp: "5585999999999",
-                deliveryFee: 0
-            })
-        };
-
-        if (!Array.isArray(state.products) || state.products.length === 0) {
-            state.products = [...DEFAULT_PRODUCTS];
-            saveJson(STORAGE_KEYS.products, state.products);
-        }
-
-        function formatBRL(value) {
-            return Number(value || 0).toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL"
-            });
-        }
-
-        function waitMs(ms) {
-            return new Promise((resolve) => setTimeout(resolve, ms));
-        }
-
-        // Aviso na tela sem bloquear navegação (substitui alert())
-        let toastTimer = null;
-        function showToast(message, isError = false) {
-            const banner = document.getElementById("toast-banner");
-            const textEl = document.getElementById("toast-text");
-            const iconEl = document.getElementById("toast-icon");
-
-            textEl.textContent = message;
-            iconEl.className = isError
-                ? "fa-solid fa-circle-exclamation text-red-400 text-xl shrink-0"
-                : "fa-solid fa-circle-check text-emerald-400 text-xl shrink-0";
-
-            banner.classList.remove("hidden");
-            banner.classList.add("flex");
-
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => hideToast(), 4500);
-        }
-
-        function hideToast() {
-            const banner = document.getElementById("toast-banner");
-            banner.classList.add("hidden");
-            banner.classList.remove("flex");
-        }
-
-        function hideOrderSentBanner() {
-            const banner = document.getElementById("order-sent-banner");
-            banner.classList.add("hidden");
-            banner.classList.remove("flex");
-        }
-
-        function closeOrderSuccessModal() {
-            const modal = document.getElementById("order-success-modal");
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-        }
-
-        // Confirmação customizada na tela (substitui confirm())
-        function askConfirm(title, message) {
-            return new Promise((resolve) => {
-                const modal = document.getElementById("confirm-modal");
-                document.getElementById("confirm-title").textContent = title;
-                document.getElementById("confirm-message").textContent = message;
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-
-                const okBtn = document.getElementById("confirm-ok-btn");
-                const cancelBtn = document.getElementById("confirm-cancel-btn");
-
-                const finish = (result) => {
-                    modal.classList.add("hidden");
-                    modal.classList.remove("flex");
-                    okBtn.replaceWith(okBtn.cloneNode(true));
-                    cancelBtn.replaceWith(cancelBtn.cloneNode(true));
-                    resolve(result);
-                };
-
-                document.getElementById("confirm-ok-btn").addEventListener("click", () => finish(true));
-                document.getElementById("confirm-cancel-btn").addEventListener("click", () => finish(false));
-            });
-        }
-
-        // Banner animado em HTML5 <canvas> no topo da vitrine
-        function initCanvasBanner() {
-            const canvas = document.getElementById("promo-canvas");
-            if (!canvas) return;
-            const ctx = canvas.getContext("2d");
-            let tick = 0;
-
-            function resize() {
-                const parent = canvas.parentElement;
-                if (!parent) return;
-                const rect = parent.getBoundingClientRect();
-                const dpr = window.devicePixelRatio || 1;
-                canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-                canvas.height = Math.max(1, Math.floor(rect.height * dpr));
-                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            }
-
-            function renderFrame() {
-                const parent = canvas.parentElement;
-                if (!parent) return;
-                const w = parent.getBoundingClientRect().width;
-                const h = parent.getBoundingClientRect().height;
-
-                ctx.clearRect(0, 0, w, h);
-
-                const bgGrad = ctx.createLinearGradient(0, 0, w, h);
-                bgGrad.addColorStop(0, "#064e3b");
-                bgGrad.addColorStop(0.6, "#047857");
-                bgGrad.addColorStop(1, "#059669");
-                ctx.fillStyle = bgGrad;
-                ctx.fillRect(0, 0, w, h);
-
-                ctx.fillStyle = "rgba(251, 191, 36, 0.16)";
-                ctx.beginPath();
-                ctx.moveTo(0, h);
-                for (let x = 0; x <= w; x += 14) {
-                    const y = h - 14 + Math.sin(x * 0.022 + tick * 0.03) * 5;
-                    ctx.lineTo(x, y);
-                }
-                ctx.lineTo(w, h);
-                ctx.closePath();
-                ctx.fill();
-
-                const pulse = Math.sin(tick * 0.045) * 4;
-                ctx.fillStyle = "rgba(251, 191, 36, 0.24)";
-                ctx.beginPath();
-                ctx.arc(Math.max(40, w - 36), h * 0.5, 22 + pulse, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "900 18px Inter, sans-serif";
-                ctx.textBaseline = "middle";
-                ctx.fillText("Meu Mercadinho Online", 18, h * 0.36);
-
-                ctx.fillStyle = "#fde68a";
-                ctx.font = "700 12px Inter, sans-serif";
-                ctx.fillText("Promoções do dia • Entrega rápida • Peça pelo WhatsApp", 18, h * 0.67);
-
-                tick++;
-                requestAnimationFrame(renderFrame);
-            }
-
-            resize();
-            window.addEventListener("resize", resize);
-            requestAnimationFrame(renderFrame);
-        }
-
-        // Fecha modais e gavetas para voltar à navegação normal da vitrine
-        function clearAllOverlays() {
-            document.getElementById("auth-modal").classList.add("hidden");
-            document.getElementById("auth-modal").classList.remove("flex");
-            document.getElementById("checkout-modal").classList.add("hidden");
-            document.getElementById("checkout-modal").classList.remove("flex");
-            document.getElementById("confirm-modal").classList.add("hidden");
-            document.getElementById("confirm-modal").classList.remove("flex");
-            document.getElementById("drawer-backdrop").classList.add("hidden");
-            document.getElementById("side-drawer").classList.add("-translate-x-full");
-            document.getElementById("cart-backdrop").classList.add("hidden");
-            document.getElementById("cart-drawer").classList.add("translate-x-full");
-        }
-
-        function showView(viewName) {
-            if (viewName === "admin" && !(state.currentUser && state.isAdmin)) {
-                viewName = "store";
-            }
-
-            document.getElementById("view-store").classList.toggle("hidden", viewName !== "store");
-            document.getElementById("view-profile").classList.toggle("hidden", viewName !== "profile");
-            document.getElementById("view-admin").classList.toggle("hidden", viewName !== "admin");
-
-            if (viewName === "profile") {
-                renderProfileAndOrders();
-            } else if (viewName === "admin") {
-                syncAdminInputs();
-                renderAdminProducts();
-                renderAdminOrders();
-            }
-        }
-
-        function returnToStorefront() {
-            clearAllOverlays();
-            showView("store");
-        }
-
-        function toggleDrawer(open) {
-            document.getElementById("drawer-backdrop").classList.toggle("hidden", !open);
-            document.getElementById("side-drawer").classList.toggle("-translate-x-full", !open);
-        }
-
-        function toggleCart(open) {
-            document.getElementById("cart-backdrop").classList.toggle("hidden", !open);
-            document.getElementById("cart-drawer").classList.toggle("translate-x-full", !open);
-            renderCart();
-        }
-
-        // Categorias e filtro de Promoções
-        function renderCategories() {
-            const container = document.getElementById("category-tabs");
-            container.innerHTML = CATEGORIES.map((cat) => {
-                const active = state.selectedCategory === cat;
-                const isPromo = cat === "Promoções";
-                let classes = "";
-
-                if (active && isPromo) {
-                    classes = "bg-amber-400 text-slate-950 ring-2 ring-amber-600 shadow-xs";
-                } else if (active) {
-                    classes = "bg-emerald-800 text-white shadow-xs";
-                } else if (isPromo) {
-                    classes = "bg-amber-100 text-amber-950 hover:bg-amber-200 border border-amber-400";
-                } else {
-                    classes = "bg-slate-100 text-slate-800 hover:bg-slate-200";
-                }
-
-                return `
-                    <button type="button" onclick="window.app.selectCategory('${cat}')"
-                            class="px-3.5 py-2 rounded-xl text-xs font-black whitespace-nowrap transition ${classes}">
-                        ${isPromo ? '<i class="fa-solid fa-tag mr-1"></i>' : ""}${cat}
-                    </button>
-                `;
-            }).join("");
-
-            const quickPromoBtn = document.getElementById("quick-promo-btn");
-            if (quickPromoBtn) {
-                const promoSelected = state.selectedCategory === "Promoções";
-                quickPromoBtn.className = promoSelected
-                    ? "px-3.5 py-2 rounded-xl text-xs font-black bg-amber-400 text-slate-950 ring-2 ring-amber-600 transition shrink-0"
-                    : "px-3.5 py-2 rounded-xl text-xs font-black bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 transition shrink-0";
-            }
-        }
-
-        function selectCategory(cat) {
-            state.selectedCategory = cat;
-            renderCategories();
-            renderCatalog();
-        }
-
-        function togglePromoFilter() {
-            selectCategory(state.selectedCategory === "Promoções" ? "Todos" : "Promoções");
-        }
-
-        function getEffectivePrice(prod) {
-            const normal = Number(prod.price || 0);
-            if (prod.promo === true && prod.promoPrice !== null && prod.promoPrice !== undefined && prod.promoPrice !== "") {
-                const promoNum = Number(prod.promoPrice);
-                if (!Number.isNaN(promoNum) && promoNum > 0) {
-                    return promoNum;
-                }
-            }
-            return normal;
-        }
-
-        // Renderiza catálogo em 2 colunas lado a lado
-        function renderCatalog() {
-            const grid = document.getElementById("products-grid");
-            const emptyBox = document.getElementById("empty-catalog");
-            const emptyTitle = document.getElementById("empty-catalog-title");
-            const emptyDesc = document.getElementById("empty-catalog-desc");
-
-            grid.className = "two-col-products-grid";
-
-            const canSeeHidden = Boolean(state.currentUser && state.isAdmin);
-
-            const visibleItems = state.products
-                .filter((p) => canSeeHidden ? true : p.hidden !== true)
-                .filter((p) => {
-                    let matchCat = true;
-                    if (state.selectedCategory === "Promoções") {
-                        matchCat = p.promo === true;
-                    } else if (state.selectedCategory !== "Todos") {
-                        matchCat = p.category === state.selectedCategory;
-                    }
-
-                    const q = state.searchTerm.trim().toLowerCase();
-                    const matchSearch = !q ||
-                        String(p.name || "").toLowerCase().includes(q) ||
-                        String(p.category || "").toLowerCase().includes(q) ||
-                        String(p.promoBadge || "").toLowerCase().includes(q);
-
-                    return matchCat && matchSearch;
-                });
-
-            if (visibleItems.length === 0) {
-                grid.innerHTML = "";
-                emptyTitle.textContent = state.selectedCategory === "Promoções"
-                    ? "Nenhum produto em promoção no momento"
-                    : "Nenhum produto encontrado";
-                emptyDesc.textContent = state.selectedCategory === "Promoções"
-                    ? "Toque em 'Todos' para ver os demais produtos da loja."
-                    : "Tente buscar outro nome ou selecione 'Todos'.";
-                emptyBox.classList.remove("hidden");
-                return;
-            }
-
-            emptyBox.classList.add("hidden");
-            grid.innerHTML = visibleItems.map((prod) => {
-                const fallbackImg = `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent((prod.name || "Produto").slice(0, 14))}`;
-                const imgSrc = (prod.imageUrl && prod.imageUrl.trim()) ? prod.imageUrl.trim() : fallbackImg;
-                const isPromo = prod.promo === true;
-                const isHidden = prod.hidden === true;
-                const activePrice = getEffectivePrice(prod);
-                const showStrike = isPromo && activePrice < Number(prod.price || 0);
-                const badgeText = (prod.promoBadge && prod.promoBadge.trim()) ? prod.promoBadge.trim() : "PROMOÇÃO";
-
-                const inCart = state.cart.find((item) => item.id === prod.id);
-                const qty = inCart ? Number(inCart.qty || 0) : 0;
-
-                return `
-                    <article class="bg-white rounded-2xl border-2 ${isPromo ? "border-amber-400" : "border-slate-200"} shadow-sm overflow-hidden flex flex-col justify-between min-w-0 ${isHidden ? "opacity-75" : ""}">
-                        <div>
-                            <div class="relative aspect-[4/3] bg-slate-100 overflow-hidden">
-                                <img src="${imgSrc}"
-                                     onerror="this.onerror=null;this.src='${fallbackImg}';"
-                                     alt="${prod.name}"
-                                     class="w-full h-full object-cover">
-
-                                ${isPromo ? `
-                                    <span class="absolute top-2 left-2 bg-amber-400 text-slate-950 text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-lg shadow-xs max-w-[75%] truncate">
-                                        ${badgeText}
-                                    </span>
-                                ` : ""}
-
-                                ${isHidden && canSeeHidden ? `
-                                    <span class="absolute top-2 right-2 bg-slate-950/90 text-amber-300 text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-lg shadow-xs">
-                                        Oculto
-                                    </span>
-                                ` : ""}
-                            </div>
-
-                            <div class="p-2.5 sm:p-3.5">
-                                <div class="flex items-center justify-between gap-1">
-                                    <span class="text-[10px] sm:text-[11px] font-black text-emerald-800 uppercase truncate">
-                                        ${prod.category || "Mercearia"}
-                                    </span>
-                                    ${prod.unit ? `<span class="text-[10px] sm:text-[11px] font-bold text-slate-500 truncate">${prod.unit}</span>` : ""}
-                                </div>
-                                <h3 class="font-extrabold text-slate-950 text-xs sm:text-sm mt-1 line-clamp-2 leading-snug">
-                                    ${prod.name}
-                                </h3>
-                            </div>
-                        </div>
-
-                        <div class="px-2.5 sm:px-3.5 pb-2.5 sm:pb-3.5 flex flex-col gap-2">
-                            <div class="min-w-0">
-                                ${showStrike ? `
-                                    <span class="block text-[11px] font-bold text-slate-400 line-through leading-none mb-0.5">
-                                        ${formatBRL(prod.price)}
-                                    </span>
-                                ` : ""}
-                                <span class="font-black text-sm sm:text-base ${isPromo ? "text-amber-700" : "text-slate-950"} block truncate">
-                                    ${formatBRL(activePrice)}
-                                </span>
-                            </div>
-
-                            ${qty > 0 ? `
-                                <div class="flex items-center justify-between gap-1 bg-emerald-50 border border-emerald-200 rounded-xl p-1">
-                                    <button type="button" onclick="window.app.changeQty('${prod.id}', -1)"
-                                            aria-label="Diminuir quantidade"
-                                            class="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-900 font-black text-sm shadow-2xs transition">
-                                        -
-                                    </button>
-                                    <span class="text-xs sm:text-sm font-black text-emerald-950 px-1">${qty}</span>
-                                    <button type="button" onclick="window.app.changeQty('${prod.id}', 1)"
-                                            aria-label="Aumentar quantidade"
-                                            class="w-8 h-8 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white font-black text-sm shadow-2xs transition">
-                                        +
-                                    </button>
-                                </div>
-                            ` : `
-                                <button type="button" onclick="window.app.addToCart('${prod.id}')"
-                                        class="w-full py-2 px-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 active:scale-[0.98] text-white text-xs font-black flex items-center justify-center gap-1.5 transition">
-                                    <i class="fa-solid fa-cart-plus"></i>
-                                    <span>Adicionar</span>
-                                </button>
-                            `}
-                        </div>
-                    </article>
-                `;
-            }).join("");
-        }
-
-        // Carrinho persistente durante abertura de login/cadastro e sincronização com Firestore
-        async function persistCart(syncCloud = true) {
-            saveJson(STORAGE_KEYS.cart, state.cart);
-            renderCart();
-            renderCatalog();
-
-            if (syncCloud && firebaseReady && db && state.currentUser) {
-                try {
-                    await setDoc(doc(db, "carts", state.currentUser.uid), {
-                        items: state.cart,
-                        updatedAt: serverTimestamp()
-                    }, { merge: true });
-                } catch (_) { /* Mantém carrinho salvo localmente */ }
-            }
-        }
-
-        function addToCart(productId) {
-            const prod = state.products.find((p) => p.id === productId);
-            if (!prod) return;
-            if (prod.hidden === true && !(state.currentUser && state.isAdmin)) return;
-
-            const price = getEffectivePrice(prod);
-            const existing = state.cart.find((item) => item.id === prod.id);
-            if (existing) {
-                existing.qty += 1;
-                existing.price = price;
+        state.profile = { name, email: email.toLowerCase(), address, landmark };
+        saveJSON(STORAGE_USER_PROFILE_KEY, state.profile);
+
+        const fsResult = await saveCustomerProfileToFirestore(uid, profileData);
+        await refreshAdminStatus(state.user);
+        updateUserUI();
+
+        btn.textContent = "Salvo!";
+        setAuthMsg("Salvo!", "ok");
+
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = "Salvar cadastro";
+          closeAuthModal();
+
+          if (!fsResult.ok) {
+            showNotice(`Cadastro salvo no app, mas o Firestore retornou: ${fsResult.error}`, "error");
+          } else if (state.pendingCheckoutAfterAuth) {
+            state.pendingCheckoutAfterAuth = false;
+            sendOrderToWhatsApp();
+          } else {
+            showNotice("Cadastro salvo! Você já pode navegar normalmente.", "success");
+          }
+        }, 550);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = "Salvar cadastro";
+        setAuthMsg(err && err.message ? err.message : "Não foi possível concluir o cadastro.", "err");
+      }
+    });
+
+    // Login: Aguarde... -> Salvo! -> fecha modal e entra na tela normal
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("loginSubmitBtn");
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      btn.disabled = true;
+      btn.textContent = "Aguarde...";
+      clearAuthMsg();
+
+      try {
+        const cred = await withTimeout(signInWithEmailAndPassword(auth, email, password), 9000);
+        state.user = cred.user;
+
+        await loadUserProfileAndAdmin(cred.user);
+        updateUserUI();
+        renderProducts();
+
+        btn.textContent = "Salvo!";
+        setAuthMsg("Salvo!", "ok");
+
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = "Entrar na conta";
+          closeAuthModal();
+
+          if (state.pendingCheckoutAfterAuth) {
+            state.pendingCheckoutAfterAuth = false;
+            if (state.profile && state.profile.address && state.profile.landmark) {
+              sendOrderToWhatsApp();
             } else {
-                state.cart.push({
-                    id: prod.id,
-                    name: prod.name,
-                    price,
-                    unit: prod.unit || "",
-                    imageUrl: prod.imageUrl || "",
-                    promo: prod.promo === true,
-                    qty: 1
-                });
+              openCartModal();
             }
-            persistCart(true);
-            showToast(`"${prod.name}" adicionado ao carrinho.`);
+          } else {
+            showNotice("Login realizado com sucesso!", "success");
+          }
+        }, 500);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = "Entrar na conta";
+        setAuthMsg(err && err.message ? err.message : "E-mail ou senha inválidos.", "err");
+      }
+    });
+
+    async function refreshAdminStatus(user) {
+      if (!user) {
+        state.isAdmin = false;
+        return;
+      }
+      let adminFound = false;
+      try {
+        const emailLower = String(user.email || "").toLowerCase();
+        if (emailLower) {
+          const adminDoc = await withTimeout(getDoc(doc(db, "admins", emailLower)), 5000);
+          if (adminDoc.exists() && adminDoc.data().active === true) {
+            adminFound = true;
+          }
         }
+      } catch {}
 
-        function changeQty(productId, delta) {
-            const idx = state.cart.findIndex((item) => item.id === productId);
-            if (idx === -1) return;
-            state.cart[idx].qty += delta;
-            if (state.cart[idx].qty <= 0) {
-                state.cart.splice(idx, 1);
-            }
-            persistCart(true);
+      try {
+        const userDoc = await withTimeout(getDoc(doc(db, "users", user.uid)), 5000);
+        if (userDoc.exists() && userDoc.data().isAdmin === true) {
+          adminFound = true;
         }
+      } catch {}
 
-        function removeFromCart(productId) {
-            state.cart = state.cart.filter((item) => item.id !== productId);
-            persistCart(true);
+      state.isAdmin = adminFound;
+    }
+
+    async function loadUserProfileAndAdmin(user) {
+      if (!user) return;
+      try {
+        const userSnap = await withTimeout(getDoc(doc(db, "users", user.uid)), 6000);
+        if (userSnap.exists()) {
+          const d = userSnap.data();
+          state.profile = {
+            name: d.name || "",
+            email: d.email || user.email || "",
+            address: d.address || "",
+            landmark: d.landmark || ""
+          };
+          saveJSON(STORAGE_USER_PROFILE_KEY, state.profile);
         }
+      } catch {}
+      await refreshAdminStatus(user);
+    }
 
-        function renderCart() {
-            const count = state.cart.reduce((sum, item) => sum + Number(item.qty || 0), 0);
-            const subtotal = state.cart.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0);
-            const fee = count > 0 ? Number(state.settings.deliveryFee || 0) : 0;
-            const total = subtotal + fee;
+    onAuthStateChanged(auth, async (user) => {
+      state.user = user || null;
+      if (user) {
+        await loadUserProfileAndAdmin(user);
+      } else {
+        state.isAdmin = false;
+      }
+      updateUserUI();
+      renderProducts();
+    });
 
-            document.getElementById("cart-count-badge").textContent = count;
-            document.getElementById("drawer-cart-count").textContent = count;
-            document.getElementById("cart-subtotal").textContent = formatBRL(subtotal);
-            document.getElementById("cart-delivery").textContent = fee === 0 ? "Grátis" : formatBRL(fee);
-            document.getElementById("cart-total").textContent = formatBRL(total);
-
-            const list = document.getElementById("cart-items-list");
-            if (state.cart.length === 0) {
-                list.innerHTML = `
-                    <div class="text-center py-12 text-slate-500 space-y-2">
-                        <i class="fa-solid fa-cart-shopping text-3xl text-slate-300"></i>
-                        <p class="text-sm font-extrabold text-slate-700">Seu carrinho está vazio</p>
-                        <p class="text-xs font-medium text-slate-400">Escolha itens na vitrine para montar seu pedido.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            list.innerHTML = state.cart.map((item) => {
-                const fallback = "https://placehold.co/80x80/e2e8f0/1e293b?text=Item";
-                return `
-                    <div class="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-200">
-                        <img src="${item.imageUrl || fallback}"
-                             onerror="this.onerror=null;this.src='${fallback}';"
-                             alt="${item.name}"
-                             class="w-14 h-14 rounded-lg object-cover bg-slate-100 shrink-0">
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-extrabold text-sm text-slate-950 truncate">${item.name}</h4>
-                            <p class="text-xs font-black text-emerald-800">${formatBRL(item.price * item.qty)}</p>
-                        </div>
-                        <div class="flex items-center gap-1 shrink-0">
-                            <button type="button" onclick="window.app.changeQty('${item.id}', -1)"
-                                    aria-label="Diminuir item"
-                                    class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-xs">-</button>
-                            <span class="w-5 text-center text-xs font-black">${item.qty}</span>
-                            <button type="button" onclick="window.app.changeQty('${item.id}', 1)"
-                                    aria-label="Aumentar item"
-                                    class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-xs">+</button>
-                            <button type="button" onclick="window.app.removeFromCart('${item.id}')"
-                                    aria-label="Remover item"
-                                    class="w-7 h-7 rounded-lg text-red-600 hover:bg-red-50 flex items-center justify-center text-xs ml-0.5">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join("");
+    // Sincronização em tempo real do catálogo e configurações no Firestore
+    try {
+      onSnapshot(collection(db, "products"), (snap) => {
+        if (!snap.empty) {
+          const items = [];
+          snap.forEach((d) => items.push({ id: d.id, ...d.data() }));
+          state.products = items;
+          saveJSON(STORAGE_PRODUCTS_KEY, state.products);
+          renderProducts();
         }
+      }, () => {});
+    } catch {}
 
-        // Cadastro, login e fechamento preservando os itens do carrinho
-        function hasUserSession() {
-            return Boolean(state.currentUser || (state.userProfile && state.userProfile.email));
+    try {
+      onSnapshot(doc(db, "settings", "store"), (snap) => {
+        if (snap.exists()) {
+          state.store = { ...state.store, ...snap.data() };
+          saveJSON(STORAGE_STORE_KEY, state.store);
+          document.getElementById("storeWhatsapp").value = state.store.whatsapp || "";
         }
-
-        function hasCompleteDeliveryProfile() {
-            const p = state.userProfile;
-            return Boolean(p && p.name && p.email && p.address && p.referencePoint);
-        }
-
-        function openAuthModal(mode = "register") {
-            setAuthMode(mode);
-            if (state.userProfile) {
-                document.getElementById("auth-name").value = state.userProfile.name || "";
-                document.getElementById("auth-address").value = state.userProfile.address || "";
-                document.getElementById("auth-reference-point").value = state.userProfile.referencePoint || "";
-                if (state.userProfile.email) {
-                    document.getElementById("auth-email").value = state.userProfile.email;
-                }
-            } else if (state.currentUser && state.currentUser.email) {
-                document.getElementById("auth-email").value = state.currentUser.email;
-            }
-
-            const modal = document.getElementById("auth-modal");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-        }
-
-        function closeAuthModal() {
-            const modal = document.getElementById("auth-modal");
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-            state.pendingCheckout = false;
-        }
-
-        function setAuthMode(mode) {
-            state.authMode = mode;
-            const isRegister = mode === "register";
-            document.getElementById("register-fields").classList.toggle("hidden", !isRegister);
-            document.getElementById("auth-modal-title").textContent = isRegister
-                ? "Criar Conta e Local de Entrega"
-                : "Entrar na Conta";
-            document.getElementById("auth-submit-btn").textContent = isRegister
-                ? "Criar Conta e Continuar"
-                : "Entrar na Conta";
-
-            document.getElementById("mode-register-btn").className = isRegister
-                ? "py-2 rounded-lg text-xs font-black bg-white text-emerald-800 shadow-2xs transition"
-                : "py-2 rounded-lg text-xs font-extrabold text-slate-600 transition";
-            document.getElementById("mode-login-btn").className = !isRegister
-                ? "py-2 rounded-lg text-xs font-black bg-white text-emerald-800 shadow-2xs transition"
-                : "py-2 rounded-lg text-xs font-extrabold text-slate-600 transition";
-        }
-
-        function proceedToCheckout() {
-            if (state.cart.length === 0) {
-                showToast("Adicione pelo menos um produto ao carrinho antes de fechar o pedido.", true);
-                return;
-            }
-
-            if (!state.currentUser || !hasCompleteDeliveryProfile()) {
-                toggleCart(false);
-                state.pendingCheckout = true;
-                openAuthModal(hasCompleteDeliveryProfile() ? "login" : "register");
-                showToast("Faça seu cadastro com endereço e ponto de referência para fechar o pedido.");
-                return;
-            }
-
-            toggleCart(false);
-            openCheckoutModal();
-        }
-
-        function openCheckoutModal() {
-            const subtotal = state.cart.reduce((acc, item) => acc + item.price * item.qty, 0);
-            const fee = Number(state.settings.deliveryFee || 0);
-            const total = subtotal + fee;
-            const p = state.userProfile || {};
-
-            document.getElementById("checkout-client-name").textContent = p.name || "";
-            document.getElementById("checkout-client-email").textContent = p.email || (state.currentUser ? state.currentUser.email : "");
-            document.getElementById("checkout-client-address").textContent = p.address || "";
-            document.getElementById("checkout-client-landmark").textContent = p.referencePoint || "";
-            document.getElementById("checkout-total-label").textContent = formatBRL(total);
-
-            const modal = document.getElementById("checkout-modal");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-        }
-
-        function closeCheckoutModal() {
-            const modal = document.getElementById("checkout-modal");
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-        }
-
-        async function confirmAndSendWhatsApp() {
-            if (state.cart.length === 0) return;
-
-            const profile = state.userProfile || {};
-            const payment = document.getElementById("checkout-payment").value;
-            const note = document.getElementById("checkout-note").value.trim();
-            const subtotal = state.cart.reduce((acc, item) => acc + item.price * item.qty, 0);
-            const fee = Number(state.settings.deliveryFee || 0);
-            const total = subtotal + fee;
-            const emailText = profile.email || (state.currentUser ? state.currentUser.email : "");
-
-            const orderRecord = {
-                id: "ord-" + Date.now(),
-                uid: state.currentUser ? state.currentUser.uid : "guest",
-                clientName: profile.name || "Cliente",
-                clientEmail: emailText,
-                address: profile.address || "",
-                referencePoint: profile.referencePoint || "",
-                items: [...state.cart],
-                subtotal,
-                deliveryFee: fee,
-                total,
-                payment,
-                note,
-                createdAtIso: new Date().toISOString()
-            };
-
-            state.orders.unshift(orderRecord);
-            saveJson(STORAGE_KEYS.orders, state.orders);
-
-            if (firebaseReady && db) {
-                try {
-                    await addDoc(collection(db, "orders"), {
-                        ...orderRecord,
-                        createdAt: serverTimestamp()
-                    });
-                } catch (_) { /* Mantém pedido registrado localmente */ }
-            }
-
-            const lines = state.cart
-                .map((item) => `• ${item.qty}x ${item.name}${item.unit ? ` (${item.unit})` : ""}${item.promo ? " [PROMOÇÃO]" : ""} — ${formatBRL(item.price * item.qty)}`)
-                .join("\n");
-
-            const message = [
-                "*NOVO PEDIDO — MEU MERCADINHO ONLINE*",
-                "",
-                `*Cliente:* ${orderRecord.clientName}`,
-                emailText ? `*E-mail:* ${emailText}` : null,
-                `*Endereço:* ${orderRecord.address}`,
-                `*Ponto de referência / lugar mais próximo:* ${orderRecord.referencePoint}`,
-                "",
-                "*Itens do Pedido:*",
-                lines,
-                "",
-                fee > 0 ? `*Taxa de Entrega:* ${formatBRL(fee)}` : "*Taxa de Entrega:* Grátis",
-                `*Total:* *${formatBRL(total)}*`,
-                `*Pagamento:* ${payment}`,
-                note ? `*Observação:* ${note}` : null
-            ].filter(Boolean).join("\n");
-
-            const waDigits = String(state.settings.whatsapp || "5585999999999").replace(/\D/g, "");
-            const waUrl = `https://wa.me/${waDigits}?text=${encodeURIComponent(message)}`;
-
-            state.cart = [];
-            await persistCart(true);
-            closeCheckoutModal();
-
-            const sentBanner = document.getElementById("order-sent-banner");
-            document.getElementById("order-sent-banner-desc").textContent =
-                `Pedido de ${orderRecord.clientName} (${formatBRL(total)}) enviado para o WhatsApp! Em poucos minutos chega na sua casa.`;
-            sentBanner.classList.remove("hidden");
-            sentBanner.classList.add("flex");
-
-            document.getElementById("order-modal-message").textContent =
-                "Seu pedido foi enviado para o WhatsApp e em poucos minutos chega na sua casa!";
-            document.getElementById("order-modal-subinfo").textContent =
-                `Entrega para ${orderRecord.address} • Referência: ${orderRecord.referencePoint}`;
-            const successModal = document.getElementById("order-success-modal");
-            successModal.classList.remove("hidden");
-            successModal.classList.add("flex");
-
-            window.open(waUrl, "_blank", "noopener,noreferrer");
-        }
-
-        // Escrita em users/{uid} no cadastro: NUNCA envia isAdmin para respeitar !('isAdmin' in request.resource.data)
-        async function createUserDocOnSignUp(uid, fields) {
-            if (!firebaseReady || !db || !uid) return;
-            await setDoc(doc(db, "users", uid), {
-                name: fields.name || "",
-                email: (fields.email || "").trim().toLowerCase(),
-                address: fields.address || "",
-                referencePoint: fields.referencePoint || "",
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            }, { merge: true });
-        }
-
-        // Atualização em users/{uid} no login: atualiza campos do perfil sem alterar isAdmin
-        async function updateUserDocOnSignIn(uid, fields) {
-            if (!firebaseReady || !db || !uid) return;
-            await setDoc(doc(db, "users", uid), {
-                name: fields.name || "",
-                email: (fields.email || "").trim().toLowerCase(),
-                address: fields.address || "",
-                referencePoint: fields.referencePoint || "",
-                updatedAt: serverTimestamp()
-            }, { merge: true });
-        }
-
-        document.getElementById("auth-form").addEventListener("submit", async (event) => {
-            event.preventDefault();
-            const submitBtn = document.getElementById("auth-submit-btn");
-            const originalLabel = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Aguarde...";
-
-            try {
-                const email = document.getElementById("auth-email").value.trim();
-                const password = document.getElementById("auth-password").value;
-
-                if (state.authMode === "register") {
-                    const name = document.getElementById("auth-name").value.trim();
-                    const address = document.getElementById("auth-address").value.trim();
-                    const referencePoint = document.getElementById("auth-reference-point").value.trim();
-
-                    if (!name || !address || !referencePoint || !email || password.length < 6) {
-                        showToast("Preencha nome, endereço, ponto de referência, e-mail e senha (mínimo 6 caracteres).", true);
-                        return;
-                    }
-
-                    const profilePayload = {
-                        ...(state.userProfile || {}),
-                        name,
-                        address,
-                        referencePoint,
-                        email
-                    };
-
-                    let isSignUpFlow = true;
-
-                    if (firebaseReady && auth && db) {
-                        try {
-                            let activeUser = state.currentUser;
-                            if (!activeUser) {
-                                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                                activeUser = cred.user;
-                                state.currentUser = cred.user;
-                                isSignUpFlow = true;
-                            } else {
-                                isSignUpFlow = false;
-                            }
-
-                            if (isSignUpFlow) {
-                                await createUserDocOnSignUp(activeUser.uid, profilePayload);
-                            } else {
-                                await updateUserDocOnSignIn(activeUser.uid, profilePayload);
-                            }
-                        } catch (err) {
-                            if (err && err.code === "auth/email-already-in-use") {
-                                try {
-                                    const signed = await signInWithEmailAndPassword(auth, email, password);
-                                    state.currentUser = signed.user;
-                                    await updateUserDocOnSignIn(signed.user.uid, profilePayload);
-                                } catch (signErr) {
-                                    showToast(`Não foi possível entrar com este e-mail (${signErr.code || "erro de autenticação"}).`, true);
-                                    return;
-                                }
-                            } else {
-                                const reason = err && (err.message || err.code) ? ` (${err.code || err.message})` : "";
-                                showToast(`Não foi possível salvar no Firestore${reason}. Salvo localmente neste aparelho.`, true);
-                            }
-                        }
-                    } else {
-                        showToast("Cadastro salvo neste aparelho.");
-                    }
-
-                    state.userProfile = profilePayload;
-                    saveJson(STORAGE_KEYS.profile, state.userProfile);
-
-                    const shouldOpenCheckout = state.pendingCheckout;
-                    submitBtn.textContent = "Salvo!";
-                    await waitMs(450);
-
-                    returnToStorefront();
-                    state.pendingCheckout = false;
-
-                    if (state.currentUser) {
-                        const adminOk = await checkAdminAuthorization(state.currentUser);
-                        applyAdminAuthorization(adminOk);
-                        await persistCart(true);
-                    }
-                    updateAccountUI();
-
-                    showToast(isSignUpFlow
-                        ? "Conta criada e salva! Você já pode navegar."
-                        : "Cadastro salvo! Você já pode navegar.");
-
-                    if (shouldOpenCheckout && state.cart.length > 0 && hasCompleteDeliveryProfile()) {
-                        openCheckoutModal();
-                    }
-                } else {
-                    submitBtn.textContent = "Entrando...";
-
-                    if (firebaseReady && auth && db) {
-                        try {
-                            const cred = await signInWithEmailAndPassword(auth, email, password);
-                            state.currentUser = cred.user;
-
-                            let existingDocData = {};
-                            try {
-                                const snap = await getDoc(doc(db, "users", cred.user.uid));
-                                if (snap.exists()) {
-                                    existingDocData = snap.data() || {};
-                                }
-                            } catch (readErr) {
-                                const rReason = readErr && (readErr.message || readErr.code) ? ` (${readErr.code || readErr.message})` : "";
-                                showToast(`Aviso ao ler perfil no Firestore${rReason}.`, true);
-                            }
-
-                            const mergedProfile = {
-                                ...(state.userProfile || {}),
-                                ...existingDocData,
-                                name: existingDocData.name || (state.userProfile && state.userProfile.name) || "",
-                                address: existingDocData.address || (state.userProfile && state.userProfile.address) || "",
-                                referencePoint: existingDocData.referencePoint || (state.userProfile && state.userProfile.referencePoint) || "",
-                                email: existingDocData.email || email
-                            };
-
-                            state.userProfile = mergedProfile;
-                            saveJson(STORAGE_KEYS.profile, state.userProfile);
-
-                            try {
-                                await updateUserDocOnSignIn(cred.user.uid, mergedProfile);
-                            } catch (writeErr) {
-                                const wReason = writeErr && (writeErr.message || writeErr.code) ? ` (${writeErr.code || writeErr.message})` : "";
-                                showToast(`Não foi possível atualizar no Firestore${wReason}.`, true);
-                            }
-                        } catch (authErr) {
-                            const codeText = authErr && authErr.code ? ` (${authErr.code})` : "";
-                            showToast(`E-mail ou senha inválidos${codeText}.`, true);
-                            return;
-                        }
-                    } else {
-                        state.userProfile = { ...(state.userProfile || {}), email };
-                        saveJson(STORAGE_KEYS.profile, state.userProfile);
-                    }
-
-                    const shouldOpenCheckout = state.pendingCheckout;
-                    submitBtn.textContent = "Salvo!";
-                    await waitMs(450);
-
-                    returnToStorefront();
-                    state.pendingCheckout = false;
-
-                    if (state.currentUser) {
-                        const adminOk = await checkAdminAuthorization(state.currentUser);
-                        applyAdminAuthorization(adminOk);
-                        await persistCart(true);
-                    }
-                    updateAccountUI();
-                    showToast("Login concluído! Você já pode navegar.");
-
-                    if (shouldOpenCheckout && state.cart.length > 0) {
-                        if (hasCompleteDeliveryProfile()) {
-                            openCheckoutModal();
-                        } else {
-                            openAuthModal("register");
-                            showToast("Complete seu endereço e ponto de referência para fechar o pedido.");
-                        }
-                    }
-                }
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalLabel;
-            }
-        });
-
-        async function logoutUser() {
-            if (firebaseReady && auth) {
-                try { await signOut(auth); } catch (_) { /* Ignora erro ao sair */ }
-            }
-            state.currentUser = null;
-            applyAdminAuthorization(false);
-            updateAccountUI();
-            returnToStorefront();
-            showToast("Você saiu da conta.");
-        }
-
-        // Checagem silenciosa de privilégios no Firestore (admins/{lowercaseEmail} active == true ou users/{uid} isAdmin == true)
-        async function checkAdminAuthorization(user) {
-            if (!firebaseReady || !db || !user) {
-                return false;
-            }
-
-            let authorized = false;
-
-            if (user.email) {
-                const lowerEmail = String(user.email).trim().toLowerCase();
-                try {
-                    const adminSnap = await getDoc(doc(db, "admins", lowerEmail));
-                    if (adminSnap.exists() && adminSnap.data()?.active === true) {
-                        authorized = true;
-                    }
-                } catch (_) {
-                    // Continua para checagem em users/{uid}
-                }
-            }
-
-            if (!authorized && user.uid) {
-                try {
-                    const userSnap = await getDoc(doc(db, "users", user.uid));
-                    if (userSnap.exists() && userSnap.data()?.isAdmin === true) {
-                        authorized = true;
-                    }
-                } catch (_) {
-                    authorized = false;
-                }
-            }
-
-            return authorized;
-        }
-
-        function applyAdminAuthorization(isAuthorized) {
-            state.isAdmin = Boolean(isAuthorized);
-            document.getElementById("admin-menu-section").classList.toggle("hidden", !(state.currentUser && state.isAdmin));
-
-            if (!state.isAdmin) {
-                const adminView = document.getElementById("view-admin");
-                if (adminView && !adminView.classList.contains("hidden")) {
-                    showView("store");
-                }
-            }
-            renderCatalog();
-        }
-
-        function openAdminPanel() {
-            toggleDrawer(false);
-            if (!(state.currentUser && state.isAdmin)) {
-                showView("store");
-                return;
-            }
-            showView("admin");
-        }
-
-        function updateAccountUI() {
-            const p = state.userProfile;
-            const hasName = Boolean(p && p.name);
-            const label = hasName
-                ? p.name
-                : (state.currentUser && state.currentUser.email ? state.currentUser.email : "Visitante");
-
-            document.getElementById("header-user-label").textContent = label;
-            document.getElementById("drawer-account-name").textContent = label;
-
-            const pill = document.getElementById("drawer-role-pill");
-            if (state.currentUser && state.isAdmin) {
-                pill.textContent = "Admin";
-                pill.className = "text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 shrink-0";
-            } else if (state.currentUser || hasName) {
-                pill.textContent = "Cliente";
-                pill.className = "text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-700 text-white shrink-0";
-            } else {
-                pill.textContent = "Visitante";
-                pill.className = "text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-100 shrink-0";
-            }
-
-            const addrEl = document.getElementById("drawer-account-address");
-            const landEl = document.getElementById("drawer-account-landmark");
-
-            if (p && p.address) {
-                addrEl.textContent = p.address;
-            } else {
-                addrEl.textContent = "Navegue livremente e monte seu carrinho. Ao finalizar o pedido, informe endereço e ponto de referência.";
-            }
-
-            if (p && p.referencePoint) {
-                landEl.textContent = `Referência: ${p.referencePoint}`;
-                landEl.classList.remove("hidden");
-            } else {
-                landEl.classList.add("hidden");
-            }
-
-            document.getElementById("drawer-login-btn").classList.toggle("hidden", Boolean(state.currentUser));
-            document.getElementById("drawer-edit-profile-btn").classList.toggle("hidden", !Boolean(state.currentUser || hasName));
-            document.getElementById("drawer-logout-btn").classList.toggle("hidden", !Boolean(state.currentUser || hasName));
-        }
-
-        function renderProfileAndOrders() {
-            const p = state.userProfile || {};
-            document.getElementById("profile-name-display").textContent = p.name || (state.currentUser ? state.currentUser.email : "Visitante");
-            document.getElementById("profile-email-display").textContent = p.email || (state.currentUser ? state.currentUser.email : "Não informado");
-            document.getElementById("profile-address-display").textContent = p.address || "Endereço ainda não cadastrado";
-            document.getElementById("profile-landmark-display").textContent = p.referencePoint || "Ponto de referência ainda não cadastrado";
-
-            const list = document.getElementById("customer-orders-list");
-            if (state.orders.length === 0) {
-                list.innerHTML = `<p class="text-sm font-medium text-slate-500">Nenhum pedido enviado até o momento.</p>`;
-                return;
-            }
-
-            list.innerHTML = state.orders.map((order) => `
-                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm space-y-1">
-                    <div class="flex items-center justify-between font-black text-slate-950">
-                        <span>Total: ${formatBRL(order.total)}</span>
-                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900">${order.payment || "WhatsApp"}</span>
-                    </div>
-                    <p class="text-xs font-semibold text-slate-700"><strong>Endereço:</strong> ${order.address}</p>
-                    <p class="text-xs font-extrabold text-amber-950"><strong>Ponto de referência:</strong> ${order.referencePoint}</p>
-                    <p class="text-xs text-slate-700 pt-1">${(order.items || []).map((i) => `${i.qty}x ${i.name}`).join(", ")}</p>
-                </div>
-            `).join("");
-        }
-
-        // Administração: WhatsApp, produtos, promoções, ocultar/exibir e excluir
-        function syncAdminInputs() {
-            document.getElementById("admin-whatsapp-input").value = state.settings.whatsapp || "";
-            document.getElementById("admin-delivery-fee-input").value = state.settings.deliveryFee ?? 0;
-        }
-
-        document.getElementById("admin-settings-form").addEventListener("submit", async (event) => {
-            event.preventDefault();
-            if (!(state.currentUser && state.isAdmin)) return;
-
-            const btn = document.getElementById("admin-settings-save-btn");
-            const prevLabel = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = "Aguarde...";
-
-            try {
-                const whatsapp = document.getElementById("admin-whatsapp-input").value.trim().replace(/\D/g, "");
-                const deliveryFee = parseFloat(document.getElementById("admin-delivery-fee-input").value) || 0;
-
-                if (!whatsapp || whatsapp.length < 10) {
-                    showToast("Informe o número de WhatsApp com DDI e DDD.", true);
-                    return;
-                }
-
-                state.settings = { whatsapp, deliveryFee };
-                saveJson(STORAGE_KEYS.settings, state.settings);
-                renderCart();
-
-                if (firebaseReady && db) {
-                    try {
-                        await setDoc(doc(db, "settings", "main"), {
-                            ...state.settings,
-                            updatedAt: serverTimestamp()
-                        }, { merge: true });
-                    } catch (err) {
-                        const r = err && (err.message || err.code) ? ` (${err.code || err.message})` : "";
-                        showToast(`Aviso ao salvar WhatsApp no Firestore${r}.`, true);
-                    }
-                }
-
-                btn.textContent = "Salvo!";
-                await waitMs(400);
-                showToast("Configurações do WhatsApp salvas!");
-            } finally {
-                btn.disabled = false;
-                btn.textContent = prevLabel;
-            }
-        });
-
-        function togglePromoFields() {
-            const isPromo = document.getElementById("product-promo").checked;
-            const priceEl = document.getElementById("product-promo-price");
-            const badgeEl = document.getElementById("product-promo-badge");
-            priceEl.disabled = !isPromo;
-            badgeEl.disabled = !isPromo;
-            priceEl.classList.toggle("opacity-50", !isPromo);
-            badgeEl.classList.toggle("opacity-50", !isPromo);
-        }
-
-        function updatePhotoPreview() {
-            const url = document.getElementById("product-image-url").value.trim();
-            const img = document.getElementById("product-image-preview");
-            img.src = url || "https://placehold.co/96x96/e2e8f0/1e293b?text=Foto";
-        }
-
-        function resetProductForm() {
-            document.getElementById("product-edit-id").value = "";
-            document.getElementById("product-name").value = "";
-            document.getElementById("product-price").value = "";
-            document.getElementById("product-category").value = "Mercearia";
-            document.getElementById("product-promo").checked = false;
-            document.getElementById("product-promo-price").value = "";
-            document.getElementById("product-promo-badge").value = "";
-            document.getElementById("product-image-url").value = "";
-            document.getElementById("product-unit").value = "";
-            document.getElementById("product-hidden").checked = false;
-            document.getElementById("admin-product-form-title").textContent = "Cadastrar Novo Produto";
-            document.getElementById("cancel-edit-product-btn").classList.add("hidden");
-            togglePromoFields();
-            updatePhotoPreview();
-        }
-
-        function startEditProduct(productId) {
-            if (!(state.currentUser && state.isAdmin)) return;
-            const prod = state.products.find((p) => p.id === productId);
-            if (!prod) return;
-
-            document.getElementById("product-edit-id").value = prod.id;
-            document.getElementById("product-name").value = prod.name || "";
-            document.getElementById("product-price").value = prod.price ?? "";
-            document.getElementById("product-category").value = prod.category || "Mercearia";
-            document.getElementById("product-promo").checked = prod.promo === true;
-            document.getElementById("product-promo-price").value = (prod.promoPrice !== null && prod.promoPrice !== undefined) ? prod.promoPrice : "";
-            document.getElementById("product-promo-badge").value = prod.promoBadge || "";
-            document.getElementById("product-image-url").value = prod.imageUrl || "";
-            document.getElementById("product-unit").value = prod.unit || "";
-            document.getElementById("product-hidden").checked = prod.hidden === true;
-            document.getElementById("admin-product-form-title").textContent = "Editar Produto";
-            document.getElementById("cancel-edit-product-btn").classList.remove("hidden");
-            togglePromoFields();
-            updatePhotoPreview();
-            document.getElementById("admin-product-form").scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-
-        document.getElementById("admin-product-form").addEventListener("submit", async (event) => {
-            event.preventDefault();
-            if (!(state.currentUser && state.isAdmin)) return;
-
-            const saveBtn = document.getElementById("admin-product-save-btn");
-            const prevLabel = saveBtn.textContent;
-            saveBtn.disabled = true;
-            saveBtn.textContent = "Aguarde...";
-
-            try {
-                const editId = document.getElementById("product-edit-id").value;
-                const isPromo = document.getElementById("product-promo").checked;
-                const rawPromo = document.getElementById("product-promo-price").value.trim();
-                const parsedPromo = rawPromo !== "" ? parseFloat(rawPromo) : null;
-                const promoBadge = isPromo ? document.getElementById("product-promo-badge").value.trim() : "";
-
-                const payload = {
-                    name: document.getElementById("product-name").value.trim(),
-                    price: parseFloat(document.getElementById("product-price").value),
-                    category: document.getElementById("product-category").value,
-                    promo: isPromo,
-                    promoPrice: (isPromo && parsedPromo !== null && !Number.isNaN(parsedPromo) && parsedPromo > 0) ? parsedPromo : null,
-                    promoBadge,
-                    imageUrl: document.getElementById("product-image-url").value.trim(),
-                    unit: document.getElementById("product-unit").value.trim(),
-                    hidden: document.getElementById("product-hidden").checked
-                };
-
-                if (!payload.name || Number.isNaN(payload.price) || payload.price <= 0 || !payload.imageUrl) {
-                    showToast("Preencha nome, preço válido e link da foto.", true);
-                    return;
-                }
-
-                if (editId) {
-                    state.products = state.products.map((p) => (p.id === editId ? { ...p, ...payload } : p));
-                    saveJson(STORAGE_KEYS.products, state.products);
-                    renderCatalog();
-                    renderAdminProducts();
-
-                    if (firebaseReady && db) {
-                        try {
-                            await setDoc(doc(db, "products", editId), {
-                                ...payload,
-                                updatedAt: serverTimestamp()
-                            }, { merge: true });
-                        } catch (err) {
-                            const r = err && (err.message || err.code) ? ` (${err.code || err.message})` : "";
-                            showToast(`Erro ao atualizar no Firestore${r}.`, true);
-                        }
-                    }
-
-                    saveBtn.textContent = "Salvo!";
-                    await waitMs(400);
-                    resetProductForm();
-                    showToast("Produto atualizado!");
-                } else {
-                    const localId = "prod-" + Date.now();
-                    state.products.unshift({ id: localId, ...payload });
-                    saveJson(STORAGE_KEYS.products, state.products);
-                    renderCatalog();
-                    renderAdminProducts();
-
-                    if (firebaseReady && db) {
-                        try {
-                            const docRef = await addDoc(collection(db, "products"), {
-                                ...payload,
-                                createdAt: serverTimestamp()
-                            });
-                            state.products = state.products.map((p) => (p.id === localId ? { ...p, id: docRef.id } : p));
-                            saveJson(STORAGE_KEYS.products, state.products);
-                            renderCatalog();
-                            renderAdminProducts();
-                        } catch (err) {
-                            const r = err && (err.message || err.code) ? ` (${err.code || err.message})` : "";
-                            showToast(`Erro ao cadastrar no Firestore${r}.`, true);
-                        }
-                    }
-
-                    saveBtn.textContent = "Salvo!";
-                    await waitMs(400);
-                    resetProductForm();
-                    showToast("Produto cadastrado!");
-                }
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.textContent = prevLabel;
-            }
-        });
-
-        async function toggleHideProduct(productId) {
-            if (!(state.currentUser && state.isAdmin)) return;
-            const prod = state.products.find((p) => p.id === productId);
-            if (!prod) return;
-
-            const nextHidden = prod.hidden !== true;
-            state.products = state.products.map((p) => (p.id === productId ? { ...p, hidden: nextHidden } : p));
-            saveJson(STORAGE_KEYS.products, state.products);
-            renderCatalog();
-            renderAdminProducts();
-
-            if (firebaseReady && db) {
-                try {
-                    await updateDoc(doc(db, "products", productId), { hidden: nextHidden });
-                } catch (err) {
-                    const r = err && (err.message || err.code) ? ` (${err.code || err.message})` : "";
-                    showToast(`Erro ao atualizar visibilidade no Firestore${r}.`, true);
-                    return;
-                }
-            }
-
-            showToast(nextHidden ? `"${prod.name}" ocultado da vitrine.` : `"${prod.name}" visível na vitrine.`);
-        }
-
-        async function deleteProductItem(productId) {
-            if (!(state.currentUser && state.isAdmin)) return;
-            const prod = state.products.find((p) => p.id === productId);
-            if (!prod) return;
-
-            const confirmed = await askConfirm(
-                "Excluir produto",
-                `Deseja excluir "${prod.name}" permanentemente?`
-            );
-            if (!confirmed) return;
-
-            state.products = state.products.filter((p) => p.id !== productId);
-            saveJson(STORAGE_KEYS.products, state.products);
-            renderCatalog();
-            renderAdminProducts();
-
-            if (firebaseReady && db) {
-                try {
-                    await deleteDoc(doc(db, "products", productId));
-                } catch (err) {
-                    const r = err && (err.message || err.code) ? ` (${err.code || err.message})` : "";
-                    showToast(`Erro ao excluir no Firestore${r}.`, true);
-                    return;
-                }
-            }
-
-            showToast("Produto excluído.");
-        }
-
-        function renderAdminProducts() {
-            const list = document.getElementById("admin-products-list");
-            const countEl = document.getElementById("admin-product-count");
-            if (!list) return;
-
-            countEl.textContent = `${state.products.length} ${state.products.length === 1 ? "item" : "itens"}`;
-
-            if (state.products.length === 0) {
-                list.innerHTML = `<p class="text-sm font-medium text-slate-500 py-4">Nenhum produto cadastrado.</p>`;
-                return;
-            }
-
-            list.innerHTML = state.products.map((prod) => {
-                const isHidden = prod.hidden === true;
-                const fallback = "https://placehold.co/64x64/e2e8f0/1e293b?text=Foto";
-                return `
-                    <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <img src="${prod.imageUrl || fallback}"
-                                 onerror="this.onerror=null;this.src='${fallback}';"
-                                 alt="${prod.name}"
-                                 class="w-12 h-12 rounded-xl object-cover bg-slate-100 shrink-0 ${isHidden ? "opacity-40" : ""}">
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <p class="font-extrabold text-sm text-slate-950 truncate">${prod.name}</p>
-                                    <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${
-                                        isHidden ? "bg-amber-100 text-amber-950" : "bg-emerald-100 text-emerald-900"
-                                    }">
-                                        ${isHidden ? "Oculto" : "Visível"}
-                                    </span>
-                                    ${prod.promo === true ? `
-                                        <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-300 text-slate-950">
-                                            ${(prod.promoBadge && prod.promoBadge.trim()) ? prod.promoBadge.trim() : "Promoção"}
-                                        </span>
-                                    ` : ""}
-                                </div>
-                                <p class="text-xs font-semibold text-slate-600">
-                                    ${prod.promo === true && prod.promoPrice
-                                        ? `<span class="line-through mr-1">${formatBRL(prod.price)}</span><strong class="text-amber-800">${formatBRL(prod.promoPrice)}</strong>`
-                                        : formatBRL(prod.price)} • ${prod.category || "Mercearia"}${prod.unit ? ` • ${prod.unit}` : ""}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-2 shrink-0 flex-wrap">
-                            <button type="button" onclick="window.app.toggleHideProduct('${prod.id}')"
-                                    class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-extrabold transition">
-                                ${isHidden ? "Exibir" : "Ocultar"}
-                            </button>
-                            <button type="button" onclick="window.app.startEditProduct('${prod.id}')"
-                                    class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-extrabold transition">
-                                Editar
-                            </button>
-                            <button type="button" onclick="window.app.deleteProductItem('${prod.id}')"
-                                    class="px-3 py-1.5 rounded-xl bg-red-100 hover:bg-red-200 text-red-800 text-xs font-extrabold transition">
-                                Excluir
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join("");
-        }
-
-        function renderAdminOrders() {
-            const list = document.getElementById("admin-orders-list");
-            if (!list) return;
-
-            if (state.orders.length === 0) {
-                list.innerHTML = `<p class="text-sm font-medium text-slate-500">Nenhum pedido registrado ainda.</p>`;
-                return;
-            }
-
-            list.innerHTML = state.orders.map((order) => `
-                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
-                    <div class="flex items-center justify-between font-black text-slate-950">
-                        <span>${order.clientName} — ${formatBRL(order.total)}</span>
-                        <span>${order.payment || "WhatsApp"}</span>
-                    </div>
-                    <p class="text-slate-700 font-semibold"><strong>Endereço:</strong> ${order.address}</p>
-                    <p class="text-amber-950 font-bold"><strong>Ponto de referência:</strong> ${order.referencePoint}</p>
-                    <p class="text-slate-700 pt-0.5">
-                        <strong>Itens:</strong> ${(order.items || []).map((i) => `${i.qty}x ${i.name}`).join(", ")}
-                    </p>
-                </div>
-            `).join("");
-        }
-
-        // Sincronização em tempo real com Firestore (mantém fallback local se vazio/inacessível)
-        if (firebaseReady && db) {
-            onSnapshot(collection(db, "products"), (snap) => {
-                if (!snap.empty) {
-                    state.products = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-                    saveJson(STORAGE_KEYS.products, state.products);
-                    renderCatalog();
-                    renderAdminProducts();
-                }
-            }, () => { /* Mantém produtos locais em caso de indisponibilidade */ });
-
-            onSnapshot(doc(db, "settings", "main"), (snap) => {
-                if (snap.exists()) {
-                    const data = snap.data() || {};
-                    state.settings = {
-                        whatsapp: data.whatsapp || state.settings.whatsapp,
-                        deliveryFee: data.deliveryFee ?? state.settings.deliveryFee
-                    };
-                    saveJson(STORAGE_KEYS.settings, state.settings);
-                    syncAdminInputs();
-                    renderCart();
-                }
-            }, () => { /* Mantém configurações locais */ });
-        }
-
-        if (firebaseReady && auth && db) {
-            onAuthStateChanged(auth, async (user) => {
-                state.currentUser = user;
-                if (user) {
-                    try {
-                        const userSnap = await getDoc(doc(db, "users", user.uid));
-                        if (userSnap.exists()) {
-                            const uData = userSnap.data() || {};
-                            state.userProfile = {
-                                ...(state.userProfile || {}),
-                                ...uData,
-                                email: uData.email || user.email
-                            };
-                            saveJson(STORAGE_KEYS.profile, state.userProfile);
-                        } else {
-                            const baseProfile = {
-                                ...(state.userProfile || {}),
-                                email: user.email || ""
-                            };
-                            state.userProfile = baseProfile;
-                            saveJson(STORAGE_KEYS.profile, state.userProfile);
-                            await updateUserDocOnSignIn(user.uid, baseProfile);
-                        }
-                    } catch (err) {
-                        if (!state.userProfile) {
-                            state.userProfile = { email: user.email };
-                            saveJson(STORAGE_KEYS.profile, state.userProfile);
-                        }
-                    }
-
-                    try {
-                        const cartSnap = await getDoc(doc(db, "carts", user.uid));
-                        if (cartSnap.exists() && Array.isArray(cartSnap.data()?.items)) {
-                            const cloudCart = cartSnap.data().items;
-                            if (state.cart.length === 0 && cloudCart.length > 0) {
-                                state.cart = cloudCart;
-                                saveJson(STORAGE_KEYS.cart, state.cart);
-                                renderCart();
-                                renderCatalog();
-                            } else if (state.cart.length > 0) {
-                                await persistCart(true);
-                            }
-                        }
-                    } catch (_) { /* Ignora se coleção carts não estiver acessível */ }
-
-                    const isAuthorized = await checkAdminAuthorization(user);
-                    applyAdminAuthorization(isAuthorized);
-                } else {
-                    applyAdminAuthorization(false);
-                }
-                updateAccountUI();
-            });
-        }
-
-        document.getElementById("search-input").addEventListener("input", (event) => {
-            state.searchTerm = event.target.value;
-            renderCatalog();
-        });
-
-        window.app = {
-            hideToast,
-            hideOrderSentBanner,
-            closeOrderSuccessModal,
-            returnToStorefront,
-            showView,
-            toggleDrawer,
-            toggleCart,
-            selectCategory,
-            togglePromoFilter,
-            addToCart,
-            changeQty,
-            removeFromCart,
-            hasUserSession,
-            openAuthModal,
-            closeAuthModal,
-            setAuthMode,
-            proceedToCheckout,
-            openCheckoutModal,
-            closeCheckoutModal,
-            confirmAndSendWhatsApp,
-            logoutUser,
-            openAdminPanel,
-            togglePromoFields,
-            updatePhotoPreview,
-            resetProductForm,
-            startEditProduct,
-            toggleHideProduct,
-            deleteProductItem
-        };
-
-        window.addEventListener("load", () => {
-            initCanvasBanner();
-            renderCategories();
-            renderCatalog();
-            renderCart();
-            syncAdminInputs();
-            togglePromoFields();
-            updatePhotoPreview();
-            updateAccountUI();
-        });
-    </script>
+      }, () => {});
+    } catch {}
+
+    // Ações do Administrador
+    const tabProductBtn = document.getElementById("tabProductBtn");
+    const tabStoreBtn = document.getElementById("tabStoreBtn");
+    const adminProductTab = document.getElementById("adminProductTab");
+    const adminStoreTab = document.getElementById("adminStoreTab");
+
+    tabProductBtn.addEventListener("click", () => {
+      tabProductBtn.classList.add("active");
+      tabStoreBtn.classList.remove("active");
+      adminProductTab.style.display = "block";
+      adminStoreTab.style.display = "none";
+    });
+
+    tabStoreBtn.addEventListener("click", () => {
+      tabStoreBtn.classList.add("active");
+      tabProductBtn.classList.remove("active");
+      adminProductTab.style.display = "none";
+      adminStoreTab.style.display = "block";
+      document.getElementById("storeWhatsapp").value = state.store.whatsapp || "";
+    });
+
+    document.getElementById("closeAdminPanelBtn").addEventListener("click", () => {
+      document.getElementById("adminPanel").classList.remove("active");
+    });
+
+    function resetProductForm() {
+      document.getElementById("editProductId").value = "";
+      document.getElementById("productForm").reset();
+      document.getElementById("saveProductBtn").textContent = "Salvar produto";
+    }
+
+    document.getElementById("resetProductFormBtn").addEventListener("click", resetProductForm);
+
+    document.getElementById("productForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!state.isAdmin) return;
+
+      const btn = document.getElementById("saveProductBtn");
+      btn.disabled = true;
+      btn.textContent = "Aguarde...";
+
+      const existingId = document.getElementById("editProductId").value.trim();
+      const id = existingId || `prod_${Date.now()}`;
+      const promoVal = parseFloat(document.getElementById("prodPromoPrice").value);
+
+      const prodData = {
+        name: document.getElementById("prodName").value.trim(),
+        category: document.getElementById("prodCategory").value,
+        price: parseFloat(document.getElementById("prodPrice").value),
+        promoPrice: Number.isFinite(promoVal) && promoVal > 0 ? promoVal : null,
+        isPromo: document.getElementById("prodIsPromo").checked,
+        hidden: document.getElementById("prodHidden").checked,
+        photo: document.getElementById("prodPhoto").value.trim(),
+        updatedAt: serverTimestamp()
+      };
+
+      try {
+        await withTimeout(setDoc(doc(db, "products", id), prodData, { merge: true }), 7000);
+        const idx = state.products.findIndex((p) => p.id === id);
+        const localItem = { id, ...prodData };
+        if (idx >= 0) state.products[idx] = localItem;
+        else state.products.unshift(localItem);
+        saveJSON(STORAGE_PRODUCTS_KEY, state.products);
+        renderProducts();
+        resetProductForm();
+        showNotice("Produto salvo com sucesso.", "success");
+      } catch (err) {
+        showNotice(`Erro ao salvar produto: ${err && err.message ? err.message : err}`, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Salvar produto";
+      }
+    });
+
+    window.__editProd = function (id) {
+      const prod = state.products.find((p) => p.id === id);
+      if (!prod) return;
+      document.getElementById("adminPanel").classList.add("active");
+      tabProductBtn.click();
+      document.getElementById("editProductId").value = prod.id;
+      document.getElementById("prodName").value = prod.name || "";
+      document.getElementById("prodCategory").value = prod.category || "Mercearia";
+      document.getElementById("prodPrice").value = prod.price || "";
+      document.getElementById("prodPromoPrice").value = prod.promoPrice || "";
+      document.getElementById("prodPhoto").value = prod.photo || "";
+      document.getElementById("prodIsPromo").checked = Boolean(prod.isPromo);
+      document.getElementById("prodHidden").checked = Boolean(prod.hidden);
+      document.getElementById("saveProductBtn").textContent = "Atualizar produto";
+      document.getElementById("adminPanel").scrollIntoView({ behavior: "smooth" });
+    };
+
+    window.__toggleHideProd = async function (id) {
+      const prod = state.products.find((p) => p.id === id);
+      if (!prod || !state.isAdmin) return;
+      const nextHidden = !prod.hidden;
+      try {
+        await withTimeout(updateDoc(doc(db, "products", id), { hidden: nextHidden }), 7000);
+        prod.hidden = nextHidden;
+        saveJSON(STORAGE_PRODUCTS_KEY, state.products);
+        renderProducts();
+        showNotice(nextHidden ? "Produto ocultado dos clientes." : "Produto visível no catálogo.", "success");
+      } catch (err) {
+        showNotice(`Erro ao atualizar visibilidade: ${err && err.message ? err.message : err}`, "error");
+      }
+    };
+
+    window.__deleteProd = async function (id) {
+      if (!state.isAdmin) return;
+      try {
+        await withTimeout(deleteDoc(doc(db, "products", id)), 7000);
+        state.products = state.products.filter((p) => p.id !== id);
+        saveJSON(STORAGE_PRODUCTS_KEY, state.products);
+        renderProducts();
+        showNotice("Produto excluído.", "success");
+      } catch (err) {
+        showNotice(`Erro ao excluir produto: ${err && err.message ? err.message : err}`, "error");
+      }
+    };
+
+    document.getElementById("storeConfigForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!state.isAdmin) return;
+      const btn = document.getElementById("saveStoreBtn");
+      btn.disabled = true;
+      btn.textContent = "Aguarde...";
+      const whatsapp = document.getElementById("storeWhatsapp").value.replace(/\D/g, "");
+      try {
+        await withTimeout(setDoc(doc(db, "settings", "store"), { whatsapp }, { merge: true }), 7000);
+        state.store.whatsapp = whatsapp;
+        saveJSON(STORAGE_STORE_KEY, state.store);
+        showNotice("WhatsApp da loja salvo.", "success");
+      } catch (err) {
+        showNotice(`Erro ao salvar WhatsApp: ${err && err.message ? err.message : err}`, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Salvar WhatsApp";
+      }
+    });
+
+    // Inicialização
+    updateCartBadge();
+    updateUserUI();
+    renderProducts();
+  </script>
 </body>
 </html>
