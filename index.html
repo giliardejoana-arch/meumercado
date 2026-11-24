@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Mercadinho JM - O melhor lugar para comprar</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
   <style>
     :root {
       --primary: #0f9d58;
@@ -57,7 +58,7 @@
     .header-content {
       position: relative;
       z-index: 2;
-      padding: 10px 16px 12px;
+      padding: 10px 14px 12px;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -70,34 +71,39 @@
       justify-content: space-between;
       align-items: center;
       color: #fff;
+      gap: 6px;
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 8px;
+      min-width: 0;
     }
 
     .brand h1 {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 800;
       letter-spacing: -0.4px;
       line-height: 1.1;
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      white-space: nowrap;
     }
 
     .brand-slogan {
-      font-size: 0.76rem;
+      font-size: 0.72rem;
       font-weight: 600;
       color: #d1fae5;
       letter-spacing: 0.2px;
       margin-top: 2px;
+      white-space: nowrap;
     }
 
     .header-actions {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
+      flex-shrink: 0;
     }
 
     .icon-btn {
@@ -105,15 +111,16 @@
       backdrop-filter: blur(6px);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: #fff;
-      padding: 6px 11px;
+      padding: 6px 9px;
       border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 600;
+      font-size: 0.76rem;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       transition: 0.2s;
+      white-space: nowrap;
     }
 
     .icon-btn:active {
@@ -124,6 +131,12 @@
       background: var(--accent);
       border-color: #ffb74d;
       color: #111;
+    }
+
+    .btn-orders {
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--primary-dark);
+      border-color: #fff;
     }
 
     /* BUSCA RÁPIDA */
@@ -479,7 +492,7 @@
       border: none;
       padding: 13px;
       border-radius: 12px;
-      font-size: 0.98rem;
+      font-size: 0.96rem;
       font-weight: 700;
       cursor: pointer;
       margin-top: 6px;
@@ -501,21 +514,24 @@
       background: #f8fafc;
       border: 1px solid #cbd5e1;
       border-radius: 12px;
-      padding: 12px;
+      padding: 14px;
       margin-top: 10px;
       font-size: 0.86rem;
+      text-align: center;
     }
 
-    .pix-code-area {
-      width: 100%;
-      font-size: 0.74rem;
-      font-family: monospace;
-      background: #fff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 8px;
-      margin-top: 8px;
-      resize: none;
+    .qr-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 12px auto 8px;
+      padding: 10px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      width: fit-content;
+      min-height: 186px;
+      min-width: 186px;
     }
 
     .cart-item {
@@ -553,9 +569,9 @@
 
     .status-badge {
       display: inline-block;
-      padding: 3px 8px;
+      padding: 4px 9px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.76rem;
       font-weight: 800;
       background: #dbeafe;
       color: #1e40af;
@@ -568,24 +584,72 @@
     }
 
     .status-badge.saiu {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .status-badge.concluida {
       background: #dcfce7;
       color: #166534;
     }
 
-    .status-actions {
+    .status-actions-3 {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
       margin-top: 8px;
     }
 
     .status-btn {
-      padding: 8px;
+      padding: 8px 4px;
       border: none;
       border-radius: 8px;
       font-weight: 700;
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       cursor: pointer;
+      line-height: 1.2;
+    }
+
+    .rating-box {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #cbd5e1;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .stars-row {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin: 8px 0;
+    }
+
+    .star-btn {
+      font-size: 1.5rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      opacity: 0.35;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .star-btn.active {
+      opacity: 1;
+      transform: scale(1.12);
+    }
+
+    .rating-summary-banner {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #78350f;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-align: center;
     }
 
     .toast {
@@ -628,13 +692,16 @@
     <div class="header-content">
       <div class="top-bar">
         <div class="brand">
-          <span style="font-size: 1.6rem;">🛒</span>
+          <span style="font-size: 1.5rem;">🛒</span>
           <div>
             <h1>Mercadinho JM</h1>
             <div class="brand-slogan">O melhor lugar para comprar</div>
           </div>
         </div>
         <div class="header-actions">
+          <button id="myOrdersBtn" class="icon-btn btn-orders" style="display: none;" onclick="openMyOrdersModal()">
+            📦 Pedidos
+          </button>
           <button id="adminBtn" class="icon-btn btn-admin" style="display: none;" onclick="openModal('adminModal')">
             ⚙️ Admin
           </button>
@@ -750,14 +817,14 @@
         <div class="form-group">
           <label>Forma de Pagamento</label>
           <select id="paymentMethod" onchange="handlePaymentChange()">
-            <option value="Pix">💠 Pix (Com Valor Calculado)</option>
+            <option value="Pix">💠 Pix (QR Code com Valor Calculado)</option>
             <option value="Dinheiro">💵 Dinheiro (Troco)</option>
             <option value="Cartão">💳 Cartão na Entrega</option>
           </select>
         </div>
 
         <!-- OPÇÃO DINHEIRO / TROCO -->
-        <div id="cashChangeBox" class="payment-box" style="display: none;">
+        <div id="cashChangeBox" class="payment-box" style="display: none; text-align: left;">
           <div class="form-group" style="margin-bottom: 6px;">
             <label>Precisa de troco para quanto? (R$)</label>
             <input type="number" step="0.01" id="changeForInput" placeholder="Ex: 50.00 (deixe vazio se não precisar)" oninput="updateChangeCalculation()" />
@@ -765,16 +832,16 @@
           <div id="changeResultText" style="font-weight: 700; color: var(--primary-dark);"></div>
         </div>
 
-        <!-- OPÇÃO PIX COM VALOR CALCULADO E BOTÃO ÚNICO DE CÓPIA -->
+        <!-- OPÇÃO PIX COM QR CODE E BOTÃO ÚNICO PARA COPIAR -->
         <div id="pixInfoBox" class="payment-box">
-          <div style="font-size: 0.92rem;">
-            <strong>Valor do Pix já calculado:</strong>
-            <span id="pixAmountDisplay" style="font-weight: 800; color: var(--primary-dark); font-size: 1.05rem;">R$ 0,00</span>
+          <div style="font-size: 0.95rem;">
+            <strong>Valor do Pix:</strong>
+            <span id="pixAmountDisplay" style="font-weight: 800; color: var(--primary-dark); font-size: 1.1rem;">R$ 0,00</span>
           </div>
           <div style="font-size: 0.78rem; color: var(--muted); margin-top: 3px;">
-            Toque no botão abaixo para copiar o código Pix já com o valor da sua compra e colar no aplicativo do seu banco.
+            Escaneie o QR Code no aplicativo do seu banco ou toque no botão para copiar já com o valor.
           </div>
-          <textarea id="pixPayloadText" class="pix-code-area" rows="3" readonly></textarea>
+          <div class="qr-wrapper" id="pixQrContainer"></div>
           <button type="button" id="copyPixBtn" class="submit-btn" style="background: #0284c7;" onclick="copyPixPayload()">
             📋 Copiar Pix com Valor
           </button>
@@ -794,7 +861,18 @@
     </div>
   </div>
 
-  <!-- MODAL DO ADMINISTRADOR (PRODUTOS + CONFIGURAÇÃO + PEDIDOS) -->
+  <!-- MODAL MEUS PEDIDOS DO CLIENTE (STATUS + AVALIAÇÃO 1 A 5 ESTRELAS) -->
+  <div class="modal-overlay" id="myOrdersModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Meus Pedidos - Mercadinho JM</h3>
+        <button class="close-btn" onclick="closeModal('myOrdersModal')">✕</button>
+      </div>
+      <div id="myOrdersListContainer">Carregando seus pedidos...</div>
+    </div>
+  </div>
+
+  <!-- MODAL DO ADMINISTRADOR (PRODUTOS + PEDIDOS + CONFIGURAÇÃO) -->
   <div class="modal-overlay" id="adminModal">
     <div class="modal-box">
       <div class="modal-header">
@@ -842,8 +920,9 @@
         <button type="submit" id="prodSubmitBtn" class="submit-btn">Salvar Produto no Catálogo</button>
       </form>
 
-      <!-- ABA 2: PEDIDOS E STATUS DE ENTREGA -->
+      <!-- ABA 2: PEDIDOS, STATUS DE ENTREGA E AVALIAÇÕES -->
       <div id="adminOrdersPanel" style="display: none;">
+        <div id="ratingsSummaryBanner" class="rating-summary-banner" style="display: none;"></div>
         <div id="ordersListContainer">Carregando pedidos...</div>
       </div>
 
@@ -912,6 +991,9 @@
 
     let allProducts = [];
     let allOrders = [];
+    let allRatings = [];
+    let currentPixPayload = '';
+    let selectedRatingStars = {};
     let cart = JSON.parse(localStorage.getItem('mercadinho_jm_cart') || '[]');
     let currentCategory = 'Todas';
     let currentUser = null;
@@ -985,7 +1067,7 @@
     animateCanvas();
 
     // =========================================================================
-    // GERADOR PIX COPIA E COLA (EMV + CRC16) COM VALOR EXATO
+    // GERADOR PIX COPIA E COLA (EMV + CRC16) + QR CODE
     // =========================================================================
     function crc16Ccitt(str) {
       let crc = 0xFFFF;
@@ -1018,7 +1100,6 @@
       const gui = emvField('00', 'br.gov.bcb.pix');
       const keyField = emvField('01', cleanKey);
       const merchantAccountInfo = emvField('26', gui + keyField);
-
       const additionalData = emvField('05', '***');
 
       const partialPayload =
@@ -1034,6 +1115,37 @@
         '6304';
 
       return partialPayload + crc16Ccitt(partialPayload);
+    }
+
+    async function renderPixQrCode(payload) {
+      const qrBox = document.getElementById('pixQrContainer');
+      if (!qrBox) return;
+
+      if (!payload) {
+        currentPixPayload = '';
+        qrBox.innerHTML = '<span style="font-size:0.78rem; color:#94a3b8; text-align:center;">Configure a chave Pix no Painel Admin</span>';
+        return;
+      }
+
+      currentPixPayload = payload;
+      qrBox.innerHTML = '';
+
+      if (window.QRCode && typeof window.QRCode.toDataURL === 'function') {
+        try {
+          const qrDataUrl = await window.QRCode.toDataURL(payload, {
+            width: 170,
+            margin: 1,
+            color: { dark: '#0f172a', light: '#ffffff' }
+          });
+          qrBox.innerHTML = `<img src="${qrDataUrl}" alt="QR Code Pix" style="width:170px; height:170px; display:block;" />`;
+          return;
+        } catch (e) {
+          console.error('Erro ao gerar QR Code:', e);
+        }
+      }
+
+      const fallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(payload)}`;
+      qrBox.innerHTML = `<img src="${fallbackUrl}" alt="QR Code Pix" style="width:170px; height:170px; display:block;" />`;
     }
 
     // =========================================================================
@@ -1062,6 +1174,16 @@
 
     window.closeModal = (id) => {
       document.getElementById(id).classList.remove('open');
+    };
+
+    window.openMyOrdersModal = () => {
+      if (!currentUser) {
+        switchAuthTab('login');
+        openModal('authModal');
+        return;
+      }
+      renderMyOrders();
+      openModal('myOrdersModal');
     };
 
     window.previewProductImage = (url) => {
@@ -1155,8 +1277,10 @@
       currentUser = user;
       const authBtn = document.getElementById('authHeaderBtn');
       const adminBtn = document.getElementById('adminBtn');
+      const myOrdersBtn = document.getElementById('myOrdersBtn');
 
       if (user) {
+        myOrdersBtn.style.display = 'flex';
         try {
           const userDoc = await getDoc(doc(db, "usuarios", user.uid));
           if (userDoc.exists()) {
@@ -1184,6 +1308,11 @@
         currentUserProfile = null;
         authBtn.textContent = '👤 Entrar';
         adminBtn.style.display = 'none';
+        myOrdersBtn.style.display = 'none';
+      }
+
+      if (document.getElementById('myOrdersModal').classList.contains('open')) {
+        renderMyOrders();
       }
     });
 
@@ -1225,6 +1354,7 @@
         const firstName = nome.split(' ')[0];
         document.getElementById('authHeaderBtn').textContent = `👋 ${firstName} (Sair)`;
         document.getElementById('adminBtn').style.display = 'none';
+        document.getElementById('myOrdersBtn').style.display = 'flex';
 
         closeModal('authModal');
         showToast('Cadastro realizado com sucesso!');
@@ -1450,20 +1580,20 @@
       resultEl.textContent = `Troco estimado: ${formatBRL(troco)}`;
     };
 
-    function updatePixAndChangeUI() {
+    async function updatePixAndChangeUI() {
       const { total } = getCartTotals();
       const amountDisplay = document.getElementById('pixAmountDisplay');
-      const payloadArea = document.getElementById('pixPayloadText');
       const copyBtn = document.getElementById('copyPixBtn');
 
       amountDisplay.textContent = formatBRL(total);
 
       if (storeConfig.pixKey) {
-        payloadArea.value = buildPixPayload(storeConfig.pixKey, storeConfig.pixMerchant, total);
+        const payload = buildPixPayload(storeConfig.pixKey, storeConfig.pixMerchant, total);
+        await renderPixQrCode(payload);
         copyBtn.disabled = false;
         copyBtn.textContent = `📋 Copiar Pix com Valor (${formatBRL(total)})`;
       } else {
-        payloadArea.value = '';
+        await renderPixQrCode('');
         copyBtn.disabled = true;
         copyBtn.textContent = 'Chave Pix não configurada no Admin';
       }
@@ -1471,25 +1601,27 @@
     }
 
     window.copyPixPayload = async () => {
-      const text = document.getElementById('pixPayloadText').value;
       const copyBtn = document.getElementById('copyPixBtn');
-      if (!text) {
+      if (!currentPixPayload) {
         showToast('Chave Pix ainda não configurada pelo administrador.');
         return;
       }
 
       try {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(currentPixPayload);
       } catch {
-        const area = document.getElementById('pixPayloadText');
-        area.select();
+        const temp = document.createElement('textarea');
+        temp.value = currentPixPayload;
+        document.body.appendChild(temp);
+        temp.select();
         document.execCommand('copy');
+        document.body.removeChild(temp);
       }
 
       const textoOriginal = copyBtn.textContent;
       copyBtn.style.background = '#0f9d58';
       copyBtn.textContent = '✅ Pix Copiado! Vá ao seu banco';
-      showToast('Pix com valor copiado! Cole na opção Pix Copia e Cola do seu banco.');
+      showToast('Pix com valor copiado! Cole no aplicativo do seu banco.');
 
       setTimeout(() => {
         copyBtn.style.background = '#0284c7';
@@ -1631,27 +1763,154 @@
     };
 
     // =========================================================================
-    // PEDIDOS NO PAINEL ADMIN E ATUALIZAÇÃO DE STATUS DE ENTREGA
+    // PEDIDOS, STATUS DE ENTREGA E AVALIAÇÕES (1 A 5 ESTRELAS)
     // =========================================================================
+    function getStatusBadgeClass(statusText) {
+      const s = (statusText || '').toLowerCase();
+      if (s.includes('conclu')) return 'status-badge concluida';
+      if (s.includes('saiu')) return 'status-badge saiu';
+      if (s.includes('separando')) return 'status-badge separando';
+      return 'status-badge';
+    }
+
     onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snapshot) => {
       allOrders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       if (document.getElementById('adminOrdersPanel').style.display === 'block') {
         renderAdminOrders();
+      }
+      if (document.getElementById('myOrdersModal').classList.contains('open')) {
+        renderMyOrders();
+      }
+    });
+
+    onSnapshot(query(collection(db, "avaliacoes"), orderBy("data", "desc")), (snapshot) => {
+      allRatings = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (document.getElementById('adminOrdersPanel').style.display === 'block') {
+        renderAdminOrders();
+      }
+      if (document.getElementById('myOrdersModal').classList.contains('open')) {
+        renderMyOrders();
       }
     });
 
     window.updateOrderStatus = async (orderId, newStatus) => {
       try {
         await updateDoc(doc(db, "pedidos", orderId), { status: newStatus });
-        showToast(`Status atualizado para: ${newStatus}`);
+        showToast(`Status atualizado: ${newStatus}`);
         renderAdminOrders();
       } catch (err) {
         showToast('Erro ao atualizar status: ' + err.message);
       }
     };
 
+    window.selectStarRating = (orderId, stars) => {
+      selectedRatingStars[orderId] = stars;
+      const box = document.getElementById(`stars_${orderId}`);
+      if (!box) return;
+      const buttons = box.querySelectorAll('.star-btn');
+      buttons.forEach((btn, idx) => {
+        btn.classList.toggle('active', idx < stars);
+      });
+    };
+
+    window.submitOrderRating = async (orderId, clienteNome) => {
+      const stars = selectedRatingStars[orderId] || 0;
+      if (stars < 1 || stars > 5) {
+        showToast('Toque de 1 a 5 estrelas antes de enviar sua avaliação.');
+        return;
+      }
+
+      const commentInput = document.getElementById(`comment_${orderId}`);
+      const comentario = commentInput ? commentInput.value.trim() : '';
+
+      try {
+        await addDoc(collection(db, "avaliacoes"), {
+          pedidoId: orderId,
+          clienteId: currentUser ? currentUser.uid : '',
+          clienteNome: clienteNome || 'Cliente',
+          estrelas: stars,
+          comentario,
+          data: new Date().toISOString()
+        });
+        showToast(`Obrigado! Você avaliou com ${stars} estrela(s).`);
+        renderMyOrders();
+      } catch (err) {
+        showToast('Erro ao enviar avaliação: ' + err.message);
+      }
+    };
+
+    function renderMyOrders() {
+      const container = document.getElementById('myOrdersListContainer');
+      if (!currentUser) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b;">Faça login para ver seus pedidos.</p>';
+        return;
+      }
+
+      const mine = allOrders.filter(o => o.clienteId === currentUser.uid);
+      if (!mine.length) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding:16px;">Você ainda não fez pedidos no Mercadinho JM.</p>';
+        return;
+      }
+
+      container.innerHTML = mine.map(ord => {
+        const st = ord.status || 'Novo Pedido';
+        const isConcluida = st.toLowerCase().includes('conclu');
+        const existingRating = allRatings.find(r => r.pedidoId === ord.id);
+        const currentStars = selectedRatingStars[ord.id] || 0;
+        const resumoItens = (ord.itens || []).map(i => `${i.qtd}x ${i.nome}`).join(', ');
+
+        let ratingHtml = '';
+        if (isConcluida) {
+          if (existingRating) {
+            const estrelasVisuais = '⭐'.repeat(existingRating.estrelas);
+            ratingHtml = `
+              <div class="rating-box">
+                <div style="font-weight:800; color:#0b7a43;">Avaliação enviada: ${estrelasVisuais} (${existingRating.estrelas}/5)</div>
+                ${existingRating.comentario ? `<div style="font-size:0.8rem; color:#475569; margin-top:4px;">"${existingRating.comentario}"</div>` : ''}
+              </div>
+            `;
+          } else {
+            const starsButtons = [1, 2, 3, 4, 5].map(n => `
+              <button type="button" class="star-btn ${n <= currentStars ? 'active' : ''}" onclick="selectStarRating('${ord.id}', ${n})">⭐</button>
+            `).join('');
+
+            ratingHtml = `
+              <div class="rating-box">
+                <div style="font-weight:800; text-align:center; font-size:0.88rem;">Entrega concluída! Como foi sua compra? (1 a 5 estrelas)</div>
+                <div class="stars-row" id="stars_${ord.id}">${starsButtons}</div>
+                <input type="text" id="comment_${ord.id}" placeholder="Opcional: deixe um recado sobre o atendimento ou entrega..." style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.82rem; margin-bottom:8px;" />
+                <button type="button" class="submit-btn" style="padding:10px; font-size:0.86rem;" onclick="submitOrderRating('${ord.id}', '${(ord.clienteNome || 'Cliente').replace(/'/g, "\\'")}')">
+                  Enviar Avaliação
+                </button>
+              </div>
+            `;
+          }
+        }
+
+        return `
+          <div class="order-card">
+            <span class="${getStatusBadgeClass(st)}">${st}</span>
+            <div><strong>Itens:</strong> ${resumoItens}</div>
+            <div><strong>Total:</strong> <strong>${formatBRL(ord.total)}</strong> • ${ord.pagamento || '-'}</div>
+            ${ratingHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
     function renderAdminOrders() {
       const container = document.getElementById('ordersListContainer');
+      const summaryBanner = document.getElementById('ratingsSummaryBanner');
+
+      if (allRatings.length > 0) {
+        const soma = allRatings.reduce((acc, r) => acc + Number(r.estrelas || 0), 0);
+        const media = (soma / allRatings.length).toFixed(1);
+        summaryBanner.style.display = 'block';
+        summaryBanner.textContent = `⭐ Média das avaliações online: ${media} / 5 (${allRatings.length} avaliação(ões))`;
+      } else {
+        summaryBanner.style.display = 'none';
+      }
+
       if (!allOrders.length) {
         container.innerHTML = '<p style="text-align:center; color:#64748b; padding:16px;">Nenhum pedido recebido ainda.</p>';
         return;
@@ -1659,28 +1918,36 @@
 
       container.innerHTML = allOrders.map(ord => {
         const st = ord.status || 'Novo Pedido';
-        let badgeClass = 'status-badge';
-        if (st.toLowerCase().includes('separando')) badgeClass += ' separando';
-        if (st.toLowerCase().includes('saiu')) badgeClass += ' saiu';
-
         const resumoItens = (ord.itens || []).map(i => `${i.qtd}x ${i.nome}`).join(', ');
+        const rating = allRatings.find(r => r.pedidoId === ord.id);
+
+        const ratingInfo = rating
+          ? `<div style="margin-top:8px; padding:8px; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; font-size:0.8rem;">
+               <strong>Avaliação do cliente:</strong> ${'⭐'.repeat(rating.estrelas)} (${rating.estrelas}/5)
+               ${rating.comentario ? `<br><em>"${rating.comentario}"</em>` : ''}
+             </div>`
+          : '';
 
         return `
           <div class="order-card">
-            <span class="${badgeClass}">${st}</span>
+            <span class="${getStatusBadgeClass(st)}">${st}</span>
             <div><strong>Cliente:</strong> ${ord.clienteNome || 'Cliente'}</div>
             <div><strong>Endereço:</strong> ${ord.endereco || ''} (${ord.referencia || ''})</div>
             <div><strong>Itens:</strong> ${resumoItens}</div>
             <div><strong>Pagamento:</strong> ${ord.pagamento || '-'} ${ord.pagamento === 'Dinheiro' ? `(${ord.troco || ''})` : ''}</div>
             <div><strong>Total:</strong> <strong>${formatBRL(ord.total)}</strong> ${ord.entregaGratis ? '• Entrega Grátis' : ''}</div>
-            <div class="status-actions">
+            <div class="status-actions-3">
               <button type="button" class="status-btn" style="background:#fef3c7; color:#92400e;" onclick="updateOrderStatus('${ord.id}', 'Estamos separando suas compras')">
-                🧺 Separando compras
+                🧺 Separando
               </button>
-              <button type="button" class="status-btn" style="background:#dcfce7; color:#166534;" onclick="updateOrderStatus('${ord.id}', 'Saiu para entrega')">
-                🛵 Saiu para entrega
+              <button type="button" class="status-btn" style="background:#e0f2fe; color:#075985;" onclick="updateOrderStatus('${ord.id}', 'Saiu para entrega')">
+                🛵 Saiu entrega
+              </button>
+              <button type="button" class="status-btn" style="background:#dcfce7; color:#166534;" onclick="updateOrderStatus('${ord.id}', 'Entrega concluída')">
+                ✅ Concluída
               </button>
             </div>
+            ${ratingInfo}
           </div>
         `;
       }).join('');
