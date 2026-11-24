@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f9d58" />
+  <link rel="manifest" href="./manifest.json" />
   <title>Mercadinho JM - O melhor lugar para comprar</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
   <style>
     :root {
       --primary: #0f9d58;
@@ -29,8 +30,8 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      padding-top: 192px;
-      padding-bottom: 90px;
+      padding-top: 235px;
+      padding-bottom: 92px;
     }
 
     /* HEADER FIXO COM CANVAS */
@@ -39,7 +40,7 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 186px;
+      min-height: 186px;
       z-index: 1000;
       background: linear-gradient(135deg, #064e3b 0%, #0f9d58 100%);
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -62,8 +63,6 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      height: 100%;
-      justify-content: space-between;
     }
 
     .top-bar {
@@ -71,14 +70,13 @@
       justify-content: space-between;
       align-items: center;
       color: #fff;
-      gap: 6px;
+      gap: 8px;
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 8px;
-      min-width: 0;
     }
 
     .brand h1 {
@@ -87,23 +85,19 @@
       letter-spacing: -0.4px;
       line-height: 1.1;
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      white-space: nowrap;
     }
 
     .brand-slogan {
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       font-weight: 600;
       color: #d1fae5;
-      letter-spacing: 0.2px;
       margin-top: 2px;
-      white-space: nowrap;
     }
 
     .header-actions {
       display: flex;
       gap: 6px;
       align-items: center;
-      flex-shrink: 0;
     }
 
     .icon-btn {
@@ -111,32 +105,76 @@
       backdrop-filter: blur(6px);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: #fff;
-      padding: 6px 9px;
-      border-radius: 20px;
-      font-size: 0.76rem;
+      padding: 6px 10px;
+      border-radius: 16px;
+      font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 3px;
-      transition: 0.2s;
-      white-space: nowrap;
+      gap: 5px;
+      position: relative;
     }
 
-    .icon-btn:active {
-      transform: scale(0.95);
-    }
-
-    .btn-admin {
-      background: var(--accent);
-      border-color: #ffb74d;
+    .admin-identity {
+      background: #ff9800;
       color: #111;
+      border: 1px solid #ffd180;
+      padding: 4px 10px;
+      border-radius: 14px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      line-height: 1.05;
     }
 
-    .btn-orders {
-      background: rgba(255, 255, 255, 0.92);
-      color: var(--primary-dark);
-      border-color: #fff;
+    .admin-identity .admin-sub {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #3b2200;
+    }
+
+    .notify-dot {
+      position: absolute;
+      top: -4px;
+      right: -3px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #ff3b30;
+      border: 2px solid #ffffff;
+      display: none;
+    }
+
+    .notify-dot.active {
+      display: block;
+    }
+
+    /* BARRA EXTERNA DE BOTÕES DO ADMIN */
+    .admin-quick-bar {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .admin-quick-bar.show {
+      display: grid;
+    }
+
+    .admin-quick-btn {
+      background: #fffbeb;
+      color: #1e293b;
+      border: 1px solid #fcd34d;
+      border-radius: 10px;
+      padding: 7px 6px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
     }
 
     /* BUSCA RÁPIDA */
@@ -169,7 +207,7 @@
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding-bottom: 3px;
+      padding-bottom: 2px;
       scrollbar-width: none;
     }
 
@@ -187,7 +225,6 @@
       font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
-      transition: 0.2s;
     }
 
     .cat-chip.active {
@@ -306,12 +343,6 @@
       font-weight: 700;
       font-size: 0.88rem;
       cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .add-btn:active {
-      background: var(--primary-dark);
-      transform: scale(0.97);
     }
 
     /* BARRA INFERIOR FIXA DO CARRINHO */
@@ -375,11 +406,11 @@
       max-height: 90vh;
       overflow-y: auto;
       box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
-      animation: slideUp 0.25s ease;
+      animation: slideUp 0.22s ease;
     }
 
     @keyframes slideUp {
-      from { transform: translateY(25px); opacity: 0; }
+      from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
 
@@ -401,16 +432,6 @@
       font-size: 1.1rem;
       cursor: pointer;
       font-weight: bold;
-    }
-
-    .tabs-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      background: #f1f5f9;
-      padding: 4px;
-      border-radius: 12px;
-      margin-bottom: 14px;
-      gap: 4px;
     }
 
     .auth-tabs {
@@ -462,10 +483,6 @@
       background: #fff;
     }
 
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      border-color: var(--primary);
-    }
-
     .img-preview-box {
       width: 100%;
       height: 105px;
@@ -492,15 +509,11 @@
       border: none;
       padding: 13px;
       border-radius: 12px;
-      font-size: 0.96rem;
+      font-size: 0.98rem;
       font-weight: 700;
       cursor: pointer;
       margin-top: 6px;
-      transition: background-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
-    }
-
-    .submit-btn:active {
-      transform: scale(0.98);
+      transition: background-color 0.2s ease, opacity 0.2s ease;
     }
 
     .submit-btn.loading {
@@ -514,24 +527,21 @@
       background: #f8fafc;
       border: 1px solid #cbd5e1;
       border-radius: 12px;
-      padding: 14px;
+      padding: 12px;
       margin-top: 10px;
       font-size: 0.86rem;
-      text-align: center;
     }
 
-    .qr-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 12px auto 8px;
-      padding: 10px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      width: fit-content;
-      min-height: 186px;
-      min-width: 186px;
+    .pix-code-area {
+      width: 100%;
+      font-size: 0.74rem;
+      font-family: monospace;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px;
+      margin-top: 8px;
+      resize: none;
     }
 
     .cart-item {
@@ -565,17 +575,36 @@
       margin-bottom: 10px;
       background: #f8fafc;
       font-size: 0.85rem;
+      position: relative;
+    }
+
+    .order-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .delete-x-btn {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      font-weight: 800;
+      cursor: pointer;
     }
 
     .status-badge {
       display: inline-block;
-      padding: 4px 9px;
+      padding: 3px 8px;
       border-radius: 8px;
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       font-weight: 800;
       background: #dbeafe;
       color: #1e40af;
-      margin-bottom: 6px;
     }
 
     .status-badge.separando {
@@ -584,16 +613,16 @@
     }
 
     .status-badge.saiu {
-      background: #e0f2fe;
-      color: #075985;
-    }
-
-    .status-badge.concluida {
       background: #dcfce7;
       color: #166534;
     }
 
-    .status-actions-3 {
+    .status-badge.concluido {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .status-actions {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 5px;
@@ -601,60 +630,37 @@
     }
 
     .status-btn {
-      padding: 8px 4px;
+      padding: 7px 5px;
       border: none;
       border-radius: 8px;
       font-weight: 700;
-      font-size: 0.74rem;
+      font-size: 0.73rem;
       cursor: pointer;
-      line-height: 1.2;
-    }
-
-    .rating-box {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px dashed #cbd5e1;
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 10px;
     }
 
     .stars-row {
       display: flex;
       gap: 6px;
-      justify-content: center;
-      margin: 8px 0;
+      margin: 6px 0;
     }
 
     .star-btn {
-      font-size: 1.5rem;
-      background: transparent;
-      border: none;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.9rem;
       cursor: pointer;
-      opacity: 0.35;
-      transition: transform 0.15s, opacity 0.15s;
     }
 
-    .star-btn.active {
-      opacity: 1;
-      transform: scale(1.12);
-    }
-
-    .rating-summary-banner {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      color: #78350f;
-      padding: 9px 12px;
-      border-radius: 10px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-      text-align: center;
+    .star-btn.selected {
+      background: #fef3c7;
+      border-color: #f59e0b;
     }
 
     .toast {
       position: fixed;
-      top: 198px;
+      top: 242px;
       left: 50%;
       transform: translateX(-50%);
       background: #1e293b;
@@ -687,28 +693,42 @@
 <body>
 
   <!-- CABEÇALHO FIXO COM ANIMAÇÃO CANVAS -->
-  <header class="fixed-header">
+  <header class="fixed-header" id="mainHeader">
     <canvas id="headerCanvas"></canvas>
     <div class="header-content">
       <div class="top-bar">
         <div class="brand">
-          <span style="font-size: 1.5rem;">🛒</span>
+          <span style="font-size: 1.55rem;">🛒</span>
           <div>
             <h1>Mercadinho JM</h1>
             <div class="brand-slogan">O melhor lugar para comprar</div>
           </div>
         </div>
         <div class="header-actions">
-          <button id="myOrdersBtn" class="icon-btn btn-orders" style="display: none;" onclick="openMyOrdersModal()">
-            📦 Pedidos
+          <div id="adminBadgeBox" class="admin-identity">
+            <span>⚙️</span>
+            <div>
+              <div id="adminFirstNameText">Admin</div>
+              <div class="admin-sub">admin</div>
+            </div>
+          </div>
+
+          <button id="clientOrdersBtn" class="icon-btn" onclick="openClientOrdersModal()">
+            <span>📦 Pedidos</span>
+            <span id="clientOrdersDot" class="notify-dot"></span>
           </button>
-          <button id="adminBtn" class="icon-btn btn-admin" style="display: none;" onclick="openModal('adminModal')">
-            ⚙️ Admin
-          </button>
+
           <button id="authHeaderBtn" class="icon-btn" onclick="handleAuthHeaderClick()">
             👤 Entrar
           </button>
         </div>
+      </div>
+
+      <!-- BOTÕES DO ADMIN SEMPRE FORA E VISÍVEIS QUANDO LOGADO COMO ADMIN -->
+      <div id="adminQuickBar" class="admin-quick-bar">
+        <button type="button" class="admin-quick-btn" onclick="openAdminAction('prod')">+ Produto</button>
+        <button type="button" class="admin-quick-btn" onclick="openAdminAction('orders')">📦 Pedidos</button>
+        <button type="button" class="admin-quick-btn" onclick="openAdminAction('config')">📞 Pix/Fone</button>
       </div>
 
       <div class="search-box">
@@ -817,14 +837,13 @@
         <div class="form-group">
           <label>Forma de Pagamento</label>
           <select id="paymentMethod" onchange="handlePaymentChange()">
-            <option value="Pix">💠 Pix (QR Code com Valor Calculado)</option>
+            <option value="Pix">💠 Pix (Com Valor Calculado)</option>
             <option value="Dinheiro">💵 Dinheiro (Troco)</option>
             <option value="Cartão">💳 Cartão na Entrega</option>
           </select>
         </div>
 
-        <!-- OPÇÃO DINHEIRO / TROCO -->
-        <div id="cashChangeBox" class="payment-box" style="display: none; text-align: left;">
+        <div id="cashChangeBox" class="payment-box" style="display: none;">
           <div class="form-group" style="margin-bottom: 6px;">
             <label>Precisa de troco para quanto? (R$)</label>
             <input type="number" step="0.01" id="changeForInput" placeholder="Ex: 50.00 (deixe vazio se não precisar)" oninput="updateChangeCalculation()" />
@@ -832,16 +851,15 @@
           <div id="changeResultText" style="font-weight: 700; color: var(--primary-dark);"></div>
         </div>
 
-        <!-- OPÇÃO PIX COM QR CODE E BOTÃO ÚNICO PARA COPIAR -->
         <div id="pixInfoBox" class="payment-box">
-          <div style="font-size: 0.95rem;">
-            <strong>Valor do Pix:</strong>
-            <span id="pixAmountDisplay" style="font-weight: 800; color: var(--primary-dark); font-size: 1.1rem;">R$ 0,00</span>
+          <div style="font-size: 0.92rem;">
+            <strong>Valor do Pix já calculado:</strong>
+            <span id="pixAmountDisplay" style="font-weight: 800; color: var(--primary-dark); font-size: 1.05rem;">R$ 0,00</span>
           </div>
           <div style="font-size: 0.78rem; color: var(--muted); margin-top: 3px;">
-            Escaneie o QR Code no aplicativo do seu banco ou toque no botão para copiar já com o valor.
+            Toque no botão abaixo para copiar o código Pix já com o valor da compra e colar no aplicativo do banco.
           </div>
-          <div class="qr-wrapper" id="pixQrContainer"></div>
+          <textarea id="pixPayloadText" class="pix-code-area" rows="3" readonly></textarea>
           <button type="button" id="copyPixBtn" class="submit-btn" style="background: #0284c7;" onclick="copyPixPayload()">
             📋 Copiar Pix com Valor
           </button>
@@ -861,32 +879,26 @@
     </div>
   </div>
 
-  <!-- MODAL MEUS PEDIDOS DO CLIENTE (STATUS + AVALIAÇÃO 1 A 5 ESTRELAS) -->
-  <div class="modal-overlay" id="myOrdersModal">
+  <!-- MODAL DE PEDIDOS DO CLIENTE (NOTIFICAÇÃO + AVALIAÇÃO) -->
+  <div class="modal-overlay" id="clientOrdersModal">
     <div class="modal-box">
       <div class="modal-header">
         <h3>Meus Pedidos - Mercadinho JM</h3>
-        <button class="close-btn" onclick="closeModal('myOrdersModal')">✕</button>
+        <button class="close-btn" onclick="closeModal('clientOrdersModal')">✕</button>
       </div>
-      <div id="myOrdersListContainer">Carregando seus pedidos...</div>
+      <div id="clientOrdersContainer">Carregando seus pedidos...</div>
     </div>
   </div>
 
-  <!-- MODAL DO ADMINISTRADOR (PRODUTOS + PEDIDOS + CONFIGURAÇÃO) -->
+  <!-- MODAL DO ADMINISTRADOR (ABRE DIRETO NA AÇÃO CLICADA FORA) -->
   <div class="modal-overlay" id="adminModal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>Painel Admin - Mercadinho JM</h3>
+        <h3 id="adminModalTitle">Admin - Mercadinho JM</h3>
         <button class="close-btn" onclick="closeModal('adminModal')">✕</button>
       </div>
 
-      <div class="tabs-3">
-        <button type="button" class="tab-btn active" id="adminTabProd" onclick="switchAdminTab('prod')">+ Produto</button>
-        <button type="button" class="tab-btn" id="adminTabOrders" onclick="switchAdminTab('orders')">📦 Pedidos</button>
-        <button type="button" class="tab-btn" id="adminTabConfig" onclick="switchAdminTab('config')">📞 Pix/Fone</button>
-      </div>
-
-      <!-- ABA 1: CADASTRAR PRODUTO -->
+      <!-- AÇÃO 1: CADASTRAR PRODUTO -->
       <form id="adminProdForm" onsubmit="addProduct(event)">
         <div class="form-group">
           <label>Nome do Produto</label>
@@ -920,13 +932,12 @@
         <button type="submit" id="prodSubmitBtn" class="submit-btn">Salvar Produto no Catálogo</button>
       </form>
 
-      <!-- ABA 2: PEDIDOS, STATUS DE ENTREGA E AVALIAÇÕES -->
+      <!-- AÇÃO 2: PEDIDOS, STATUS, AVALIAÇÕES E APAGAR COM X -->
       <div id="adminOrdersPanel" style="display: none;">
-        <div id="ratingsSummaryBanner" class="rating-summary-banner" style="display: none;"></div>
         <div id="ordersListContainer">Carregando pedidos...</div>
       </div>
 
-      <!-- ABA 3: TELEFONE, CHAVE PIX ALEATÓRIA E ENTREGA GRÁTIS -->
+      <!-- AÇÃO 3: TELEFONE, CHAVE PIX ALEATÓRIA E ENTREGA GRÁTIS -->
       <form id="adminConfigForm" style="display: none;" onsubmit="saveStoreConfig(event)">
         <div class="form-group">
           <label>Telefone WhatsApp do Administrador (com DDD)</label>
@@ -971,6 +982,7 @@
       setDoc,
       getDoc,
       updateDoc,
+      deleteDoc,
       onSnapshot,
       query,
       orderBy
@@ -991,10 +1003,8 @@
 
     let allProducts = [];
     let allOrders = [];
-    let allRatings = [];
-    let currentPixPayload = '';
-    let selectedRatingStars = {};
     let cart = JSON.parse(localStorage.getItem('mercadinho_jm_cart') || '[]');
+    let draftRatings = {};
     let currentCategory = 'Todas';
     let currentUser = null;
     let currentUserProfile = null;
@@ -1017,8 +1027,10 @@
     const marketIcons = ['🛒', '🍎', '🥖', '🥛', '🥬', '🥫', '🧼', '🍌', '🛒'];
 
     function resizeCanvas() {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      const header = document.getElementById('mainHeader');
+      canvas.width = header.offsetWidth;
+      canvas.height = header.offsetHeight;
+      document.body.style.paddingTop = `${header.offsetHeight + 8}px`;
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
@@ -1031,7 +1043,7 @@
         this.icon = marketIcons[Math.floor(Math.random() * marketIcons.length)];
         this.size = this.icon === '🛒' ? (Math.random() * 8 + 20) : (Math.random() * 8 + 16);
         this.x = randomX ? Math.random() * canvas.width : -35;
-        this.y = Math.random() * (canvas.height - 25) + 12;
+        this.y = Math.random() * Math.max(20, canvas.height - 25) + 10;
         this.vx = Math.random() * 0.85 + 0.45;
         this.vy = (Math.random() - 0.5) * 0.35;
         this.angle = (Math.random() - 0.5) * 0.25;
@@ -1067,7 +1079,7 @@
     animateCanvas();
 
     // =========================================================================
-    // GERADOR PIX COPIA E COLA (EMV + CRC16) + QR CODE
+    // GERADOR PIX COPIA E COLA (EMV + CRC16) COM VALOR EXATO
     // =========================================================================
     function crc16Ccitt(str) {
       let crc = 0xFFFF;
@@ -1117,37 +1129,6 @@
       return partialPayload + crc16Ccitt(partialPayload);
     }
 
-    async function renderPixQrCode(payload) {
-      const qrBox = document.getElementById('pixQrContainer');
-      if (!qrBox) return;
-
-      if (!payload) {
-        currentPixPayload = '';
-        qrBox.innerHTML = '<span style="font-size:0.78rem; color:#94a3b8; text-align:center;">Configure a chave Pix no Painel Admin</span>';
-        return;
-      }
-
-      currentPixPayload = payload;
-      qrBox.innerHTML = '';
-
-      if (window.QRCode && typeof window.QRCode.toDataURL === 'function') {
-        try {
-          const qrDataUrl = await window.QRCode.toDataURL(payload, {
-            width: 170,
-            margin: 1,
-            color: { dark: '#0f172a', light: '#ffffff' }
-          });
-          qrBox.innerHTML = `<img src="${qrDataUrl}" alt="QR Code Pix" style="width:170px; height:170px; display:block;" />`;
-          return;
-        } catch (e) {
-          console.error('Erro ao gerar QR Code:', e);
-        }
-      }
-
-      const fallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(payload)}`;
-      qrBox.innerHTML = `<img src="${fallbackUrl}" alt="QR Code Pix" style="width:170px; height:170px; display:block;" />`;
-    }
-
     // =========================================================================
     // UTILITÁRIOS DE INTERFACE E ESTADO DOS BOTÕES
     // =========================================================================
@@ -1168,7 +1149,6 @@
 
     window.openModal = (id) => {
       if (id === 'cartModal') renderCartModal();
-      if (id === 'adminModal') fillConfigForm();
       document.getElementById(id).classList.add('open');
     };
 
@@ -1176,14 +1156,21 @@
       document.getElementById(id).classList.remove('open');
     };
 
-    window.openMyOrdersModal = () => {
-      if (!currentUser) {
-        switchAuthTab('login');
-        openModal('authModal');
-        return;
-      }
-      renderMyOrders();
-      openModal('myOrdersModal');
+    window.openAdminAction = (section) => {
+      const titleMap = {
+        prod: 'Cadastrar Produto - Mercadinho JM',
+        orders: 'Pedidos Recebidos - Mercadinho JM',
+        config: 'Telefone, Pix e Entrega - Mercadinho JM'
+      };
+      document.getElementById('adminModalTitle').textContent = titleMap[section] || 'Admin - Mercadinho JM';
+      document.getElementById('adminProdForm').style.display = section === 'prod' ? 'block' : 'none';
+      document.getElementById('adminOrdersPanel').style.display = section === 'orders' ? 'block' : 'none';
+      document.getElementById('adminConfigForm').style.display = section === 'config' ? 'block' : 'none';
+
+      if (section === 'config') fillConfigForm();
+      if (section === 'orders') renderAdminOrders();
+
+      document.getElementById('adminModal').classList.add('open');
     };
 
     window.previewProductImage = (url) => {
@@ -1204,20 +1191,8 @@
       document.getElementById('authModalTitle').textContent = isLogin ? 'Entrar na Conta' : 'Criar Meu Cadastro';
     };
 
-    window.switchAdminTab = (tab) => {
-      document.getElementById('adminTabProd').classList.toggle('active', tab === 'prod');
-      document.getElementById('adminTabOrders').classList.toggle('active', tab === 'orders');
-      document.getElementById('adminTabConfig').classList.toggle('active', tab === 'config');
-
-      document.getElementById('adminProdForm').style.display = tab === 'prod' ? 'block' : 'none';
-      document.getElementById('adminOrdersPanel').style.display = tab === 'orders' ? 'block' : 'none';
-      document.getElementById('adminConfigForm').style.display = tab === 'config' ? 'block' : 'none';
-
-      if (tab === 'orders') renderAdminOrders();
-    };
-
     // =========================================================================
-    // CONFIGURAÇÃO DA LOJA (WHATSAPP, PIX ALEATÓRIO E ENTREGA GRÁTIS)
+    // CONFIGURAÇÃO DA LOJA
     // =========================================================================
     onSnapshot(doc(db, "configuracoes", "mercadinho_jm"), (snap) => {
       if (snap.exists()) {
@@ -1273,14 +1248,47 @@
     // =========================================================================
     // AUTENTICAÇÃO E PERFIL NO FIRESTORE
     // =========================================================================
+    function applyRoleHeaderUI() {
+      const authBtn = document.getElementById('authHeaderBtn');
+      const adminBadge = document.getElementById('adminBadgeBox');
+      const adminBar = document.getElementById('adminQuickBar');
+      const clientOrdersBtn = document.getElementById('clientOrdersBtn');
+
+      if (!currentUser) {
+        authBtn.textContent = '👤 Entrar';
+        adminBadge.style.display = 'none';
+        adminBar.classList.remove('show');
+        clientOrdersBtn.style.display = 'inline-flex';
+        resizeCanvas();
+        return;
+      }
+
+      const rawName = (currentUserProfile && currentUserProfile.nome) ? currentUserProfile.nome : currentUser.email;
+      const firstName = rawName.split(' ')[0];
+      const isAdmin = currentUserProfile && currentUserProfile.role === 'admin';
+
+      authBtn.textContent = `Sair`;
+
+      if (isAdmin) {
+        document.getElementById('adminFirstNameText').textContent = firstName;
+        adminBadge.style.display = 'flex';
+        adminBar.classList.add('show');
+        clientOrdersBtn.style.display = 'none';
+      } else {
+        adminBadge.style.display = 'none';
+        adminBar.classList.remove('show');
+        clientOrdersBtn.style.display = 'inline-flex';
+        authBtn.textContent = `👋 ${firstName} (Sair)`;
+      }
+
+      resizeCanvas();
+      updateClientNotificationDot();
+    }
+
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
-      const authBtn = document.getElementById('authHeaderBtn');
-      const adminBtn = document.getElementById('adminBtn');
-      const myOrdersBtn = document.getElementById('myOrdersBtn');
 
       if (user) {
-        myOrdersBtn.style.display = 'flex';
         try {
           const userDoc = await getDoc(doc(db, "usuarios", user.uid));
           if (userDoc.exists()) {
@@ -1296,24 +1304,14 @@
             };
             await setDoc(doc(db, "usuarios", user.uid), currentUserProfile);
           }
-
-          const firstName = (currentUserProfile.nome || user.email).split(' ')[0];
-          authBtn.textContent = `👋 ${firstName} (Sair)`;
-          adminBtn.style.display = currentUserProfile.role === 'admin' ? 'flex' : 'none';
         } catch (err) {
           console.error('Erro ao carregar perfil:', err);
-          authBtn.textContent = '👋 Conta (Sair)';
         }
       } else {
         currentUserProfile = null;
-        authBtn.textContent = '👤 Entrar';
-        adminBtn.style.display = 'none';
-        myOrdersBtn.style.display = 'none';
       }
 
-      if (document.getElementById('myOrdersModal').classList.contains('open')) {
-        renderMyOrders();
-      }
+      applyRoleHeaderUI();
     });
 
     window.handleAuthHeaderClick = async () => {
@@ -1338,7 +1336,6 @@
 
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, senha);
-
         const profileData = {
           nome,
           email,
@@ -1350,11 +1347,7 @@
 
         await setDoc(doc(db, "usuarios", cred.user.uid), profileData);
         currentUserProfile = profileData;
-
-        const firstName = nome.split(' ')[0];
-        document.getElementById('authHeaderBtn').textContent = `👋 ${firstName} (Sair)`;
-        document.getElementById('adminBtn').style.display = 'none';
-        document.getElementById('myOrdersBtn').style.display = 'flex';
+        applyRoleHeaderUI();
 
         closeModal('authModal');
         showToast('Cadastro realizado com sucesso!');
@@ -1364,7 +1357,6 @@
           openModal('cartModal');
         }
       } catch (err) {
-        console.error('Erro no cadastro:', err);
         if (err.code === 'auth/email-already-in-use') {
           showToast('Este e-mail já tem cadastro. Vá em "Já tenho conta" para entrar.');
         } else {
@@ -1392,7 +1384,6 @@
           openModal('cartModal');
         }
       } catch (err) {
-        console.error('Erro no login:', err);
         showToast('E-mail ou senha inválidos.');
       } finally {
         setButtonLoading('loginSubmitBtn', false, '⏳ Entrando...', 'Entrar no Mercadinho JM');
@@ -1580,20 +1571,20 @@
       resultEl.textContent = `Troco estimado: ${formatBRL(troco)}`;
     };
 
-    async function updatePixAndChangeUI() {
+    function updatePixAndChangeUI() {
       const { total } = getCartTotals();
       const amountDisplay = document.getElementById('pixAmountDisplay');
+      const payloadArea = document.getElementById('pixPayloadText');
       const copyBtn = document.getElementById('copyPixBtn');
 
       amountDisplay.textContent = formatBRL(total);
 
       if (storeConfig.pixKey) {
-        const payload = buildPixPayload(storeConfig.pixKey, storeConfig.pixMerchant, total);
-        await renderPixQrCode(payload);
+        payloadArea.value = buildPixPayload(storeConfig.pixKey, storeConfig.pixMerchant, total);
         copyBtn.disabled = false;
         copyBtn.textContent = `📋 Copiar Pix com Valor (${formatBRL(total)})`;
       } else {
-        await renderPixQrCode('');
+        payloadArea.value = '';
         copyBtn.disabled = true;
         copyBtn.textContent = 'Chave Pix não configurada no Admin';
       }
@@ -1601,21 +1592,19 @@
     }
 
     window.copyPixPayload = async () => {
+      const text = document.getElementById('pixPayloadText').value;
       const copyBtn = document.getElementById('copyPixBtn');
-      if (!currentPixPayload) {
+      if (!text) {
         showToast('Chave Pix ainda não configurada pelo administrador.');
         return;
       }
 
       try {
-        await navigator.clipboard.writeText(currentPixPayload);
+        await navigator.clipboard.writeText(text);
       } catch {
-        const temp = document.createElement('textarea');
-        temp.value = currentPixPayload;
-        document.body.appendChild(temp);
-        temp.select();
+        const area = document.getElementById('pixPayloadText');
+        area.select();
         document.execCommand('copy');
-        document.body.removeChild(temp);
       }
 
       const textoOriginal = copyBtn.textContent;
@@ -1717,6 +1706,10 @@
         troco: trocoInfo,
         pixCopiaECola: pixPayload || '',
         status: 'Novo Pedido',
+        statusAtualizadoEm: Date.now(),
+        avaliacaoEnviada: false,
+        estrelas: 0,
+        mensagemCliente: '',
         data: new Date().toISOString()
       };
 
@@ -1763,154 +1756,175 @@
     };
 
     // =========================================================================
-    // PEDIDOS, STATUS DE ENTREGA E AVALIAÇÕES (1 A 5 ESTRELAS)
+    // PEDIDOS, NOTIFICAÇÃO POR PONTINHO, AVALIAÇÃO E EXCLUSÃO (X)
     // =========================================================================
-    function getStatusBadgeClass(statusText) {
-      const s = (statusText || '').toLowerCase();
-      if (s.includes('conclu')) return 'status-badge concluida';
-      if (s.includes('saiu')) return 'status-badge saiu';
-      if (s.includes('separando')) return 'status-badge separando';
-      return 'status-badge';
+    function getSeenMap() {
+      try {
+        return JSON.parse(localStorage.getItem('mercadinho_jm_seen_orders') || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function setSeenStamp(orderId, stamp) {
+      const map = getSeenMap();
+      map[orderId] = stamp || Date.now();
+      localStorage.setItem('mercadinho_jm_seen_orders', JSON.stringify(map));
+    }
+
+    function updateClientNotificationDot() {
+      const dot = document.getElementById('clientOrdersDot');
+      if (!dot || !currentUser) {
+        if (dot) dot.classList.remove('active');
+        return;
+      }
+
+      const seenMap = getSeenMap();
+      const myOrders = allOrders.filter(o => o.clienteId === currentUser.uid);
+      const hasUnread = myOrders.some(o => {
+        const stamp = o.statusAtualizadoEm || 0;
+        const lastSeen = seenMap[o.id] || 0;
+        return stamp > lastSeen && o.status !== 'Novo Pedido';
+      });
+
+      dot.classList.toggle('active', hasUnread);
+    }
+
+    window.openClientOrdersModal = () => {
+      if (!currentUser) {
+        switchAuthTab('login');
+        openModal('authModal');
+        showToast('Entre na sua conta para acompanhar seus pedidos.');
+        return;
+      }
+
+      const seenMap = getSeenMap();
+      allOrders
+        .filter(o => o.clienteId === currentUser.uid)
+        .forEach(o => {
+          if (o.statusAtualizadoEm) seenMap[o.id] = o.statusAtualizadoEm;
+        });
+      localStorage.setItem('mercadinho_jm_seen_orders', JSON.stringify(seenMap));
+      updateClientNotificationDot();
+
+      renderClientOrders();
+      document.getElementById('clientOrdersModal').classList.add('open');
+    };
+
+    window.selectStar = (orderId, stars) => {
+      draftRatings[orderId] = stars;
+      renderClientOrders();
+    };
+
+    window.submitCustomerFeedback = async (orderId) => {
+      const stars = draftRatings[orderId] || 5;
+      const msgInput = document.getElementById(`feedbackMsg_${orderId}`);
+      const mensagemCliente = msgInput ? msgInput.value.trim() : '';
+
+      try {
+        await updateDoc(doc(db, "pedidos", orderId), {
+          estrelas: stars,
+          mensagemCliente,
+          avaliacaoEnviada: true,
+          avaliadoEm: new Date().toISOString()
+        });
+        if (msgInput) msgInput.value = '';
+        delete draftRatings[orderId];
+        showToast('Avaliação enviada! Obrigado.');
+        renderClientOrders();
+      } catch (err) {
+        showToast('Erro ao enviar avaliação: ' + err.message);
+      }
+    };
+
+    function renderClientOrders() {
+      const container = document.getElementById('clientOrdersContainer');
+      const myOrders = allOrders.filter(o => o.clienteId === currentUser.uid);
+
+      if (!myOrders.length) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b; padding:16px;">Você ainda não tem pedidos.</p>';
+        return;
+      }
+
+      container.innerHTML = myOrders.map(ord => {
+        const st = ord.status || 'Novo Pedido';
+        let badgeClass = 'status-badge';
+        if (st.toLowerCase().includes('separando')) badgeClass += ' separando';
+        if (st.toLowerCase().includes('saiu')) badgeClass += ' saiu';
+        if (st.toLowerCase().includes('concluído') || st.toLowerCase().includes('concluido')) badgeClass += ' concluido';
+
+        const selectedStars = draftRatings[ord.id] || 5;
+        const alreadyReviewed = Boolean(ord.avaliacaoEnviada);
+
+        const feedbackSection = alreadyReviewed
+          ? `<div style="margin-top:8px; font-size:0.8rem; color:#0b7a43; font-weight:700;">✅ Avaliação enviada (${ord.estrelas} ★). Obrigado!</div>`
+          : `
+            <div style="margin-top:10px; padding-top:8px; border-top:1px dashed #cbd5e1;">
+              <div style="font-size:0.78rem; font-weight:700;">Avaliar pedido / Enviar mensagem:</div>
+              <div class="stars-row">
+                ${[1, 2, 3, 4, 5].map(n => `
+                  <button type="button" class="star-btn ${n <= selectedStars ? 'selected' : ''}" onclick="selectStar('${ord.id}', ${n})">
+                    ${n <= selectedStars ? '⭐' : '☆'}
+                  </button>
+                `).join('')}
+              </div>
+              <input type="text" id="feedbackMsg_${ord.id}" placeholder="Deixe uma mensagem para o Mercadinho JM..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.84rem;" />
+              <button type="button" class="submit-btn" style="padding:9px; font-size:0.86rem;" onclick="submitCustomerFeedback('${ord.id}')">
+                Enviar Avaliação
+              </button>
+            </div>
+          `;
+
+        return `
+          <div class="order-card">
+            <span class="${badgeClass}">${st}</span>
+            <div><strong>Total:</strong> ${formatBRL(ord.total)} • <strong>Pagamento:</strong> ${ord.pagamento || '-'}</div>
+            <div style="font-size:0.78rem; color:#475569; margin-top:3px;">
+              ${(ord.itens || []).map(i => `${i.qtd}x ${i.nome}`).join(', ')}
+            </div>
+            ${feedbackSection}
+          </div>
+        `;
+      }).join('');
     }
 
     onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snapshot) => {
       allOrders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      if (document.getElementById('adminOrdersPanel').style.display === 'block') {
-        renderAdminOrders();
-      }
-      if (document.getElementById('myOrdersModal').classList.contains('open')) {
-        renderMyOrders();
-      }
-    });
+      updateClientNotificationDot();
 
-    onSnapshot(query(collection(db, "avaliacoes"), orderBy("data", "desc")), (snapshot) => {
-      allRatings = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       if (document.getElementById('adminOrdersPanel').style.display === 'block') {
         renderAdminOrders();
       }
-      if (document.getElementById('myOrdersModal').classList.contains('open')) {
-        renderMyOrders();
+      if (document.getElementById('clientOrdersModal').classList.contains('open')) {
+        renderClientOrders();
       }
     });
 
     window.updateOrderStatus = async (orderId, newStatus) => {
       try {
-        await updateDoc(doc(db, "pedidos", orderId), { status: newStatus });
-        showToast(`Status atualizado: ${newStatus}`);
+        await updateDoc(doc(db, "pedidos", orderId), {
+          status: newStatus,
+          statusAtualizadoEm: Date.now()
+        });
+        showToast(`Status alterado para: ${newStatus}`);
         renderAdminOrders();
       } catch (err) {
         showToast('Erro ao atualizar status: ' + err.message);
       }
     };
 
-    window.selectStarRating = (orderId, stars) => {
-      selectedRatingStars[orderId] = stars;
-      const box = document.getElementById(`stars_${orderId}`);
-      if (!box) return;
-      const buttons = box.querySelectorAll('.star-btn');
-      buttons.forEach((btn, idx) => {
-        btn.classList.toggle('active', idx < stars);
-      });
-    };
-
-    window.submitOrderRating = async (orderId, clienteNome) => {
-      const stars = selectedRatingStars[orderId] || 0;
-      if (stars < 1 || stars > 5) {
-        showToast('Toque de 1 a 5 estrelas antes de enviar sua avaliação.');
-        return;
-      }
-
-      const commentInput = document.getElementById(`comment_${orderId}`);
-      const comentario = commentInput ? commentInput.value.trim() : '';
-
+    window.deleteOrderByAdmin = async (orderId) => {
       try {
-        await addDoc(collection(db, "avaliacoes"), {
-          pedidoId: orderId,
-          clienteId: currentUser ? currentUser.uid : '',
-          clienteNome: clienteNome || 'Cliente',
-          estrelas: stars,
-          comentario,
-          data: new Date().toISOString()
-        });
-        showToast(`Obrigado! Você avaliou com ${stars} estrela(s).`);
-        renderMyOrders();
+        await deleteDoc(doc(db, "pedidos", orderId));
+        showToast('Pedido removido com sucesso.');
+        renderAdminOrders();
       } catch (err) {
-        showToast('Erro ao enviar avaliação: ' + err.message);
+        showToast('Erro ao apagar pedido: ' + err.message);
       }
     };
-
-    function renderMyOrders() {
-      const container = document.getElementById('myOrdersListContainer');
-      if (!currentUser) {
-        container.innerHTML = '<p style="text-align:center; color:#64748b;">Faça login para ver seus pedidos.</p>';
-        return;
-      }
-
-      const mine = allOrders.filter(o => o.clienteId === currentUser.uid);
-      if (!mine.length) {
-        container.innerHTML = '<p style="text-align:center; color:#64748b; padding:16px;">Você ainda não fez pedidos no Mercadinho JM.</p>';
-        return;
-      }
-
-      container.innerHTML = mine.map(ord => {
-        const st = ord.status || 'Novo Pedido';
-        const isConcluida = st.toLowerCase().includes('conclu');
-        const existingRating = allRatings.find(r => r.pedidoId === ord.id);
-        const currentStars = selectedRatingStars[ord.id] || 0;
-        const resumoItens = (ord.itens || []).map(i => `${i.qtd}x ${i.nome}`).join(', ');
-
-        let ratingHtml = '';
-        if (isConcluida) {
-          if (existingRating) {
-            const estrelasVisuais = '⭐'.repeat(existingRating.estrelas);
-            ratingHtml = `
-              <div class="rating-box">
-                <div style="font-weight:800; color:#0b7a43;">Avaliação enviada: ${estrelasVisuais} (${existingRating.estrelas}/5)</div>
-                ${existingRating.comentario ? `<div style="font-size:0.8rem; color:#475569; margin-top:4px;">"${existingRating.comentario}"</div>` : ''}
-              </div>
-            `;
-          } else {
-            const starsButtons = [1, 2, 3, 4, 5].map(n => `
-              <button type="button" class="star-btn ${n <= currentStars ? 'active' : ''}" onclick="selectStarRating('${ord.id}', ${n})">⭐</button>
-            `).join('');
-
-            ratingHtml = `
-              <div class="rating-box">
-                <div style="font-weight:800; text-align:center; font-size:0.88rem;">Entrega concluída! Como foi sua compra? (1 a 5 estrelas)</div>
-                <div class="stars-row" id="stars_${ord.id}">${starsButtons}</div>
-                <input type="text" id="comment_${ord.id}" placeholder="Opcional: deixe um recado sobre o atendimento ou entrega..." style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.82rem; margin-bottom:8px;" />
-                <button type="button" class="submit-btn" style="padding:10px; font-size:0.86rem;" onclick="submitOrderRating('${ord.id}', '${(ord.clienteNome || 'Cliente').replace(/'/g, "\\'")}')">
-                  Enviar Avaliação
-                </button>
-              </div>
-            `;
-          }
-        }
-
-        return `
-          <div class="order-card">
-            <span class="${getStatusBadgeClass(st)}">${st}</span>
-            <div><strong>Itens:</strong> ${resumoItens}</div>
-            <div><strong>Total:</strong> <strong>${formatBRL(ord.total)}</strong> • ${ord.pagamento || '-'}</div>
-            ${ratingHtml}
-          </div>
-        `;
-      }).join('');
-    }
 
     function renderAdminOrders() {
       const container = document.getElementById('ordersListContainer');
-      const summaryBanner = document.getElementById('ratingsSummaryBanner');
-
-      if (allRatings.length > 0) {
-        const soma = allRatings.reduce((acc, r) => acc + Number(r.estrelas || 0), 0);
-        const media = (soma / allRatings.length).toFixed(1);
-        summaryBanner.style.display = 'block';
-        summaryBanner.textContent = `⭐ Média das avaliações online: ${media} / 5 (${allRatings.length} avaliação(ões))`;
-      } else {
-        summaryBanner.style.display = 'none';
-      }
-
       if (!allOrders.length) {
         container.innerHTML = '<p style="text-align:center; color:#64748b; padding:16px;">Nenhum pedido recebido ainda.</p>';
         return;
@@ -1918,39 +1932,57 @@
 
       container.innerHTML = allOrders.map(ord => {
         const st = ord.status || 'Novo Pedido';
-        const resumoItens = (ord.itens || []).map(i => `${i.qtd}x ${i.nome}`).join(', ');
-        const rating = allRatings.find(r => r.pedidoId === ord.id);
+        const isConcluido = st.toLowerCase().includes('concluído') || st.toLowerCase().includes('concluido');
 
-        const ratingInfo = rating
-          ? `<div style="margin-top:8px; padding:8px; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; font-size:0.8rem;">
-               <strong>Avaliação do cliente:</strong> ${'⭐'.repeat(rating.estrelas)} (${rating.estrelas}/5)
-               ${rating.comentario ? `<br><em>"${rating.comentario}"</em>` : ''}
+        let badgeClass = 'status-badge';
+        if (st.toLowerCase().includes('separando')) badgeClass += ' separando';
+        if (st.toLowerCase().includes('saiu')) badgeClass += ' saiu';
+        if (isConcluido) badgeClass += ' concluido';
+
+        const resumoItens = (ord.itens || []).map(i => `${i.qtd}x ${i.nome}`).join(', ');
+
+        const ratingDisplay = ord.avaliacaoEnviada
+          ? `<div style="margin-top:6px; padding:6px 8px; background:#ecfdf5; border-radius:8px; font-size:0.8rem;">
+               <strong>Avaliação do cliente:</strong> ${'⭐'.repeat(ord.estrelas || 5)} (${ord.estrelas || 5}/5)
+               ${ord.mensagemCliente ? `<br><em>"${ord.mensagemCliente}"</em>` : ''}
              </div>`
-          : '';
+          : (isConcluido
+            ? `<div style="margin-top:6px; font-size:0.78rem; color:#64748b;">⏳ Aguardando cliente enviar estrelinhas...</div>`
+            : '');
 
         return `
           <div class="order-card">
-            <span class="${getStatusBadgeClass(st)}">${st}</span>
+            <div class="order-top-row">
+              <span class="${badgeClass}">${st}</span>
+              <button type="button" class="delete-x-btn" title="Apagar pedido" onclick="deleteOrderByAdmin('${ord.id}')">✕</button>
+            </div>
             <div><strong>Cliente:</strong> ${ord.clienteNome || 'Cliente'}</div>
             <div><strong>Endereço:</strong> ${ord.endereco || ''} (${ord.referencia || ''})</div>
             <div><strong>Itens:</strong> ${resumoItens}</div>
             <div><strong>Pagamento:</strong> ${ord.pagamento || '-'} ${ord.pagamento === 'Dinheiro' ? `(${ord.troco || ''})` : ''}</div>
             <div><strong>Total:</strong> <strong>${formatBRL(ord.total)}</strong> ${ord.entregaGratis ? '• Entrega Grátis' : ''}</div>
-            <div class="status-actions-3">
+            ${ratingDisplay}
+            <div class="status-actions">
               <button type="button" class="status-btn" style="background:#fef3c7; color:#92400e;" onclick="updateOrderStatus('${ord.id}', 'Estamos separando suas compras')">
                 🧺 Separando
               </button>
-              <button type="button" class="status-btn" style="background:#e0f2fe; color:#075985;" onclick="updateOrderStatus('${ord.id}', 'Saiu para entrega')">
-                🛵 Saiu entrega
+              <button type="button" class="status-btn" style="background:#dcfce7; color:#166534;" onclick="updateOrderStatus('${ord.id}', 'Saiu para entrega')">
+                🛵 Saiu p/ entrega
               </button>
-              <button type="button" class="status-btn" style="background:#dcfce7; color:#166534;" onclick="updateOrderStatus('${ord.id}', 'Entrega concluída')">
-                ✅ Concluída
+              <button type="button" class="status-btn" style="background:#e0e7ff; color:#3730a3;" onclick="updateOrderStatus('${ord.id}', 'Concluído')">
+                ✅ Concluído
               </button>
             </div>
-            ${ratingInfo}
           </div>
         `;
       }).join('');
+    }
+
+    // Registro do Service Worker do PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(console.error);
+      });
     }
 
     saveCart();
