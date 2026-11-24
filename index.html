@@ -532,16 +532,23 @@
       font-size: 0.86rem;
     }
 
-    .pix-code-area {
-      width: 100%;
-      font-size: 0.74rem;
-      font-family: monospace;
-      background: #fff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 8px;
-      margin-top: 8px;
-      resize: none;
+    .qr-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      padding: 10px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+    }
+
+    .qr-wrapper img {
+      width: 185px;
+      height: 185px;
+      object-fit: contain;
+      display: block;
     }
 
     .cart-item {
@@ -837,7 +844,7 @@
         <div class="form-group">
           <label>Forma de Pagamento</label>
           <select id="paymentMethod" onchange="handlePaymentChange()">
-            <option value="Pix">💠 Pix (Com Valor Calculado)</option>
+            <option value="Pix">💠 Pix (QR Code com Valor)</option>
             <option value="Dinheiro">💵 Dinheiro (Troco)</option>
             <option value="Cartão">💳 Cartão na Entrega</option>
           </select>
@@ -851,18 +858,18 @@
           <div id="changeResultText" style="font-weight: 700; color: var(--primary-dark);"></div>
         </div>
 
+        <!-- APENAS QR CODE COM VALOR CALCULADO -->
         <div id="pixInfoBox" class="payment-box">
-          <div style="font-size: 0.92rem;">
+          <div style="font-size: 0.92rem; text-align: center;">
             <strong>Valor do Pix já calculado:</strong>
             <span id="pixAmountDisplay" style="font-weight: 800; color: var(--primary-dark); font-size: 1.05rem;">R$ 0,00</span>
           </div>
-          <div style="font-size: 0.78rem; color: var(--muted); margin-top: 3px;">
-            Toque no botão abaixo para copiar o código Pix já com o valor da compra e colar no aplicativo do banco.
+          <div class="qr-wrapper" id="pixQrWrapper">
+            <img id="pixQrImage" alt="QR Code Pix" style="display: none;" />
+            <span id="pixQrPlaceholder" style="font-size: 0.8rem; color: #64748b; text-align: center;">
+              Cadastre sua chave Pix no Painel Admin para gerar o QR Code.
+            </span>
           </div>
-          <textarea id="pixPayloadText" class="pix-code-area" rows="3" readonly></textarea>
-          <button type="button" id="copyPixBtn" class="submit-btn" style="background: #0284c7;" onclick="copyPixPayload()">
-            📋 Copiar Pix com Valor
-          </button>
         </div>
       </div>
 
@@ -1574,49 +1581,26 @@
     function updatePixAndChangeUI() {
       const { total } = getCartTotals();
       const amountDisplay = document.getElementById('pixAmountDisplay');
-      const payloadArea = document.getElementById('pixPayloadText');
-      const copyBtn = document.getElementById('copyPixBtn');
+      const qrImg = document.getElementById('pixQrImage');
+      const qrPlaceholder = document.getElementById('pixQrPlaceholder');
 
       amountDisplay.textContent = formatBRL(total);
 
-      if (storeConfig.pixKey) {
-        payloadArea.value = buildPixPayload(storeConfig.pixKey, storeConfig.pixMerchant, total);
-        copyBtn.disabled = false;
-        copyBtn.textContent = `📋 Copiar Pix com Valor (${formatBRL(total)})`;
+      if (storeConfig.pixKey && total > 0) {
+        const payload = buildPixPayload(storeConfig.pixKey, storeConfig.pixMerchant, total);
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(payload)}`;
+        qrImg.style.display = 'block';
+        qrPlaceholder.style.display = 'none';
       } else {
-        payloadArea.value = '';
-        copyBtn.disabled = true;
-        copyBtn.textContent = 'Chave Pix não configurada no Admin';
+        qrImg.removeAttribute('src');
+        qrImg.style.display = 'none';
+        qrPlaceholder.style.display = 'block';
+        qrPlaceholder.textContent = storeConfig.pixKey
+          ? 'Adicione itens ao carrinho para gerar o QR Code.'
+          : 'Cadastre sua chave Pix no Painel Admin para gerar o QR Code.';
       }
       updateChangeCalculation();
     }
-
-    window.copyPixPayload = async () => {
-      const text = document.getElementById('pixPayloadText').value;
-      const copyBtn = document.getElementById('copyPixBtn');
-      if (!text) {
-        showToast('Chave Pix ainda não configurada pelo administrador.');
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch {
-        const area = document.getElementById('pixPayloadText');
-        area.select();
-        document.execCommand('copy');
-      }
-
-      const textoOriginal = copyBtn.textContent;
-      copyBtn.style.background = '#0f9d58';
-      copyBtn.textContent = '✅ Pix Copiado! Vá ao seu banco';
-      showToast('Pix com valor copiado! Cole no aplicativo do seu banco.');
-
-      setTimeout(() => {
-        copyBtn.style.background = '#0284c7';
-        copyBtn.textContent = textoOriginal;
-      }, 2500);
-    };
 
     function renderCartModal() {
       const container = document.getElementById('cartItemsContainer');
@@ -1734,7 +1718,7 @@
           msg += `\n*Troco:* ${trocoInfo}`;
         }
         if (paymentMethod === 'Pix' && pixPayload) {
-          msg += `\n*Pix Copia e Cola (Valor ${formatBRL(total)}):*\n${pixPayload}`;
+          msg += `\n*Pix (Valor ${formatBRL(total)}):* ${pixPayload}`;
         }
 
         const phoneClean = (storeConfig.whatsapp || '').replace(/\D/g, '');
@@ -1764,12 +1748,6 @@
       } catch {
         return {};
       }
-    }
-
-    function setSeenStamp(orderId, stamp) {
-      const map = getSeenMap();
-      map[orderId] = stamp || Date.now();
-      localStorage.setItem('mercadinho_jm_seen_orders', JSON.stringify(map));
     }
 
     function updateClientNotificationDot() {
@@ -1978,7 +1956,6 @@
       }).join('');
     }
 
-    // Registro do Service Worker do PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(console.error);
